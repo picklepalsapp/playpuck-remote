@@ -10,7 +10,7 @@
     header { padding: 14px 16px; background: #121a2b; border-bottom: 1px solid #22304f; }
     header h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .3px; }
     header p { margin: 6px 0 0; font-size: 12px; color: #a8b6d6; line-height: 1.35; }
-    main { padding: 14px 16px 80px; max-width: 980px; margin: 0 auto; }
+    main { padding: 14px 16px 90px; max-width: 980px; margin: 0 auto; }
     .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 900px) { .row { grid-template-columns: 1.05fr .95fr; } }
 
@@ -44,8 +44,9 @@
       border-radius: 12px; border: 1px solid #2a3b61; background:#0b1326; color:#e7eefc;
       outline: none;
     }
-    textarea { min-height: 110px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+    textarea { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
     .footerbar {
       position: fixed; left:0; right:0; bottom:0; padding: 10px 16px;
       background:#0b1326; border-top: 1px solid #22304f;
@@ -58,7 +59,7 @@
 <header>
   <h1>PlayPuck BLE Remote</h1>
   <p>
-    Works in <b>Chrome on Android</b> over HTTPS. Connect to your puck, then send score + profile + start commands.
+    Chrome on Android + HTTPS. Connect, then send score + profiles + Wi-Fi provisioning commands over BLE.
   </p>
 </header>
 
@@ -76,7 +77,6 @@
       <div class="btnbar">
         <button id="btnConnect">Connect</button>
         <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
-        <button id="btnPing" class="secondary" disabled>Ping (send "S")</button>
         <button id="btnClearLog" class="secondary">Clear log</button>
       </div>
 
@@ -89,22 +89,19 @@
         <button id="btnUp" class="secondary" disabled>UP (U)</button>
         <button id="btnDown" class="secondary" disabled>DOWN (D)</button>
       </div>
-
       <div class="btnbar">
         <button id="btnSelect" class="secondary" disabled>SELECT / START (S)</button>
       </div>
 
       <p class="muted" style="margin-top:10px;">
-        Quick Score uses single-letter commands (<span class="mono">A / B / U / D / S</span>) so it works even with
-        a “letters-only” BLE handler.
+        Quick Score uses single-letter commands (<span class="mono">A / B / U / D / S</span>).
       </p>
 
       <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
 
-      <h2>Profile Builder (Master)</h2>
+      <h2>Profile Builder</h2>
       <p class="muted">
-        Builds <span class="mono">&lt;SING|PAIR&gt;_&lt;SO|RL&gt;_&lt;SD|W2&gt;_&lt;7|11|15|21&gt;</span>
-        then sends <span class="mono">PROFILE_SELECT,&lt;profileId&gt;,&lt;SEQ&gt;</span>. 
+        Sends <span class="mono">PROFILE_SELECT,&lt;profileId&gt;,&lt;SEQ&gt;</span> and <span class="mono">START_GAME,&lt;SEQ&gt;</span>.
       </p>
 
       <div class="grid2">
@@ -153,11 +150,32 @@
 
       <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
 
-      <h2>Exit Menu (Option 2 confirm)</h2>
+      <h2>Wi-Fi Setup</h2>
       <p class="muted">
-        Sends <span class="mono">CMD,EXIT_MENU_STEP1,SEQ</span> then <span class="mono">CMD,EXIT_MENU_STEP2,SEQ</span>. :contentReference[oaicite:3]{index=3}
+        Sends <span class="mono">WIFI_SET,&lt;ssid&gt;,&lt;pass&gt;,&lt;SEQ&gt;</span> then optionally <span class="mono">WIFI_CONNECT,&lt;SEQ&gt;</span>.
+        (Firmware must support these commands.)
       </p>
 
+      <label for="wifiSsid">SSID</label>
+      <input id="wifiSsid" placeholder="e.g. Armor 15" />
+
+      <label for="wifiPass">Password</label>
+      <input id="wifiPass" type="password" placeholder="e.g. Password" />
+
+      <div class="btnbar">
+        <button id="btnWifiSet" class="secondary" disabled>Send WIFI_SET</button>
+        <button id="btnWifiConnect" class="good" disabled>Send WIFI_CONNECT</button>
+        <button id="btnWifiStatus" class="secondary" disabled>Send WIFI_STATUS</button>
+        <button id="btnWifiClear" class="danger" disabled>Send WIFI_CLEAR</button>
+      </div>
+
+      <p class="muted" style="margin-top:10px;">
+        Tip: Wi-Fi credentials are sensitive. Don’t use this in public unless you add BLE pairing/encryption.
+      </p>
+
+      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
+
+      <h2>Exit Menu (confirm)</h2>
       <div class="btnbar">
         <button id="btnExitStep1" class="secondary" disabled>EXIT step 1</button>
         <button id="btnExitStep2" class="secondary" disabled>EXIT step 2</button>
@@ -166,8 +184,6 @@
       <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
 
       <h2>Raw Command</h2>
-      <p class="muted">Send any string (useful while we add full BLE parsing on the puck).</p>
-
       <label for="rawCmd">Command</label>
       <input id="rawCmd" class="mono" placeholder='e.g. PROFILE_SELECT,PAIR_SO_W2_11,12' />
 
@@ -182,7 +198,7 @@
       <h2>Log</h2>
       <textarea id="log" readonly></textarea>
       <p class="muted">
-        Tip: If you can’t connect, make sure nRF Connect is disconnected. Only one client can connect at a time.
+        If you can’t connect: ensure nRF Connect is disconnected (only one BLE client at a time).
       </p>
     </div>
   </div>
@@ -222,7 +238,6 @@
 
   const btnConnect = document.getElementById("btnConnect");
   const btnDisconnect = document.getElementById("btnDisconnect");
-  const btnPing = document.getElementById("btnPing");
   const btnClearLog = document.getElementById("btnClearLog");
 
   const btnA = document.getElementById("btnA");
@@ -238,6 +253,13 @@
   const profileIdView = document.getElementById("profileIdView");
   const btnSendProfile = document.getElementById("btnSendProfile");
   const btnStartGame = document.getElementById("btnStartGame");
+
+  const wifiSsid = document.getElementById("wifiSsid");
+  const wifiPass = document.getElementById("wifiPass");
+  const btnWifiSet = document.getElementById("btnWifiSet");
+  const btnWifiConnect = document.getElementById("btnWifiConnect");
+  const btnWifiStatus = document.getElementById("btnWifiStatus");
+  const btnWifiClear = document.getElementById("btnWifiClear");
 
   const btnExitStep1 = document.getElementById("btnExitStep1");
   const btnExitStep2 = document.getElementById("btnExitStep2");
@@ -258,7 +280,6 @@
     statusText.textContent = isConnected ? "Connected" : "Not connected";
 
     btnDisconnect.disabled = !isConnected;
-    btnPing.disabled = !isConnected;
 
     btnA.disabled = !isConnected;
     btnB.disabled = !isConnected;
@@ -268,6 +289,12 @@
 
     btnSendProfile.disabled = !isConnected;
     btnStartGame.disabled = !isConnected;
+
+    btnWifiSet.disabled = !isConnected;
+    btnWifiConnect.disabled = !isConnected;
+    btnWifiStatus.disabled = !isConnected;
+    btnWifiClear.disabled = !isConnected;
+
     btnExitStep1.disabled = !isConnected;
     btnExitStep2.disabled = !isConnected;
 
@@ -288,6 +315,16 @@
     const current = seq;
     bumpSeq();
     return current;
+  }
+
+  // Escape commas/newlines so SSID/PASS can't break the CSV-style protocol.
+  // (Firmware should unescape.)
+  function escField(s) {
+    return String(s || "")
+      .replaceAll("\\", "\\\\")
+      .replaceAll(",", "\\,")
+      .replaceAll("\n", "\\n")
+      .replaceAll("\r", "\\r");
   }
 
   async function writeString(str) {
@@ -333,9 +370,8 @@
       log("Getting RX characteristic (write)...");
       rxChar = await service.getCharacteristic(RX_UUID);
 
-      // TX notify is optional. We'll try; if it fails, it's fine.
+      // Optional notify
       try {
-        log("Trying TX notify characteristic...");
         txChar = await service.getCharacteristic(TX_UUID);
         await txChar.startNotifications();
         txChar.addEventListener("characteristicvaluechanged", (e) => {
@@ -369,8 +405,6 @@
   // ===== Events =====
   btnConnect.addEventListener("click", connect);
   btnDisconnect.addEventListener("click", disconnect);
-  btnPing.addEventListener("click", async () => { await sendLetter("S"); });
-
   btnClearLog.addEventListener("click", () => { logEl.value = ""; });
 
   btnA.addEventListener("click", async () => { await sendLetter("A"); });
@@ -387,7 +421,6 @@
   btnSendProfile.addEventListener("click", async () => {
     const pid = profileIdView.value;
     const s = nextSeq();
-    // Master-style packet
     await writeString(`PROFILE_SELECT,${pid},${s}`);
   });
 
@@ -404,6 +437,31 @@
   btnExitStep2.addEventListener("click", async () => {
     const s = nextSeq();
     await writeString(`CMD,EXIT_MENU_STEP2,${s}`);
+  });
+
+  btnWifiSet.addEventListener("click", async () => {
+    const ssid = wifiSsid.value.trim();
+    const pass = wifiPass.value; // allow spaces
+    if (!ssid) { alert("Enter SSID"); return; }
+
+    const s = nextSeq();
+    // Escaped fields so commas/newlines don't break the protocol
+    await writeString(`WIFI_SET,${escField(ssid)},${escField(pass)},${s}`);
+  });
+
+  btnWifiConnect.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`WIFI_CONNECT,${s}`);
+  });
+
+  btnWifiStatus.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`WIFI_STATUS,${s}`);
+  });
+
+  btnWifiClear.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`WIFI_CLEAR,${s}`);
   });
 
   btnSendRaw.addEventListener("click", async () => {
