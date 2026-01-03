@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>PicklePuck BLE Control</title>
+  <title>PlayPUCK BLE Control</title>
 
   <style>
     :root{
@@ -259,7 +259,7 @@
 <body>
 <header>
   <h1>
-    PicklePuck BLE Control
+    PlayPUCK BLE Control
     <span id="connStatus" class="status">Disconnected</span>
   </h1>
 </header>
@@ -272,7 +272,7 @@
       <div class="cardHeader">
         <div>
           <h2>BLE Connection</h2>
-          <p>Connect to the puck, then follow the steps in order.</p>
+          <p>Connect to the PlayPUCK, then follow the steps in order.</p>
         </div>
         <div class="stepBadge">0</div>
       </div>
@@ -299,7 +299,7 @@
       <div class="cardHeader">
         <div>
           <h2>Wi-Fi set up</h2>
-          <p>Send SSID + password to the puck.</p>
+          <p>Send SSID + password to the PlayPUCK.</p>
         </div>
         <div class="stepBadge">1</div>
       </div>
@@ -316,7 +316,7 @@
         </div>
 
         <div style="margin-top:10px;">
-          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to puck</button>
+          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to PlayPUCK</button>
           <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code> (change command if needed).</div>
         </div>
       </div>
@@ -327,7 +327,7 @@
       <div class="cardHeader">
         <div>
           <h2>Match selection</h2>
-          <p>Choose rules/preset before uploading to the puck.</p>
+          <p>Choose rules/preset before uploading to the PlayPUCK.</p>
         </div>
         <div class="stepBadge">2</div>
       </div>
@@ -401,13 +401,13 @@
     <section class="card" id="cardUpload">
       <div class="cardHeader">
         <div>
-          <h2>Upload to puck</h2>
-          <p>Send match profile to the puck (PROFILE_SELECT).</p>
+          <h2>Upload to PlayPUCK</h2>
+          <p>Send match profile to the PlayPUCK (PROFILE_SELECT).</p>
         </div>
         <div class="stepBadge">3</div>
       </div>
       <div class="cardBody">
-        <button id="btnUploadProfile" class="accent" disabled>Upload match to puck</button>
+        <button id="btnUploadProfile" class="accent" disabled>Upload match to PlayPUCK</button>
         <div class="hint">Sends <b>PROFILE_SELECT</b> with the payload from your selections (or JSON override).</div>
       </div>
     </section>
@@ -417,7 +417,7 @@
       <div class="cardHeader">
         <div>
           <h2>Start game</h2>
-          <p>Tell the puck to start the match (START_GAME).</p>
+          <p>Tell the PlayPUCK to start the match (START_GAME).</p>
         </div>
         <div class="stepBadge">4</div>
       </div>
@@ -520,7 +520,7 @@
 <script>
 /**
  * IMPORTANT:
- * Replace these UUIDs with your puck’s BLE service/characteristics.
+ * Replace these UUIDs with your PlayPUCK BLE service/characteristics.
  */
 const BLE = {
   SERVICE_UUID: '0000ffff-0000-1000-8000-00805f9b34fb', // <-- CHANGE ME
@@ -625,7 +625,7 @@ function setScore(a,b){
 }
 
 function parseRx(text){
-  // Optional: parse incoming messages from puck
+  // Optional: parse incoming messages from PlayPUCK
   // Example:
   // SCORE {"a":3,"b":2}
   try{
@@ -656,10 +656,10 @@ function buildMatchPayload(){
   // Preset-driven payload (adjust key names if your firmware uses different ones)
   const id = matchId.value.trim() || null;
   const payload = {
-    format: matchType.value,              // "SINGLES" | "DOUBLES"
-    scoring: scoringMode.value,           // "SIDEOUT" | "RALLY"
+    format: matchType.value,                   // "SINGLES" | "DOUBLES"
+    scoring: scoringMode.value,                // "SIDEOUT" | "RALLY"
     win_points: Number(winPointsPreset.value), // 7 | 11 | 15 | 21
-    win_rule: winRule.value,              // "SUDDEN_DEATH" | "TWO_CLEAR"
+    win_rule: winRule.value,                   // "SUDDEN_DEATH" | "TWO_CLEAR"
   };
   if(id) payload.match_id = id;
   return payload;
@@ -744,7 +744,7 @@ btnSendWifi.addEventListener('click', async () => {
   }
 });
 
-// 3) Upload to puck (PROFILE_SELECT)
+// 3) Upload to PlayPUCK (PROFILE_SELECT)
 btnUploadProfile.addEventListener('click', async () => {
   try{
     const payload = buildMatchPayload();
@@ -829,7 +829,7 @@ btnBset.addEventListener('click', async () => {
 
 // Start disabled until connected
 setConnectedUI(false);
-log('Ready. Connect to a puck to begin.');
+log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
