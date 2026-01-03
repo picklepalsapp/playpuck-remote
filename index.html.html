@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PlayPuck Phone Remote (BLE)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 16px; }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .status { padding: 12px; border-radius: 12px; background: #f3f4f6; margin-bottom: 12px; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    button {
+      font-size: 18px;
+      padding: 18px 14px;
+      border-radius: 16px;
+      border: 0;
+      background: #111827;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+    }
+    button.secondary { background: #374151; }
+    button.good { background: #065f46; }
+    button.warn { background: #7c2d12; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .small { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+    .footer { margin-top: 14px; font-size: 12px; opacity: 0.75; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>PlayPuck Phone Remote (BLE)</h1>
+
+    <div class="status" id="statusBox">
+      <div><strong>Status:</strong> <span id="statusText">Not connected</span></div>
+      <div class="small" id="detailText"></div>
+    </div>
+
+    <div class="row">
+      <button id="btnConnect" class="secondary">Connect to PlayPuck</button>
+
+      <button id="btnA" class="good" disabled>TEAM A (send “A”)</button>
+      <button id="btnB" class="good" disabled>TEAM B (send “B”)</button>
+      <button id="btnS" class="warn" disabled>START (send “S”)</button>
+
+      <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
+    </div>
+
+    <div class="footer">
+      Uses BLE service <code>6E400001-B5A3-F393-E0A9-E50E24DCCA9E</code><br/>
+      Writes to characteristic <code>6E400002-B5A3-F393-E0A9-E50E24DCCA9E</code>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // Your Heltec BLE UUIDs
+  const SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
+  const CHAR_RX_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E';
+
+  const statusText = document.getElementById('statusText');
+  const detailText = document.getElementById('detailText');
+
+  const btnConnect = document.getElementById('btnConnect');
+  const btnDisconnect = document.getElementById('btnDisconnect');
+
+  const btnA = document.getElementById('btnA');
+  const btnB = document.getElementById('btnB');
+  const btnS = document.getElementById('btnS');
+
+  let device = null;
+  let server = null;
+  let rxChar = null;
+
+  function setStatus(main, detail='') {
+    statusText.textContent = main;
+    detailText.textContent = detail;
+  }
+
+  function setButtonsEnabled(connected) {
+    btnA.disabled = !connected;
+    btnB.disabled = !connected;
+    btnS.disabled = !connected;
+    btnDisconnect.disabled = !connected;
+  }
+
+  async function connect() {
+    if (!navigator.bluetooth) {
+      setStatus('Web Bluetooth not supported', 'Use Chrome on Android.');
+      return;
+    }
+
+    try {
+      setStatus('Requesting device…', 'Select “PlayPuck” from the chooser.');
+
+      device = await navigator.bluetooth.requestDevice({
+        // Filter by the service UUID we advertise
+        filters: [{ services: [SERVICE_UUID] }]
+      });
+
+      device.addEventListener('gattserverdisconnected', onDisconnected);
+
+      setStatus('Connecting…', device.name || 'Device selected');
+      server = await device.gatt.connect();
+
+      setStatus('Discovering service…', 'Reading GATT services');
+      const service = await server.getPrimaryService(SERVICE_UUID);
+
+      setStatus('Getting RX characteristic…', '');
+      rxChar = await service.getCharacteristic(CHAR_RX_UUID);
+
+      setStatus('Connected ✅', device.name || 'PlayPuck');
+      setButtonsEnabled(true);
+
+    } catch (err) {
+      console.error(err);
+      setStatus('Connect failed', String(err && err.message ? err.message : err));
+      setButtonsEnabled(false);
+    }
+  }
+
+  async function sendCmd(cmd) {
+    if (!rxChar) return;
+
+    try {
+      // Send ASCII text (single letter)
+      const data = new TextEncoder().encode(cmd);
+
+      // Most reliable for quick presses:
+      // writeValueWithoutResponse works if characteristic supports WRITE_NR
+      if (rxChar.writeValueWithoutResponse) {
+        await rxChar.writeValueWithoutResponse(data);
+      } else {
+        await rxChar.writeValue(data);
+      }
+
+      setStatus('Connected ✅', `Sent “${cmd}”`);
+      // Small revert after a moment
+      setTimeout(() => setStatus('Connected ✅', device?.name || 'PlayPuck'), 600);
+
+    } catch (err) {
+      console.error(err);
+      setStatus('Send failed', String(err && err.message ? err.message : err));
+    }
+  }
+
+  async function disconnect() {
+    try {
+      if (device && device.gatt && device.gatt.connected) {
+        device.gatt.disconnect();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function onDisconnected() {
+    setStatus('Disconnected', 'Tap Connect to reconnect.');
+    setButtonsEnabled(false);
+    rxChar = null;
+    server = null;
+  }
+
+  btnConnect.addEventListener('click', connect);
+  btnDisconnect.addEventListener('click', disconnect);
+
+  btnA.addEventListener('click', () => sendCmd('A'));
+  btnB.addEventListener('click', () => sendCmd('B'));
+  btnS.addEventListener('click', () => sendCmd('S'));
+
+  setButtonsEnabled(false);
+})();
+</script>
+</body>
+</html>
