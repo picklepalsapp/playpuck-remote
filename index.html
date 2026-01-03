@@ -1,123 +1,424 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PlayPuck BLE Remote</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f5f5f5;
-    }
-    h1 {
-      margin-top: 0;
-    }
-    .status {
-      padding: 12px;
-      margin-bottom: 16px;
-      background: white;
-      border-radius: 8px;
-      font-weight: bold;
-    }
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; background: #0b0f19; color: #e7eefc; }
+    header { padding: 14px 16px; background: #121a2b; border-bottom: 1px solid #22304f; }
+    header h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .3px; }
+    header p { margin: 6px 0 0; font-size: 12px; color: #a8b6d6; line-height: 1.35; }
+    main { padding: 14px 16px 80px; max-width: 980px; margin: 0 auto; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 900px) { .row { grid-template-columns: 1.05fr .95fr; } }
+
+    .card { background: #101a31; border: 1px solid #22304f; border-radius: 14px; padding: 12px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+    .card h2 { margin: 0 0 10px; font-size: 14px; }
+    .muted { color: #a8b6d6; font-size: 12px; }
+    .pill { display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid #22304f; background:#0b1326; }
+    .dot { width:10px; height:10px; border-radius:50%; background:#667; box-shadow: 0 0 0 3px rgba(255,255,255,.06) inset; }
+    .dot.ok { background:#38d39f; }
+    .dot.bad { background:#ff5d6c; }
+    .dot.warn { background:#ffcf5a; }
+
+    .btnbar { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
     button {
-      width: 100%;
-      padding: 18px;
-      margin: 8px 0;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      appearance: none; border: 1px solid #2a3b61; background: #16244a; color: #e7eefc;
+      padding: 10px 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
     }
-    .connect { background: #333; color: white; }
-    .a { background: #4caf50; color: white; }
-    .b { background: #2196f3; color: white; }
-    .s { background: #ff9800; color: white; }
-    .disabled { opacity: 0.5; cursor: not-allowed; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button.secondary { background:#0f1a33; }
+    button.danger { background:#3a1430; border-color:#5c1e4a; }
+    button.good { background:#113a2c; border-color:#1c5f49; }
+    button.small { padding: 8px 10px; font-size: 12px; border-radius: 10px; }
+
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .grid4 { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+    @media (min-width: 520px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+
+    label { display:block; font-size:12px; color:#a8b6d6; margin: 10px 0 6px; }
+    select, input, textarea {
+      width: 100%; box-sizing: border-box; padding: 10px 10px;
+      border-radius: 12px; border: 1px solid #2a3b61; background:#0b1326; color:#e7eefc;
+      outline: none;
+    }
+    textarea { min-height: 110px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .footerbar {
+      position: fixed; left:0; right:0; bottom:0; padding: 10px 16px;
+      background:#0b1326; border-top: 1px solid #22304f;
+    }
+    .footerbar .inner { max-width: 980px; margin: 0 auto; display:flex; gap:10px; align-items:center; justify-content:space-between; }
+    .tiny { font-size: 11px; color:#a8b6d6; line-height:1.25; }
   </style>
 </head>
-
 <body>
+<header>
+  <h1>PlayPuck BLE Remote</h1>
+  <p>
+    Works in <b>Chrome on Android</b> over HTTPS. Connect to your puck, then send score + profile + start commands.
+  </p>
+</header>
 
-<h1>PlayPuck BLE Remote</h1>
+<main>
+  <div class="row">
+    <!-- LEFT: CONTROL -->
+    <div class="card">
+      <h2>Connection</h2>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <span class="pill"><span id="statusDot" class="dot bad"></span><span id="statusText">Not connected</span></span>
+        <span class="pill">Device: <span id="deviceName" class="mono">—</span></span>
+        <span class="pill">SEQ: <span id="seqView" class="mono">1</span></span>
+      </div>
 
-<div id="status" class="status">
-  Status: Not connected
+      <div class="btnbar">
+        <button id="btnConnect">Connect</button>
+        <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
+        <button id="btnPing" class="secondary" disabled>Ping (send "S")</button>
+        <button id="btnClearLog" class="secondary">Clear log</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
+
+      <h2>Quick Score</h2>
+      <div class="grid4">
+        <button id="btnA" class="good" disabled>TEAM A (+1)</button>
+        <button id="btnB" class="danger" disabled>TEAM B (+1)</button>
+        <button id="btnUp" class="secondary" disabled>UP (U)</button>
+        <button id="btnDown" class="secondary" disabled>DOWN (D)</button>
+      </div>
+
+      <div class="btnbar">
+        <button id="btnSelect" class="secondary" disabled>SELECT / START (S)</button>
+      </div>
+
+      <p class="muted" style="margin-top:10px;">
+        Quick Score uses single-letter commands (<span class="mono">A / B / U / D / S</span>) so it works even with
+        a “letters-only” BLE handler.
+      </p>
+
+      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
+
+      <h2>Profile Builder (Master)</h2>
+      <p class="muted">
+        Builds <span class="mono">&lt;SING|PAIR&gt;_&lt;SO|RL&gt;_&lt;SD|W2&gt;_&lt;7|11|15|21&gt;</span>
+        then sends <span class="mono">PROFILE_SELECT,&lt;profileId&gt;,&lt;SEQ&gt;</span>. 
+      </p>
+
+      <div class="grid2">
+        <div>
+          <label for="selFormat">FORMAT</label>
+          <select id="selFormat">
+            <option value="PAIR" selected>PAIRS</option>
+            <option value="SING">SINGLES</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="selScoring">SCORING</label>
+          <select id="selScoring">
+            <option value="SO" selected>SIDEOUT</option>
+            <option value="RL">RALLY</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="selWin">WIN</label>
+          <select id="selWin">
+            <option value="SD" selected>SUDDEN DEATH</option>
+            <option value="W2">2 CLEAR POINTS</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="selTarget">TARGET</label>
+          <select id="selTarget">
+            <option value="7" selected>7</option>
+            <option value="11">11</option>
+            <option value="15">15</option>
+            <option value="21">21</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Computed Profile ID</label>
+      <input id="profileIdView" class="mono" value="PAIR_SO_SD_7" readonly />
+
+      <div class="btnbar">
+        <button id="btnSendProfile" disabled>Send PROFILE_SELECT</button>
+        <button id="btnStartGame" class="good" disabled>Send START_GAME</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
+
+      <h2>Exit Menu (Option 2 confirm)</h2>
+      <p class="muted">
+        Sends <span class="mono">CMD,EXIT_MENU_STEP1,SEQ</span> then <span class="mono">CMD,EXIT_MENU_STEP2,SEQ</span>. :contentReference[oaicite:3]{index=3}
+      </p>
+
+      <div class="btnbar">
+        <button id="btnExitStep1" class="secondary" disabled>EXIT step 1</button>
+        <button id="btnExitStep2" class="secondary" disabled>EXIT step 2</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
+
+      <h2>Raw Command</h2>
+      <p class="muted">Send any string (useful while we add full BLE parsing on the puck).</p>
+
+      <label for="rawCmd">Command</label>
+      <input id="rawCmd" class="mono" placeholder='e.g. PROFILE_SELECT,PAIR_SO_W2_11,12' />
+
+      <div class="btnbar">
+        <button id="btnSendRaw" class="secondary" disabled>Send raw</button>
+        <button id="btnBumpSeq" class="secondary">+SEQ</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: LOG -->
+    <div class="card">
+      <h2>Log</h2>
+      <textarea id="log" readonly></textarea>
+      <p class="muted">
+        Tip: If you can’t connect, make sure nRF Connect is disconnected. Only one client can connect at a time.
+      </p>
+    </div>
+  </div>
+</main>
+
+<div class="footerbar">
+  <div class="inner">
+    <div class="tiny">
+      BLE Service/Char (NUS-style):<br/>
+      <span class="mono">6E400001…</span> / <span class="mono">6E400002…</span> (Write)
+    </div>
+    <div class="tiny">
+      If “Web Bluetooth not supported”: you’re not in Chrome Android or not on HTTPS.
+    </div>
+  </div>
 </div>
 
-<button class="connect" onclick="connect()">Connect to PlayPuck</button>
-<button id="btnA" class="a disabled" onclick="send('A')">TEAM A</button>
-<button id="btnB" class="b disabled" onclick="send('B')">TEAM B</button>
-<button id="btnS" class="s disabled" onclick="send('S')">START</button>
-
 <script>
-  const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  const CHAR_UUID    = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+  // ===== UUIDs (match your puck BLE sketch) =====
+  const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+  const RX_UUID      = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // write
+  const TX_UUID      = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // notify (optional)
 
+  // ===== State =====
   let device = null;
-  let characteristic = null;
+  let server = null;
+  let rxChar = null;
+  let txChar = null;
+  let seq = 1;
 
-  const statusEl = document.getElementById('status');
-  const buttons = ['btnA', 'btnB', 'btnS'];
+  // ===== UI =====
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+  const deviceName = document.getElementById("deviceName");
+  const logEl = document.getElementById("log");
+  const seqView = document.getElementById("seqView");
 
-  function setStatus(text) {
-    statusEl.textContent = 'Status: ' + text;
+  const btnConnect = document.getElementById("btnConnect");
+  const btnDisconnect = document.getElementById("btnDisconnect");
+  const btnPing = document.getElementById("btnPing");
+  const btnClearLog = document.getElementById("btnClearLog");
+
+  const btnA = document.getElementById("btnA");
+  const btnB = document.getElementById("btnB");
+  const btnUp = document.getElementById("btnUp");
+  const btnDown = document.getElementById("btnDown");
+  const btnSelect = document.getElementById("btnSelect");
+
+  const selFormat = document.getElementById("selFormat");
+  const selScoring = document.getElementById("selScoring");
+  const selWin = document.getElementById("selWin");
+  const selTarget = document.getElementById("selTarget");
+  const profileIdView = document.getElementById("profileIdView");
+  const btnSendProfile = document.getElementById("btnSendProfile");
+  const btnStartGame = document.getElementById("btnStartGame");
+
+  const btnExitStep1 = document.getElementById("btnExitStep1");
+  const btnExitStep2 = document.getElementById("btnExitStep2");
+
+  const rawCmd = document.getElementById("rawCmd");
+  const btnSendRaw = document.getElementById("btnSendRaw");
+  const btnBumpSeq = document.getElementById("btnBumpSeq");
+
+  function log(msg) {
+    const ts = new Date().toLocaleTimeString();
+    logEl.value += `[${ts}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
   }
 
-  function enableButtons(enable) {
-    buttons.forEach(id => {
-      const b = document.getElementById(id);
-      if (enable) b.classList.remove('disabled');
-      else b.classList.add('disabled');
-    });
+  function setConnectedUI(isConnected) {
+    statusDot.classList.remove("ok", "bad", "warn");
+    statusDot.classList.add(isConnected ? "ok" : "bad");
+    statusText.textContent = isConnected ? "Connected" : "Not connected";
+
+    btnDisconnect.disabled = !isConnected;
+    btnPing.disabled = !isConnected;
+
+    btnA.disabled = !isConnected;
+    btnB.disabled = !isConnected;
+    btnUp.disabled = !isConnected;
+    btnDown.disabled = !isConnected;
+    btnSelect.disabled = !isConnected;
+
+    btnSendProfile.disabled = !isConnected;
+    btnStartGame.disabled = !isConnected;
+    btnExitStep1.disabled = !isConnected;
+    btnExitStep2.disabled = !isConnected;
+
+    btnSendRaw.disabled = !isConnected;
+  }
+
+  function updateProfileId() {
+    const pid = `${selFormat.value}_${selScoring.value}_${selWin.value}_${selTarget.value}`;
+    profileIdView.value = pid;
+  }
+
+  function bumpSeq() {
+    seq++;
+    seqView.textContent = String(seq);
+  }
+
+  function nextSeq() {
+    const current = seq;
+    bumpSeq();
+    return current;
+  }
+
+  async function writeString(str) {
+    if (!rxChar) throw new Error("Not connected / RX characteristic missing");
+    const data = new TextEncoder().encode(str);
+    await rxChar.writeValue(data);
+    log(`TX -> ${str}`);
+  }
+
+  async function sendLetter(ch) {
+    await writeString(String(ch));
+  }
+
+  function onDisconnected() {
+    log("BLE disconnected");
+    device = null; server = null; rxChar = null; txChar = null;
+    deviceName.textContent = "—";
+    setConnectedUI(false);
   }
 
   async function connect() {
     if (!navigator.bluetooth) {
-      setStatus('Web Bluetooth NOT available (must be HTTPS + Chrome)');
+      alert("Web Bluetooth not supported here. Use Chrome on Android and HTTPS.");
       return;
     }
 
     try {
-      setStatus('Requesting device…');
-
+      log("Requesting device...");
       device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [SERVICE_UUID] }]
+        filters: [{ services: [SERVICE_UUID] }],
+        optionalServices: [SERVICE_UUID]
       });
 
-      device.addEventListener('gattserverdisconnected', () => {
-        setStatus('Disconnected');
-        enableButtons(false);
-      });
+      deviceName.textContent = device.name || "(unnamed)";
+      device.addEventListener("gattserverdisconnected", onDisconnected);
 
-      setStatus('Connecting…');
-      const server = await device.gatt.connect();
+      log("Connecting GATT...");
+      server = await device.gatt.connect();
 
+      log("Getting service...");
       const service = await server.getPrimaryService(SERVICE_UUID);
-      characteristic = await service.getCharacteristic(CHAR_UUID);
 
-      setStatus('Connected');
-      enableButtons(true);
+      log("Getting RX characteristic (write)...");
+      rxChar = await service.getCharacteristic(RX_UUID);
 
+      // TX notify is optional. We'll try; if it fails, it's fine.
+      try {
+        log("Trying TX notify characteristic...");
+        txChar = await service.getCharacteristic(TX_UUID);
+        await txChar.startNotifications();
+        txChar.addEventListener("characteristicvaluechanged", (e) => {
+          const val = new TextDecoder().decode(e.target.value);
+          log(`RX <- ${val}`);
+        });
+        log("Notifications enabled");
+      } catch (e) {
+        log("Notify characteristic not available (ok)");
+      }
+
+      setConnectedUI(true);
+      log("Connected");
     } catch (err) {
-      setStatus('Error: ' + err.message);
+      log("Connect error: " + err);
+      alert("Connect failed. Make sure nRF Connect is disconnected and try again.");
+      setConnectedUI(false);
     }
   }
 
-  async function send(letter) {
-    if (!characteristic) return;
-
+  async function disconnect() {
     try {
-      const data = new TextEncoder().encode(letter);
-      await characteristic.writeValueWithoutResponse(data);
-      setStatus('Sent "' + letter + '"');
-    } catch (err) {
-      setStatus('Send failed');
-    }
+      if (device?.gatt?.connected) {
+        log("Disconnecting...");
+        device.gatt.disconnect();
+      }
+    } catch (e) {}
+    onDisconnected();
   }
-</script>
 
+  // ===== Events =====
+  btnConnect.addEventListener("click", connect);
+  btnDisconnect.addEventListener("click", disconnect);
+  btnPing.addEventListener("click", async () => { await sendLetter("S"); });
+
+  btnClearLog.addEventListener("click", () => { logEl.value = ""; });
+
+  btnA.addEventListener("click", async () => { await sendLetter("A"); });
+  btnB.addEventListener("click", async () => { await sendLetter("B"); });
+  btnUp.addEventListener("click", async () => { await sendLetter("U"); });
+  btnDown.addEventListener("click", async () => { await sendLetter("D"); });
+  btnSelect.addEventListener("click", async () => { await sendLetter("S"); });
+
+  selFormat.addEventListener("change", updateProfileId);
+  selScoring.addEventListener("change", updateProfileId);
+  selWin.addEventListener("change", updateProfileId);
+  selTarget.addEventListener("change", updateProfileId);
+
+  btnSendProfile.addEventListener("click", async () => {
+    const pid = profileIdView.value;
+    const s = nextSeq();
+    // Master-style packet
+    await writeString(`PROFILE_SELECT,${pid},${s}`);
+  });
+
+  btnStartGame.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`START_GAME,${s}`);
+  });
+
+  btnExitStep1.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`CMD,EXIT_MENU_STEP1,${s}`);
+  });
+
+  btnExitStep2.addEventListener("click", async () => {
+    const s = nextSeq();
+    await writeString(`CMD,EXIT_MENU_STEP2,${s}`);
+  });
+
+  btnSendRaw.addEventListener("click", async () => {
+    const val = rawCmd.value.trim();
+    if (!val) return;
+    await writeString(val);
+  });
+
+  btnBumpSeq.addEventListener("click", () => bumpSeq());
+
+  // Init
+  updateProfileId();
+  seqView.textContent = String(seq);
+  setConnectedUI(false);
+  log("Ready. Tap Connect to pair with PlayPuck.");
+</script>
 </body>
 </html>
