@@ -359,18 +359,10 @@
               <option value="11" selected>11</option>
               <option value="15">15</option>
               <option value="21">21</option>
-              <option value="CUSTOM">CUSTOM</option>
             </select>
-            <div class="hint">Choose CUSTOM to enable the custom points box.</div>
+            <div class="hint">For anything else (e.g. 13), use the JSON override below.</div>
           </div>
 
-          <div>
-            <label for="winPointsCustom">Custom points</label>
-            <input id="winPointsCustom" type="number" inputmode="numeric" min="1" step="1" value="11" disabled>
-          </div>
-        </div>
-
-        <div class="twoCol" style="margin-top:10px;">
           <div>
             <label for="winRule">Win rule</label>
             <select id="winRule">
@@ -379,26 +371,28 @@
             </select>
             <div class="hint">2-clear means “win by two”.</div>
           </div>
+        </div>
 
+        <div class="twoCol" style="margin-top:10px;">
           <div>
             <label for="matchId">Match ID (optional)</label>
             <input id="matchId" placeholder="e.g. OKEHAMPTON-2026-01-03-001">
           </div>
-        </div>
 
-        <div style="margin-top:10px;">
-          <label for="customOverride">Custom override</label>
-          <select id="customOverride">
-            <option value="OFF" selected>Use presets above</option>
-            <option value="ON">Override with JSON below</option>
-          </select>
-          <div class="hint">If ON, the JSON below is uploaded exactly as typed.</div>
+          <div>
+            <label for="customOverride">Custom override</label>
+            <select id="customOverride">
+              <option value="OFF" selected>Use presets above</option>
+              <option value="ON">Override with JSON below</option>
+            </select>
+          </div>
         </div>
 
         <div style="margin-top:10px;">
           <label for="matchJson">Match / Rules JSON</label>
           <textarea id="matchJson"
             placeholder='{"format":"DOUBLES","scoring":"SIDEOUT","win_points":11,"win_rule":"SUDDEN_DEATH"}'></textarea>
+          <div class="hint">If override is ON, this JSON is uploaded exactly (plus match_id if provided).</div>
         </div>
       </div>
     </section>
@@ -557,7 +551,6 @@ const btnSendWifi = el('btnSendWifi');
 const matchType = el('matchType');
 const scoringMode = el('scoringMode');
 const winPointsPreset = el('winPointsPreset');
-const winPointsCustom = el('winPointsCustom');
 const winRule = el('winRule');
 const matchId = el('matchId');
 const customOverride = el('customOverride');
@@ -649,16 +642,6 @@ function parseRx(text){
 
 /* ---------- MATCH PAYLOAD (presets) ---------- */
 
-function getWinPoints(){
-  const preset = winPointsPreset.value;
-  if(preset === 'CUSTOM'){
-    const v = Number(winPointsCustom.value);
-    if(!Number.isFinite(v) || v < 1) throw new Error('Custom points must be 1 or more.');
-    return Math.floor(v);
-  }
-  return Number(preset);
-}
-
 function buildMatchPayload(){
   // If override is ON, upload JSON exactly
   if(customOverride.value === 'ON'){
@@ -673,20 +656,16 @@ function buildMatchPayload(){
   // Preset-driven payload (adjust key names if your firmware uses different ones)
   const id = matchId.value.trim() || null;
   const payload = {
-    format: matchType.value,     // "SINGLES" | "DOUBLES"
-    scoring: scoringMode.value,  // "SIDEOUT" | "RALLY"
-    win_points: getWinPoints(),  // number
-    win_rule: winRule.value,     // "SUDDEN_DEATH" | "TWO_CLEAR"
+    format: matchType.value,              // "SINGLES" | "DOUBLES"
+    scoring: scoringMode.value,           // "SIDEOUT" | "RALLY"
+    win_points: Number(winPointsPreset.value), // 7 | 11 | 15 | 21
+    win_rule: winRule.value,              // "SUDDEN_DEATH" | "TWO_CLEAR"
   };
   if(id) payload.match_id = id;
   return payload;
 }
 
 function syncJsonPreview(){
-  const isCustomPts = (winPointsPreset.value === 'CUSTOM');
-  winPointsCustom.disabled = !isCustomPts;
-  if(!isCustomPts) winPointsCustom.value = winPointsPreset.value;
-
   if(customOverride.value === 'OFF'){
     try{
       matchJson.value = JSON.stringify(buildMatchPayload(), null, 2);
@@ -696,7 +675,6 @@ function syncJsonPreview(){
 
 [matchType, scoringMode, winPointsPreset, winRule, customOverride, matchId]
   .forEach(x => x.addEventListener('change', syncJsonPreview));
-winPointsCustom.addEventListener('input', syncJsonPreview);
 
 // Initial seed
 syncJsonPreview();
