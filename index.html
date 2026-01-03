@@ -1,482 +1,797 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PlayPuck BLE Remote</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PicklePuck BLE Control</title>
+
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 0; background: #0b0f19; color: #e7eefc; }
-    header { padding: 14px 16px; background: #121a2b; border-bottom: 1px solid #22304f; }
-    header h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .3px; }
-    header p { margin: 6px 0 0; font-size: 12px; color: #a8b6d6; line-height: 1.35; }
-    main { padding: 14px 16px 90px; max-width: 980px; margin: 0 auto; }
-    .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 900px) { .row { grid-template-columns: 1.05fr .95fr; } }
-
-    .card { background: #101a31; border: 1px solid #22304f; border-radius: 14px; padding: 12px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
-    .card h2 { margin: 0 0 10px; font-size: 14px; }
-    .muted { color: #a8b6d6; font-size: 12px; }
-    .pill { display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid #22304f; background:#0b1326; }
-    .dot { width:10px; height:10px; border-radius:50%; background:#667; box-shadow: 0 0 0 3px rgba(255,255,255,.06) inset; }
-    .dot.ok { background:#38d39f; }
-    .dot.bad { background:#ff5d6c; }
-    .dot.warn { background:#ffcf5a; }
-
-    .btnbar { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
-    button {
-      appearance: none; border: 1px solid #2a3b61; background: #16244a; color: #e7eefc;
-      padding: 10px 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --shadow: 0 8px 30px rgba(2,8,23,.08);
+      --accent: #635bff;
+      --accent2: #10b981;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --btn: #111827;
+      --btnText: #ffffff;
+      --chip: #eef2ff;
     }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    button.secondary { background:#0f1a33; }
-    button.danger { background:#3a1430; border-color:#5c1e4a; }
-    button.good { background:#113a2c; border-color:#1c5f49; }
-    button.small { padding: 8px 10px; font-size: 12px; border-radius: 10px; }
 
-    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    .grid4 { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
-    @media (min-width: 520px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg) 65%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-    label { display:block; font-size:12px; color:#a8b6d6; margin: 10px 0 6px; }
-    select, input, textarea {
-      width: 100%; box-sizing: border-box; padding: 10px 10px;
-      border-radius: 12px; border: 1px solid #2a3b61; background:#0b1326; color:#e7eefc;
+    header{
+      padding: 16px 16px 10px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    header h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .2px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content: space-between;
+    }
+    header .status{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--muted);
+      border: 1px solid rgba(99,91,255,.15);
+      white-space: nowrap;
+    }
+
+    main{
+      padding: 14px 14px 26px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card .cardHeader{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+    }
+    .card .cardHeader h2{
+      margin:0;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .card .cardHeader p{
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .stepBadge{
+      font-size: 12px;
+      font-weight: 700;
+      color: #1f2937;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      min-width: 46px;
+      text-align:center;
+    }
+
+    .card .cardBody{
+      padding: 14px;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+
+    input, select, textarea{
+      width: 100%;
+      padding: 12px 12px;
+      font-size: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
       outline: none;
+      box-shadow: 0 1px 0 rgba(2,8,23,.02);
     }
-    textarea { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    textarea{ min-height: 92px; resize: vertical; }
 
-    .footerbar {
-      position: fixed; left:0; right:0; bottom:0; padding: 10px 16px;
-      background:#0b1326; border-top: 1px solid #22304f;
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(99,91,255,.5);
+      box-shadow: 0 0 0 4px rgba(99,91,255,.12);
     }
-    .footerbar .inner { max-width: 980px; margin: 0 auto; display:flex; gap:10px; align-items:center; justify-content:space-between; }
-    .tiny { font-size: 11px; color:#a8b6d6; line-height:1.25; }
+
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .threeCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    button{
+      -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor:pointer;
+      width: 100%;
+      min-height: 48px;
+      background: var(--btn);
+      color: var(--btnText);
+      box-shadow: 0 8px 18px rgba(17,24,39,.12);
+      transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    button:active{ transform: translateY(1px); }
+    button.secondary{
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 18px rgba(2,8,23,.06);
+    }
+    button.accent{ background: var(--accent); }
+    button.good{ background: var(--accent2); }
+    button.warn{ background: var(--warn); }
+    button.danger{ background: var(--danger); }
+
+    button:disabled{
+      opacity: .55;
+      cursor:not-allowed;
+      box-shadow: none;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .log{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      background: #0b1220;
+      color: #dbeafe;
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(226,232,240,.14);
+      max-height: 180px;
+      overflow:auto;
+      white-space: pre-wrap;
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .scoreboard{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .scoreTile{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+    }
+    .scoreTile h3{
+      margin:0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .scoreVal{
+      margin-top: 8px;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: .6px;
+    }
+
+    @media (max-width: 460px){
+      .twoCol, .threeCol{ grid-template-columns: 1fr; }
+      .scoreboard{ grid-template-columns: 1fr; }
+    }
   </style>
 </head>
+
 <body>
 <header>
-  <h1>PlayPuck BLE Remote</h1>
-  <p>
-    Chrome on Android + HTTPS. Connect, then send score + profiles + Wi-Fi provisioning commands over BLE.
-  </p>
+  <h1>
+    PicklePuck BLE Control
+    <span id="connStatus" class="status">Disconnected</span>
+  </h1>
 </header>
 
 <main>
-  <div class="row">
-    <!-- LEFT: CONTROL -->
-    <div class="card">
-      <h2>Connection</h2>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <span class="pill"><span id="statusDot" class="dot bad"></span><span id="statusText">Not connected</span></span>
-        <span class="pill">Device: <span id="deviceName" class="mono">—</span></span>
-        <span class="pill">SEQ: <span id="seqView" class="mono">1</span></span>
-      </div>
+  <div class="grid">
 
-      <div class="btnbar">
-        <button id="btnConnect">Connect</button>
-        <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
-        <button id="btnClearLog" class="secondary">Clear log</button>
-      </div>
-
-      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
-
-      <h2>Quick Score</h2>
-      <div class="grid4">
-        <button id="btnA" class="good" disabled>TEAM A (+1)</button>
-        <button id="btnB" class="danger" disabled>TEAM B (+1)</button>
-        <button id="btnUp" class="secondary" disabled>UP (U)</button>
-        <button id="btnDown" class="secondary" disabled>DOWN (D)</button>
-      </div>
-      <div class="btnbar">
-        <button id="btnSelect" class="secondary" disabled>SELECT / START (S)</button>
-      </div>
-
-      <p class="muted" style="margin-top:10px;">
-        Quick Score uses single-letter commands (<span class="mono">A / B / U / D / S</span>).
-      </p>
-
-      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
-
-      <h2>Profile Builder</h2>
-      <p class="muted">
-        Sends <span class="mono">PROFILE_SELECT,&lt;profileId&gt;,&lt;SEQ&gt;</span> and <span class="mono">START_GAME,&lt;SEQ&gt;</span>.
-      </p>
-
-      <div class="grid2">
+    <!-- CONNECTION -->
+    <section class="card" id="cardConnect">
+      <div class="cardHeader">
         <div>
-          <label for="selFormat">FORMAT</label>
-          <select id="selFormat">
-            <option value="PAIR" selected>PAIRS</option>
-            <option value="SING">SINGLES</option>
-          </select>
+          <h2>BLE Connection</h2>
+          <p>Connect to the puck, then follow the steps in order.</p>
+        </div>
+        <div class="stepBadge">0</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <button id="btnConnect" class="accent">Connect</button>
+          <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
         </div>
 
-        <div>
-          <label for="selScoring">SCORING</label>
-          <select id="selScoring">
-            <option value="SO" selected>SIDEOUT</option>
-            <option value="RL">RALLY</option>
-          </select>
+        <div class="row" style="margin-top:10px;">
+          <span class="pill" id="deviceNamePill">Device: —</span>
+          <span class="pill" id="rssiPill">RSSI: —</span>
         </div>
 
+        <p class="hint">
+          Tip: On iPhone/Android this must be opened in a browser that supports Web Bluetooth (Chrome/Edge on Android,
+          or a compatible iOS wrapper). If your phone can’t do WebBLE, use this as a reference UI for an app wrapper.
+        </p>
+      </div>
+    </section>
+
+    <!-- 1) WIFI SETUP -->
+    <section class="card" id="cardWifi">
+      <div class="cardHeader">
         <div>
-          <label for="selWin">WIN</label>
-          <select id="selWin">
-            <option value="SD" selected>SUDDEN DEATH</option>
-            <option value="W2">2 CLEAR POINTS</option>
-          </select>
+          <h2>Wi-Fi set up</h2>
+          <p>Send SSID + password to the puck.</p>
+        </div>
+        <div class="stepBadge">1</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <div>
+            <label for="wifiSsid">Wi-Fi SSID</label>
+            <input id="wifiSsid" autocomplete="username" placeholder="e.g. HomeWiFi">
+          </div>
+          <div>
+            <label for="wifiPass">Wi-Fi Password</label>
+            <input id="wifiPass" type="password" autocomplete="current-password" placeholder="••••••••">
+          </div>
         </div>
 
-        <div>
-          <label for="selTarget">TARGET</label>
-          <select id="selTarget">
-            <option value="7" selected>7</option>
-            <option value="11">11</option>
-            <option value="15">15</option>
-            <option value="21">21</option>
-          </select>
+        <div style="margin-top:10px;">
+          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to puck</button>
+          <div class="hint">This typically maps to your puck command for Wi-Fi credentials (e.g. <b>WIFI_SET</b>).</div>
         </div>
       </div>
+    </section>
 
-      <label>Computed Profile ID</label>
-      <input id="profileIdView" class="mono" value="PAIR_SO_SD_7" readonly />
-
-      <div class="btnbar">
-        <button id="btnSendProfile" disabled>Send PROFILE_SELECT</button>
-        <button id="btnStartGame" class="good" disabled>Send START_GAME</button>
+    <!-- 2) MATCH SELECTION -->
+    <section class="card" id="cardMatch">
+      <div class="cardHeader">
+        <div>
+          <h2>Match selection</h2>
+          <p>Select rules/preset before uploading to the puck.</p>
+        </div>
+        <div class="stepBadge">2</div>
       </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <div>
+            <label for="matchPreset">Preset</label>
+            <select id="matchPreset">
+              <option value="PB_DBL_SIDEOUT_11_SD">Doubles • Side-out to 11 • Sudden Death</option>
+              <option value="PB_DBL_RALLY_11_SD">Doubles • Rally to 11 • Sudden Death</option>
+              <option value="PB_SGL_SIDEOUT_11_SD">Singles • Side-out to 11 • Sudden Death</option>
+              <option value="CUSTOM">Custom (JSON below)</option>
+            </select>
+          </div>
+          <div>
+            <label for="matchId">Match ID (optional)</label>
+            <input id="matchId" placeholder="e.g. OKEHAMPTON-2026-01-03-001">
+          </div>
+        </div>
 
-      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
-
-      <h2>Wi-Fi Setup</h2>
-      <p class="muted">
-        Sends <span class="mono">WIFI_SET,&lt;ssid&gt;,&lt;pass&gt;,&lt;SEQ&gt;</span> then optionally <span class="mono">WIFI_CONNECT,&lt;SEQ&gt;</span>.
-        (Firmware must support these commands.)
-      </p>
-
-      <label for="wifiSsid">SSID</label>
-      <input id="wifiSsid" placeholder="e.g. Armor 15" />
-
-      <label for="wifiPass">Password</label>
-      <input id="wifiPass" type="password" placeholder="e.g. Password" />
-
-      <div class="btnbar">
-        <button id="btnWifiSet" class="secondary" disabled>Send WIFI_SET</button>
-        <button id="btnWifiConnect" class="good" disabled>Send WIFI_CONNECT</button>
-        <button id="btnWifiStatus" class="secondary" disabled>Send WIFI_STATUS</button>
-        <button id="btnWifiClear" class="danger" disabled>Send WIFI_CLEAR</button>
+        <div style="margin-top:10px;">
+          <label for="matchJson">Match / Rules JSON</label>
+          <textarea id="matchJson" placeholder='{"preset":"PB_DBL_SIDEOUT_11_SD","win_points":11,"sudden_death":true}'></textarea>
+          <div class="hint">If preset = Custom, this JSON is uploaded. Otherwise it’s derived from preset.</div>
+        </div>
       </div>
+    </section>
 
-      <p class="muted" style="margin-top:10px;">
-        Tip: Wi-Fi credentials are sensitive. Don’t use this in public unless you add BLE pairing/encryption.
-      </p>
-
-      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
-
-      <h2>Exit Menu (confirm)</h2>
-      <div class="btnbar">
-        <button id="btnExitStep1" class="secondary" disabled>EXIT step 1</button>
-        <button id="btnExitStep2" class="secondary" disabled>EXIT step 2</button>
+    <!-- 3) UPLOAD TO PUCK -->
+    <section class="card" id="cardUpload">
+      <div class="cardHeader">
+        <div>
+          <h2>Upload to puck</h2>
+          <p>Send match profile to the puck (PROFILE_SELECT).</p>
+        </div>
+        <div class="stepBadge">3</div>
       </div>
-
-      <hr style="border:none;border-top:1px solid #22304f;margin:14px 0;" />
-
-      <h2>Raw Command</h2>
-      <label for="rawCmd">Command</label>
-      <input id="rawCmd" class="mono" placeholder='e.g. PROFILE_SELECT,PAIR_SO_W2_11,12' />
-
-      <div class="btnbar">
-        <button id="btnSendRaw" class="secondary" disabled>Send raw</button>
-        <button id="btnBumpSeq" class="secondary">+SEQ</button>
+      <div class="cardBody">
+        <button id="btnUploadProfile" class="accent" disabled>Upload match to puck</button>
+        <div class="hint">Sends <b>PROFILE_SELECT</b> with payload (preset or JSON).</div>
       </div>
-    </div>
+    </section>
 
-    <!-- RIGHT: LOG -->
-    <div class="card">
-      <h2>Log</h2>
-      <textarea id="log" readonly></textarea>
-      <p class="muted">
-        If you can’t connect: ensure nRF Connect is disconnected (only one BLE client at a time).
-      </p>
-    </div>
+    <!-- 4) START GAME -->
+    <section class="card" id="cardStart">
+      <div class="cardHeader">
+        <div>
+          <h2>Start game</h2>
+          <p>Tell the puck to start the match (START_GAME).</p>
+        </div>
+        <div class="stepBadge">4</div>
+      </div>
+      <div class="cardBody">
+        <button id="btnStartGame" class="good" disabled>Start game</button>
+        <div class="hint">Sends <b>START_GAME</b>.</div>
+      </div>
+    </section>
+
+    <!-- 5) SCORE GAME -->
+    <section class="card" id="cardScore">
+      <div class="cardHeader">
+        <div>
+          <h2>Score game</h2>
+          <p>Team A / Team B scoring buttons.</p>
+        </div>
+        <div class="stepBadge">5</div>
+      </div>
+      <div class="cardBody">
+        <div class="scoreboard">
+          <div class="scoreTile">
+            <h3>Team A</h3>
+            <div id="scoreA" class="scoreVal">0</div>
+          </div>
+          <div class="scoreTile">
+            <h3>Team B</h3>
+            <div id="scoreB" class="scoreVal">0</div>
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <button id="btnScoreA" class="accent" disabled>+1 Team A</button>
+          <button id="btnScoreB" class="accent" disabled>+1 Team B</button>
+        </div>
+
+        <div class="hint">
+          These map to your puck scoring commands (e.g. <b>SCORE_A</b> / <b>SCORE_B</b> or a single <b>SCORE</b> with team field).
+        </div>
+      </div>
+    </section>
+
+    <!-- 6) EDIT SCORE -->
+    <section class="card" id="cardEdit">
+      <div class="cardHeader">
+        <div>
+          <h2>Edit score</h2>
+          <p>Adjust scores up/down (admin correction).</p>
+        </div>
+        <div class="stepBadge">6</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <div class="threeCol" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button id="btnAminus" class="secondary" disabled>− A</button>
+            <button id="btnAplus" class="secondary" disabled>+ A</button>
+            <button id="btnAset" class="warn" disabled>Set A</button>
+          </div>
+          <div class="threeCol" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button id="btnBminus" class="secondary" disabled>− B</button>
+            <button id="btnBplus" class="secondary" disabled>+ B</button>
+            <button id="btnBset" class="warn" disabled>Set B</button>
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <div>
+            <label for="setAVal">Set Team A to…</label>
+            <input id="setAVal" type="number" inputmode="numeric" min="0" step="1" value="0">
+          </div>
+          <div>
+            <label for="setBVal">Set Team B to…</label>
+            <input id="setBVal" type="number" inputmode="numeric" min="0" step="1" value="0">
+          </div>
+        </div>
+
+        <div class="hint">
+          Use <b>SCORE_SET</b> (team + value) or your equivalent command.
+        </div>
+      </div>
+    </section>
+
+    <!-- LOG -->
+    <section class="card">
+      <div class="cardHeader">
+        <div>
+          <h2>Debug log</h2>
+          <p>Messages sent/received.</p>
+        </div>
+        <div class="stepBadge">LOG</div>
+      </div>
+      <div class="cardBody">
+        <div id="log" class="log"></div>
+      </div>
+    </section>
+
   </div>
 </main>
 
-<div class="footerbar">
-  <div class="inner">
-    <div class="tiny">
-      BLE Service/Char (NUS-style):<br/>
-      <span class="mono">6E400001…</span> / <span class="mono">6E400002…</span> (Write)
-    </div>
-    <div class="tiny">
-      If “Web Bluetooth not supported”: you’re not in Chrome Android or not on HTTPS.
-    </div>
-  </div>
-</div>
-
 <script>
-  // ===== UUIDs (match your puck BLE sketch) =====
-  const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-  const RX_UUID      = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // write
-  const TX_UUID      = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // notify (optional)
+/**
+ * NOTE:
+ * This is a UI + Web Bluetooth scaffold.
+ * You MUST set these UUIDs to match your puck BLE service/characteristic.
+ *
+ * If you already have working UUIDs/commands elsewhere, drop them in below.
+ */
+const BLE = {
+  SERVICE_UUID:      '0000ffff-0000-1000-8000-00805f9b34fb', // <-- CHANGE ME
+  TX_CHAR_UUID:      '0000ff01-0000-1000-8000-00805f9b34fb', // phone -> puck
+  RX_CHAR_UUID:      '0000ff02-0000-1000-8000-00805f9b34fb', // puck -> phone (notify)
+};
 
-  // ===== State =====
-  let device = null;
-  let server = null;
-  let rxChar = null;
-  let txChar = null;
-  let seq = 1;
+// ---- UI refs
+const el = (id) => document.getElementById(id);
+const logEl = el('log');
+const connStatus = el('connStatus');
+const deviceNamePill = el('deviceNamePill');
+const rssiPill = el('rssiPill');
 
-  // ===== UI =====
-  const statusDot = document.getElementById("statusDot");
-  const statusText = document.getElementById("statusText");
-  const deviceName = document.getElementById("deviceName");
-  const logEl = document.getElementById("log");
-  const seqView = document.getElementById("seqView");
+// Buttons
+const btnConnect = el('btnConnect');
+const btnDisconnect = el('btnDisconnect');
+const btnSendWifi = el('btnSendWifi');
+const btnUploadProfile = el('btnUploadProfile');
+const btnStartGame = el('btnStartGame');
 
-  const btnConnect = document.getElementById("btnConnect");
-  const btnDisconnect = document.getElementById("btnDisconnect");
-  const btnClearLog = document.getElementById("btnClearLog");
+const btnScoreA = el('btnScoreA');
+const btnScoreB = el('btnScoreB');
 
-  const btnA = document.getElementById("btnA");
-  const btnB = document.getElementById("btnB");
-  const btnUp = document.getElementById("btnUp");
-  const btnDown = document.getElementById("btnDown");
-  const btnSelect = document.getElementById("btnSelect");
+const btnAminus = el('btnAminus');
+const btnAplus  = el('btnAplus');
+const btnAset   = el('btnAset');
 
-  const selFormat = document.getElementById("selFormat");
-  const selScoring = document.getElementById("selScoring");
-  const selWin = document.getElementById("selWin");
-  const selTarget = document.getElementById("selTarget");
-  const profileIdView = document.getElementById("profileIdView");
-  const btnSendProfile = document.getElementById("btnSendProfile");
-  const btnStartGame = document.getElementById("btnStartGame");
+const btnBminus = el('btnBminus');
+const btnBplus  = el('btnBplus');
+const btnBset   = el('btnBset');
 
-  const wifiSsid = document.getElementById("wifiSsid");
-  const wifiPass = document.getElementById("wifiPass");
-  const btnWifiSet = document.getElementById("btnWifiSet");
-  const btnWifiConnect = document.getElementById("btnWifiConnect");
-  const btnWifiStatus = document.getElementById("btnWifiStatus");
-  const btnWifiClear = document.getElementById("btnWifiClear");
+const scoreAEl = el('scoreA');
+const scoreBEl = el('scoreB');
 
-  const btnExitStep1 = document.getElementById("btnExitStep1");
-  const btnExitStep2 = document.getElementById("btnExitStep2");
+const wifiSsid = el('wifiSsid');
+const wifiPass = el('wifiPass');
 
-  const rawCmd = document.getElementById("rawCmd");
-  const btnSendRaw = document.getElementById("btnSendRaw");
-  const btnBumpSeq = document.getElementById("btnBumpSeq");
+const matchPreset = el('matchPreset');
+const matchId = el('matchId');
+const matchJson = el('matchJson');
 
-  function log(msg) {
-    const ts = new Date().toLocaleTimeString();
-    logEl.value += `[${ts}] ${msg}\n`;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
+const setAVal = el('setAVal');
+const setBVal = el('setBVal');
 
-  function setConnectedUI(isConnected) {
-    statusDot.classList.remove("ok", "bad", "warn");
-    statusDot.classList.add(isConnected ? "ok" : "bad");
-    statusText.textContent = isConnected ? "Connected" : "Not connected";
+// ---- BLE state
+let device = null;
+let server = null;
+let service = null;
+let txChar = null;
+let rxChar = null;
 
-    btnDisconnect.disabled = !isConnected;
+function log(msg){
+  const ts = new Date().toLocaleTimeString();
+  logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
+}
 
-    btnA.disabled = !isConnected;
-    btnB.disabled = !isConnected;
-    btnUp.disabled = !isConnected;
-    btnDown.disabled = !isConnected;
-    btnSelect.disabled = !isConnected;
+function setConnectedUI(connected){
+  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
+  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
+  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
+  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
 
-    btnSendProfile.disabled = !isConnected;
-    btnStartGame.disabled = !isConnected;
+  btnDisconnect.disabled = !connected;
 
-    btnWifiSet.disabled = !isConnected;
-    btnWifiConnect.disabled = !isConnected;
-    btnWifiStatus.disabled = !isConnected;
-    btnWifiClear.disabled = !isConnected;
+  // Enable the flow buttons in order
+  btnSendWifi.disabled = !connected;
+  btnUploadProfile.disabled = !connected;
+  btnStartGame.disabled = !connected;
 
-    btnExitStep1.disabled = !isConnected;
-    btnExitStep2.disabled = !isConnected;
+  btnScoreA.disabled = !connected;
+  btnScoreB.disabled = !connected;
 
-    btnSendRaw.disabled = !isConnected;
-  }
+  btnAminus.disabled = !connected;
+  btnAplus.disabled  = !connected;
+  btnAset.disabled   = !connected;
 
-  function updateProfileId() {
-    const pid = `${selFormat.value}_${selScoring.value}_${selWin.value}_${selTarget.value}`;
-    profileIdView.value = pid;
-  }
+  btnBminus.disabled = !connected;
+  btnBplus.disabled  = !connected;
+  btnBset.disabled   = !connected;
+}
 
-  function bumpSeq() {
-    seq++;
-    seqView.textContent = String(seq);
-  }
+function enc(str){
+  return new TextEncoder().encode(str);
+}
 
-  function nextSeq() {
-    const current = seq;
-    bumpSeq();
-    return current;
-  }
+async function bleSend(command, payloadObj=null){
+  if(!txChar) throw new Error('Not connected / TX characteristic missing.');
 
-  // Escape commas/newlines so SSID/PASS can't break the CSV-style protocol.
-  // (Firmware should unescape.)
-  function escField(s) {
-    return String(s || "")
-      .replaceAll("\\", "\\\\")
-      .replaceAll(",", "\\,")
-      .replaceAll("\n", "\\n")
-      .replaceAll("\r", "\\r");
-  }
+  const payload = payloadObj ? JSON.stringify(payloadObj) : '';
+  const line = payload ? `${command} ${payload}` : `${command}`;
+  const data = enc(line);
 
-  async function writeString(str) {
-    if (!rxChar) throw new Error("Not connected / RX characteristic missing");
-    const data = new TextEncoder().encode(str);
-    await rxChar.writeValue(data);
-    log(`TX -> ${str}`);
-  }
+  await txChar.writeValue(data);
+  log(`→ ${line}`);
+}
 
-  async function sendLetter(ch) {
-    await writeString(String(ch));
-  }
-
-  function onDisconnected() {
-    log("BLE disconnected");
-    device = null; server = null; rxChar = null; txChar = null;
-    deviceName.textContent = "—";
-    setConnectedUI(false);
-  }
-
-  async function connect() {
-    if (!navigator.bluetooth) {
-      alert("Web Bluetooth not supported here. Use Chrome on Android and HTTPS.");
-      return;
-    }
-
-    try {
-      log("Requesting device...");
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [SERVICE_UUID] }],
-        optionalServices: [SERVICE_UUID]
-      });
-
-      deviceName.textContent = device.name || "(unnamed)";
-      device.addEventListener("gattserverdisconnected", onDisconnected);
-
-      log("Connecting GATT...");
-      server = await device.gatt.connect();
-
-      log("Getting service...");
-      const service = await server.getPrimaryService(SERVICE_UUID);
-
-      log("Getting RX characteristic (write)...");
-      rxChar = await service.getCharacteristic(RX_UUID);
-
-      // Optional notify
-      try {
-        txChar = await service.getCharacteristic(TX_UUID);
-        await txChar.startNotifications();
-        txChar.addEventListener("characteristicvaluechanged", (e) => {
-          const val = new TextDecoder().decode(e.target.value);
-          log(`RX <- ${val}`);
-        });
-        log("Notifications enabled");
-      } catch (e) {
-        log("Notify characteristic not available (ok)");
+function parseRx(text){
+  // Optional: you can parse incoming updates from puck here.
+  // Example expected messages:
+  // SCORE {"a":3,"b":2}
+  // STATE {"connected_wifi":true}
+  try{
+    const parts = text.trim().split(' ');
+    const cmd = parts[0];
+    const json = parts.slice(1).join(' ');
+    if(json){
+      const obj = JSON.parse(json);
+      if(cmd === 'SCORE' && typeof obj.a === 'number' && typeof obj.b === 'number'){
+        setScore(obj.a, obj.b);
       }
+    }
+  }catch(e){
+    // ignore
+  }
+}
 
-      setConnectedUI(true);
-      log("Connected");
-    } catch (err) {
-      log("Connect error: " + err);
-      alert("Connect failed. Make sure nRF Connect is disconnected and try again.");
+function setScore(a,b){
+  scoreAEl.textContent = String(a);
+  scoreBEl.textContent = String(b);
+  setAVal.value = String(a);
+  setBVal.value = String(b);
+}
+
+btnConnect.addEventListener('click', async () => {
+  try{
+    log('Requesting BLE device…');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [BLE.SERVICE_UUID] }],
+      optionalServices: [BLE.SERVICE_UUID]
+    });
+
+    deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
+    device.addEventListener('gattserverdisconnected', () => {
+      log('Disconnected.');
       setConnectedUI(false);
+    });
+
+    server = await device.gatt.connect();
+    service = await server.getPrimaryService(BLE.SERVICE_UUID);
+
+    txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+    rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+
+    // Notifications
+    try{
+      await rxChar.startNotifications();
+      rxChar.addEventListener('characteristicvaluechanged', (ev) => {
+        const val = ev.target.value;
+        const txt = new TextDecoder().decode(val);
+        log(`← ${txt}`);
+        parseRx(txt);
+      });
+    }catch(e){
+      log(`RX notifications not enabled: ${e.message}`);
     }
+
+    setConnectedUI(true);
+    log('Connected ✅');
+
+    // RSSI (not standard via WebBLE; shown as unavailable)
+    rssiPill.textContent = 'RSSI: (not available in WebBLE)';
+  }catch(err){
+    log(`Connect error: ${err.message}`);
   }
+});
 
-  async function disconnect() {
-    try {
-      if (device?.gatt?.connected) {
-        log("Disconnecting...");
-        device.gatt.disconnect();
-      }
-    } catch (e) {}
-    onDisconnected();
+btnDisconnect.addEventListener('click', async () => {
+  try{
+    if(device && device.gatt && device.gatt.connected){
+      device.gatt.disconnect();
+    }
+    setConnectedUI(false);
+  }catch(e){
+    log(`Disconnect error: ${e.message}`);
   }
+});
 
-  // ===== Events =====
-  btnConnect.addEventListener("click", connect);
-  btnDisconnect.addEventListener("click", disconnect);
-  btnClearLog.addEventListener("click", () => { logEl.value = ""; });
-
-  btnA.addEventListener("click", async () => { await sendLetter("A"); });
-  btnB.addEventListener("click", async () => { await sendLetter("B"); });
-  btnUp.addEventListener("click", async () => { await sendLetter("U"); });
-  btnDown.addEventListener("click", async () => { await sendLetter("D"); });
-  btnSelect.addEventListener("click", async () => { await sendLetter("S"); });
-
-  selFormat.addEventListener("change", updateProfileId);
-  selScoring.addEventListener("change", updateProfileId);
-  selWin.addEventListener("change", updateProfileId);
-  selTarget.addEventListener("change", updateProfileId);
-
-  btnSendProfile.addEventListener("click", async () => {
-    const pid = profileIdView.value;
-    const s = nextSeq();
-    await writeString(`PROFILE_SELECT,${pid},${s}`);
-  });
-
-  btnStartGame.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`START_GAME,${s}`);
-  });
-
-  btnExitStep1.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`CMD,EXIT_MENU_STEP1,${s}`);
-  });
-
-  btnExitStep2.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`CMD,EXIT_MENU_STEP2,${s}`);
-  });
-
-  btnWifiSet.addEventListener("click", async () => {
+// 1) Wi-Fi set up
+btnSendWifi.addEventListener('click', async () => {
+  try{
     const ssid = wifiSsid.value.trim();
-    const pass = wifiPass.value; // allow spaces
-    if (!ssid) { alert("Enter SSID"); return; }
+    const pass = wifiPass.value;
+    if(!ssid) return log('Enter Wi-Fi SSID first.');
+    await bleSend('WIFI_SET', { ssid, pass });
+  }catch(e){
+    log(`Wi-Fi send error: ${e.message}`);
+  }
+});
 
-    const s = nextSeq();
-    // Escaped fields so commas/newlines don't break the protocol
-    await writeString(`WIFI_SET,${escField(ssid)},${escField(pass)},${s}`);
-  });
+// 2) Match selection -> (prepare JSON)
+function buildMatchPayload(){
+  const preset = matchPreset.value;
+  const id = matchId.value.trim() || null;
 
-  btnWifiConnect.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`WIFI_CONNECT,${s}`);
-  });
+  if(preset === 'CUSTOM'){
+    let obj = null;
+    try{ obj = JSON.parse(matchJson.value); }
+    catch(e){ throw new Error('Custom JSON invalid.'); }
+    if(id) obj.match_id = id;
+    return obj;
+  }
 
-  btnWifiStatus.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`WIFI_STATUS,${s}`);
-  });
+  // Preset derived payload (adjust to your firmware schema)
+  const presetPayload = {
+    preset,
+    match_id: id,
+  };
 
-  btnWifiClear.addEventListener("click", async () => {
-    const s = nextSeq();
-    await writeString(`WIFI_CLEAR,${s}`);
-  });
+  return presetPayload;
+}
 
-  btnSendRaw.addEventListener("click", async () => {
-    const val = rawCmd.value.trim();
-    if (!val) return;
-    await writeString(val);
-  });
+matchPreset.addEventListener('change', () => {
+  if(matchPreset.value !== 'CUSTOM'){
+    const obj = buildMatchPayload();
+    matchJson.value = JSON.stringify(obj, null, 2);
+  }
+});
 
-  btnBumpSeq.addEventListener("click", () => bumpSeq());
+// Seed initial JSON display
+(() => {
+  try{
+    const obj = buildMatchPayload();
+    matchJson.value = JSON.stringify(obj, null, 2);
+  }catch(_){}
+})();
 
-  // Init
-  updateProfileId();
-  seqView.textContent = String(seq);
-  setConnectedUI(false);
-  log("Ready. Tap Connect to pair with PlayPuck.");
+// 3) Upload to puck (PROFILE_SELECT)
+btnUploadProfile.addEventListener('click', async () => {
+  try{
+    const payload = buildMatchPayload();
+    await bleSend('PROFILE_SELECT', payload);
+  }catch(e){
+    log(`Upload error: ${e.message}`);
+  }
+});
+
+// 4) Start game (START_GAME)
+btnStartGame.addEventListener('click', async () => {
+  try{
+    await bleSend('START_GAME');
+  }catch(e){
+    log(`Start error: ${e.message}`);
+  }
+});
+
+// 5) Score game - Team A & Team B
+btnScoreA.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'A', delta: 1 });
+    setScore(Number(scoreAEl.textContent)+1, Number(scoreBEl.textContent));
+  }catch(e){
+    log(`Score A error: ${e.message}`);
+  }
+});
+btnScoreB.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'B', delta: 1 });
+    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent)+1);
+  }catch(e){
+    log(`Score B error: ${e.message}`);
+  }
+});
+
+// 6) Edit score
+btnAminus.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'A', delta: -1 });
+    setScore(Math.max(0, Number(scoreAEl.textContent)-1), Number(scoreBEl.textContent));
+  }catch(e){ log(`A- error: ${e.message}`); }
+});
+btnAplus.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'A', delta: 1 });
+    setScore(Number(scoreAEl.textContent)+1, Number(scoreBEl.textContent));
+  }catch(e){ log(`A+ error: ${e.message}`); }
+});
+btnAset.addEventListener('click', async () => {
+  try{
+    const v = Math.max(0, Number(setAVal.value||0));
+    await bleSend('SCORE_SET', { team: 'A', value: v });
+    setScore(v, Number(scoreBEl.textContent));
+  }catch(e){ log(`A set error: ${e.message}`); }
+});
+
+btnBminus.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'B', delta: -1 });
+    setScore(Number(scoreAEl.textContent), Math.max(0, Number(scoreBEl.textContent)-1));
+  }catch(e){ log(`B- error: ${e.message}`); }
+});
+btnBplus.addEventListener('click', async () => {
+  try{
+    await bleSend('SCORE', { team: 'B', delta: 1 });
+    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent)+1);
+  }catch(e){ log(`B+ error: ${e.message}`); }
+});
+btnBset.addEventListener('click', async () => {
+  try{
+    const v = Math.max(0, Number(setBVal.value||0));
+    await bleSend('SCORE_SET', { team: 'B', value: v });
+    setScore(Number(scoreAEl.textContent), v);
+  }catch(e){ log(`B set error: ${e.message}`); }
+});
+
+// Start disabled until connected
+setConnectedUI(false);
+log('Ready. Connect to a puck to begin.');
 </script>
 </body>
 </html>
