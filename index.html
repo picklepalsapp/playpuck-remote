@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>PicklePuck BLE Control</title>
 
   <style>
@@ -111,9 +111,7 @@
       text-align:center;
     }
 
-    .card .cardBody{
-      padding: 14px;
-    }
+    .card .cardBody{ padding: 14px; }
 
     .row{
       display:flex;
@@ -141,7 +139,7 @@
       outline: none;
       box-shadow: 0 1px 0 rgba(2,8,23,.02);
     }
-    textarea{ min-height: 92px; resize: vertical; }
+    textarea{ min-height: 110px; resize: vertical; }
 
     input:focus, select:focus, textarea:focus{
       border-color: rgba(99,91,255,.5);
@@ -214,7 +212,7 @@
       border-radius: 14px;
       padding: 12px;
       border: 1px solid rgba(226,232,240,.14);
-      max-height: 180px;
+      max-height: 200px;
       overflow:auto;
       white-space: pre-wrap;
     }
@@ -269,7 +267,7 @@
 <main>
   <div class="grid">
 
-    <!-- CONNECTION -->
+    <!-- 0) CONNECTION -->
     <section class="card" id="cardConnect">
       <div class="cardHeader">
         <div>
@@ -290,8 +288,8 @@
         </div>
 
         <p class="hint">
-          Tip: On iPhone/Android this must be opened in a browser that supports Web Bluetooth (Chrome/Edge on Android,
-          or a compatible iOS wrapper). If your phone can’t do WebBLE, use this as a reference UI for an app wrapper.
+          Note: Web Bluetooth availability varies by phone/browser. If WebBLE isn’t supported on your device,
+          this UI can still be used as your “screen spec” for a wrapped app.
         </p>
       </div>
     </section>
@@ -319,7 +317,7 @@
 
         <div style="margin-top:10px;">
           <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to puck</button>
-          <div class="hint">This typically maps to your puck command for Wi-Fi credentials (e.g. <b>WIFI_SET</b>).</div>
+          <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code> (change command if needed).</div>
         </div>
       </div>
     </section>
@@ -329,21 +327,59 @@
       <div class="cardHeader">
         <div>
           <h2>Match selection</h2>
-          <p>Select rules/preset before uploading to the puck.</p>
+          <p>Choose rules/preset before uploading to the puck.</p>
         </div>
         <div class="stepBadge">2</div>
       </div>
+
       <div class="cardBody">
         <div class="twoCol">
           <div>
-            <label for="matchPreset">Preset</label>
-            <select id="matchPreset">
-              <option value="PB_DBL_SIDEOUT_11_SD">Doubles • Side-out to 11 • Sudden Death</option>
-              <option value="PB_DBL_RALLY_11_SD">Doubles • Rally to 11 • Sudden Death</option>
-              <option value="PB_SGL_SIDEOUT_11_SD">Singles • Side-out to 11 • Sudden Death</option>
-              <option value="CUSTOM">Custom (JSON below)</option>
+            <label for="matchType">Format</label>
+            <select id="matchType">
+              <option value="DOUBLES" selected>DOUBLES</option>
+              <option value="SINGLES">SINGLES</option>
             </select>
           </div>
+
+          <div>
+            <label for="scoringMode">Scoring</label>
+            <select id="scoringMode">
+              <option value="SIDEOUT" selected>SIDEOUT</option>
+              <option value="RALLY">RALLY</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <div>
+            <label for="winPointsPreset">First to…</label>
+            <select id="winPointsPreset">
+              <option value="7">7</option>
+              <option value="11" selected>11</option>
+              <option value="15">15</option>
+              <option value="21">21</option>
+              <option value="CUSTOM">CUSTOM</option>
+            </select>
+            <div class="hint">Choose CUSTOM to enable the custom points box.</div>
+          </div>
+
+          <div>
+            <label for="winPointsCustom">Custom points</label>
+            <input id="winPointsCustom" type="number" inputmode="numeric" min="1" step="1" value="11" disabled>
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <div>
+            <label for="winRule">Win rule</label>
+            <select id="winRule">
+              <option value="SUDDEN_DEATH" selected>SUDDEN DEATH</option>
+              <option value="TWO_CLEAR">2-CLEAR POINTS</option>
+            </select>
+            <div class="hint">2-clear means “win by two”.</div>
+          </div>
+
           <div>
             <label for="matchId">Match ID (optional)</label>
             <input id="matchId" placeholder="e.g. OKEHAMPTON-2026-01-03-001">
@@ -351,9 +387,18 @@
         </div>
 
         <div style="margin-top:10px;">
+          <label for="customOverride">Custom override</label>
+          <select id="customOverride">
+            <option value="OFF" selected>Use presets above</option>
+            <option value="ON">Override with JSON below</option>
+          </select>
+          <div class="hint">If ON, the JSON below is uploaded exactly as typed.</div>
+        </div>
+
+        <div style="margin-top:10px;">
           <label for="matchJson">Match / Rules JSON</label>
-          <textarea id="matchJson" placeholder='{"preset":"PB_DBL_SIDEOUT_11_SD","win_points":11,"sudden_death":true}'></textarea>
-          <div class="hint">If preset = Custom, this JSON is uploaded. Otherwise it’s derived from preset.</div>
+          <textarea id="matchJson"
+            placeholder='{"format":"DOUBLES","scoring":"SIDEOUT","win_points":11,"win_rule":"SUDDEN_DEATH"}'></textarea>
         </div>
       </div>
     </section>
@@ -369,7 +414,7 @@
       </div>
       <div class="cardBody">
         <button id="btnUploadProfile" class="accent" disabled>Upload match to puck</button>
-        <div class="hint">Sends <b>PROFILE_SELECT</b> with payload (preset or JSON).</div>
+        <div class="hint">Sends <b>PROFILE_SELECT</b> with the payload from your selections (or JSON override).</div>
       </div>
     </section>
 
@@ -415,7 +460,8 @@
         </div>
 
         <div class="hint">
-          These map to your puck scoring commands (e.g. <b>SCORE_A</b> / <b>SCORE_B</b> or a single <b>SCORE</b> with team field).
+          Default mapping used here: <b>SCORE</b> with payload <code>{"team":"A|B","delta":±1}</code>.
+          Change if your firmware expects different commands.
         </div>
       </div>
     </section>
@@ -431,12 +477,12 @@
       </div>
       <div class="cardBody">
         <div class="twoCol">
-          <div class="threeCol" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="threeCol">
             <button id="btnAminus" class="secondary" disabled>− A</button>
             <button id="btnAplus" class="secondary" disabled>+ A</button>
             <button id="btnAset" class="warn" disabled>Set A</button>
           </div>
-          <div class="threeCol" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="threeCol">
             <button id="btnBminus" class="secondary" disabled>− B</button>
             <button id="btnBplus" class="secondary" disabled>+ B</button>
             <button id="btnBset" class="warn" disabled>Set B</button>
@@ -455,7 +501,7 @@
         </div>
 
         <div class="hint">
-          Use <b>SCORE_SET</b> (team + value) or your equivalent command.
+          Default mapping used here: <b>SCORE_SET</b> with payload <code>{"team":"A|B","value":n}</code>.
         </div>
       </div>
     </section>
@@ -479,29 +525,44 @@
 
 <script>
 /**
- * NOTE:
- * This is a UI + Web Bluetooth scaffold.
- * You MUST set these UUIDs to match your puck BLE service/characteristic.
- *
- * If you already have working UUIDs/commands elsewhere, drop them in below.
+ * IMPORTANT:
+ * Replace these UUIDs with your puck’s BLE service/characteristics.
  */
 const BLE = {
-  SERVICE_UUID:      '0000ffff-0000-1000-8000-00805f9b34fb', // <-- CHANGE ME
-  TX_CHAR_UUID:      '0000ff01-0000-1000-8000-00805f9b34fb', // phone -> puck
-  RX_CHAR_UUID:      '0000ff02-0000-1000-8000-00805f9b34fb', // puck -> phone (notify)
+  SERVICE_UUID: '0000ffff-0000-1000-8000-00805f9b34fb', // <-- CHANGE ME
+  TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb', // phone -> puck
+  RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb', // puck -> phone (notify)
 };
 
-// ---- UI refs
+// ---- UI helpers
 const el = (id) => document.getElementById(id);
 const logEl = el('log');
 const connStatus = el('connStatus');
 const deviceNamePill = el('deviceNamePill');
 const rssiPill = el('rssiPill');
 
-// Buttons
+function log(msg){
+  const ts = new Date().toLocaleTimeString();
+  logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
+}
+
+// ---- UI refs
 const btnConnect = el('btnConnect');
 const btnDisconnect = el('btnDisconnect');
+
+const wifiSsid = el('wifiSsid');
+const wifiPass = el('wifiPass');
 const btnSendWifi = el('btnSendWifi');
+
+const matchType = el('matchType');
+const scoringMode = el('scoringMode');
+const winPointsPreset = el('winPointsPreset');
+const winPointsCustom = el('winPointsCustom');
+const winRule = el('winRule');
+const matchId = el('matchId');
+const customOverride = el('customOverride');
+const matchJson = el('matchJson');
+
 const btnUploadProfile = el('btnUploadProfile');
 const btnStartGame = el('btnStartGame');
 
@@ -519,13 +580,6 @@ const btnBset   = el('btnBset');
 const scoreAEl = el('scoreA');
 const scoreBEl = el('scoreB');
 
-const wifiSsid = el('wifiSsid');
-const wifiPass = el('wifiPass');
-
-const matchPreset = el('matchPreset');
-const matchId = el('matchId');
-const matchJson = el('matchJson');
-
 const setAVal = el('setAVal');
 const setBVal = el('setBVal');
 
@@ -536,11 +590,6 @@ let service = null;
 let txChar = null;
 let rxChar = null;
 
-function log(msg){
-  const ts = new Date().toLocaleTimeString();
-  logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
-}
-
 function setConnectedUI(connected){
   connStatus.textContent = connected ? 'Connected' : 'Disconnected';
   connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
@@ -549,7 +598,6 @@ function setConnectedUI(connected){
 
   btnDisconnect.disabled = !connected;
 
-  // Enable the flow buttons in order
   btnSendWifi.disabled = !connected;
   btnUploadProfile.disabled = !connected;
   btnStartGame.disabled = !connected;
@@ -566,39 +614,14 @@ function setConnectedUI(connected){
   btnBset.disabled   = !connected;
 }
 
-function enc(str){
-  return new TextEncoder().encode(str);
-}
+function enc(str){ return new TextEncoder().encode(str); }
 
 async function bleSend(command, payloadObj=null){
   if(!txChar) throw new Error('Not connected / TX characteristic missing.');
-
   const payload = payloadObj ? JSON.stringify(payloadObj) : '';
   const line = payload ? `${command} ${payload}` : `${command}`;
-  const data = enc(line);
-
-  await txChar.writeValue(data);
+  await txChar.writeValue(enc(line));
   log(`→ ${line}`);
-}
-
-function parseRx(text){
-  // Optional: you can parse incoming updates from puck here.
-  // Example expected messages:
-  // SCORE {"a":3,"b":2}
-  // STATE {"connected_wifi":true}
-  try{
-    const parts = text.trim().split(' ');
-    const cmd = parts[0];
-    const json = parts.slice(1).join(' ');
-    if(json){
-      const obj = JSON.parse(json);
-      if(cmd === 'SCORE' && typeof obj.a === 'number' && typeof obj.b === 'number'){
-        setScore(obj.a, obj.b);
-      }
-    }
-  }catch(e){
-    // ignore
-  }
 }
 
 function setScore(a,b){
@@ -607,6 +630,78 @@ function setScore(a,b){
   setAVal.value = String(a);
   setBVal.value = String(b);
 }
+
+function parseRx(text){
+  // Optional: parse incoming messages from puck
+  // Example:
+  // SCORE {"a":3,"b":2}
+  try{
+    const parts = text.trim().split(' ');
+    const cmd = parts[0];
+    const json = parts.slice(1).join(' ');
+    if(!json) return;
+    const obj = JSON.parse(json);
+    if(cmd === 'SCORE' && typeof obj.a === 'number' && typeof obj.b === 'number'){
+      setScore(obj.a, obj.b);
+    }
+  }catch(_){}
+}
+
+/* ---------- MATCH PAYLOAD (presets) ---------- */
+
+function getWinPoints(){
+  const preset = winPointsPreset.value;
+  if(preset === 'CUSTOM'){
+    const v = Number(winPointsCustom.value);
+    if(!Number.isFinite(v) || v < 1) throw new Error('Custom points must be 1 or more.');
+    return Math.floor(v);
+  }
+  return Number(preset);
+}
+
+function buildMatchPayload(){
+  // If override is ON, upload JSON exactly
+  if(customOverride.value === 'ON'){
+    let obj;
+    try { obj = JSON.parse(matchJson.value); }
+    catch { throw new Error('Custom JSON invalid.'); }
+    const id = matchId.value.trim();
+    if(id) obj.match_id = id;
+    return obj;
+  }
+
+  // Preset-driven payload (adjust key names if your firmware uses different ones)
+  const id = matchId.value.trim() || null;
+  const payload = {
+    format: matchType.value,     // "SINGLES" | "DOUBLES"
+    scoring: scoringMode.value,  // "SIDEOUT" | "RALLY"
+    win_points: getWinPoints(),  // number
+    win_rule: winRule.value,     // "SUDDEN_DEATH" | "TWO_CLEAR"
+  };
+  if(id) payload.match_id = id;
+  return payload;
+}
+
+function syncJsonPreview(){
+  const isCustomPts = (winPointsPreset.value === 'CUSTOM');
+  winPointsCustom.disabled = !isCustomPts;
+  if(!isCustomPts) winPointsCustom.value = winPointsPreset.value;
+
+  if(customOverride.value === 'OFF'){
+    try{
+      matchJson.value = JSON.stringify(buildMatchPayload(), null, 2);
+    }catch(_){}
+  }
+}
+
+[matchType, scoringMode, winPointsPreset, winRule, customOverride, matchId]
+  .forEach(x => x.addEventListener('change', syncJsonPreview));
+winPointsCustom.addEventListener('input', syncJsonPreview);
+
+// Initial seed
+syncJsonPreview();
+
+/* ---------- BLE CONNECT / DISCONNECT ---------- */
 
 btnConnect.addEventListener('click', async () => {
   try{
@@ -632,8 +727,7 @@ btnConnect.addEventListener('click', async () => {
     try{
       await rxChar.startNotifications();
       rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-        const val = ev.target.value;
-        const txt = new TextDecoder().decode(val);
+        const txt = new TextDecoder().decode(ev.target.value);
         log(`← ${txt}`);
         parseRx(txt);
       });
@@ -643,8 +737,6 @@ btnConnect.addEventListener('click', async () => {
 
     setConnectedUI(true);
     log('Connected ✅');
-
-    // RSSI (not standard via WebBLE; shown as unavailable)
     rssiPill.textContent = 'RSSI: (not available in WebBLE)';
   }catch(err){
     log(`Connect error: ${err.message}`);
@@ -653,14 +745,14 @@ btnConnect.addEventListener('click', async () => {
 
 btnDisconnect.addEventListener('click', async () => {
   try{
-    if(device && device.gatt && device.gatt.connected){
-      device.gatt.disconnect();
-    }
+    if(device?.gatt?.connected) device.gatt.disconnect();
     setConnectedUI(false);
   }catch(e){
     log(`Disconnect error: ${e.message}`);
   }
 });
+
+/* ---------- STEP BUTTONS ---------- */
 
 // 1) Wi-Fi set up
 btnSendWifi.addEventListener('click', async () => {
@@ -674,43 +766,6 @@ btnSendWifi.addEventListener('click', async () => {
   }
 });
 
-// 2) Match selection -> (prepare JSON)
-function buildMatchPayload(){
-  const preset = matchPreset.value;
-  const id = matchId.value.trim() || null;
-
-  if(preset === 'CUSTOM'){
-    let obj = null;
-    try{ obj = JSON.parse(matchJson.value); }
-    catch(e){ throw new Error('Custom JSON invalid.'); }
-    if(id) obj.match_id = id;
-    return obj;
-  }
-
-  // Preset derived payload (adjust to your firmware schema)
-  const presetPayload = {
-    preset,
-    match_id: id,
-  };
-
-  return presetPayload;
-}
-
-matchPreset.addEventListener('change', () => {
-  if(matchPreset.value !== 'CUSTOM'){
-    const obj = buildMatchPayload();
-    matchJson.value = JSON.stringify(obj, null, 2);
-  }
-});
-
-// Seed initial JSON display
-(() => {
-  try{
-    const obj = buildMatchPayload();
-    matchJson.value = JSON.stringify(obj, null, 2);
-  }catch(_){}
-})();
-
 // 3) Upload to puck (PROFILE_SELECT)
 btnUploadProfile.addEventListener('click', async () => {
   try{
@@ -721,7 +776,7 @@ btnUploadProfile.addEventListener('click', async () => {
   }
 });
 
-// 4) Start game (START_GAME)
+// 4) Start game
 btnStartGame.addEventListener('click', async () => {
   try{
     await bleSend('START_GAME');
@@ -730,19 +785,20 @@ btnStartGame.addEventListener('click', async () => {
   }
 });
 
-// 5) Score game - Team A & Team B
+// 5) Score game
 btnScoreA.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent)+1, Number(scoreBEl.textContent));
+    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
   }catch(e){
     log(`Score A error: ${e.message}`);
   }
 });
+
 btnScoreB.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent)+1);
+    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
   }catch(e){
     log(`Score B error: ${e.message}`);
   }
@@ -752,18 +808,20 @@ btnScoreB.addEventListener('click', async () => {
 btnAminus.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'A', delta: -1 });
-    setScore(Math.max(0, Number(scoreAEl.textContent)-1), Number(scoreBEl.textContent));
+    setScore(Math.max(0, Number(scoreAEl.textContent) - 1), Number(scoreBEl.textContent));
   }catch(e){ log(`A- error: ${e.message}`); }
 });
+
 btnAplus.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent)+1, Number(scoreBEl.textContent));
+    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
   }catch(e){ log(`A+ error: ${e.message}`); }
 });
+
 btnAset.addEventListener('click', async () => {
   try{
-    const v = Math.max(0, Number(setAVal.value||0));
+    const v = Math.max(0, Math.floor(Number(setAVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'A', value: v });
     setScore(v, Number(scoreBEl.textContent));
   }catch(e){ log(`A set error: ${e.message}`); }
@@ -772,18 +830,20 @@ btnAset.addEventListener('click', async () => {
 btnBminus.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'B', delta: -1 });
-    setScore(Number(scoreAEl.textContent), Math.max(0, Number(scoreBEl.textContent)-1));
+    setScore(Number(scoreAEl.textContent), Math.max(0, Number(scoreBEl.textContent) - 1));
   }catch(e){ log(`B- error: ${e.message}`); }
 });
+
 btnBplus.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent)+1);
+    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
   }catch(e){ log(`B+ error: ${e.message}`); }
 });
+
 btnBset.addEventListener('click', async () => {
   try{
-    const v = Math.max(0, Number(setBVal.value||0));
+    const v = Math.max(0, Math.floor(Number(setBVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'B', value: v });
     setScore(Number(scoreAEl.textContent), v);
   }catch(e){ log(`B set error: ${e.message}`); }
