@@ -236,6 +236,7 @@
       border-radius: 16px;
       padding: 12px;
       background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+      position: relative;
     }
     .scoreTile h3{
       margin:0;
@@ -248,6 +249,48 @@
       font-size: 34px;
       font-weight: 900;
       letter-spacing: .6px;
+    }
+
+    /* Serving/info row */
+    .infoRow{
+      margin-top: 10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .infoChip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* GAME OVER banner */
+    .gameOver{
+      display:none;
+      margin-top: 10px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.08);
+      color: #7f1d1d;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    .gameOver small{
+      display:block;
+      margin-top:6px;
+      font-weight:700;
+      color:#7f1d1d;
+      opacity:.9;
+      font-size:12px;
     }
 
     /* NFC status */
@@ -342,7 +385,6 @@
           <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
         </div>
 
-        <!-- 🔴 Banner (hidden by default, shown only after failure) -->
         <div id="bleBanner" class="bleBanner"></div>
 
         <div class="row" style="margin-top:10px;">
@@ -381,7 +423,7 @@
 
         <div style="margin-top:10px;">
           <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to PlayPUCK</button>
-          <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code> (change command if needed).</div>
+          <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code>.</div>
         </div>
       </div>
     </section>
@@ -424,7 +466,7 @@
               <option value="15">15</option>
               <option value="21">21</option>
             </select>
-            <div class="hint">For anything else (e.g. 13), use the JSON override below.</div>
+            <div class="hint">For anything else, use the JSON override below.</div>
           </div>
 
           <div>
@@ -433,7 +475,6 @@
               <option value="SUDDEN_DEATH" selected>SUDDEN DEATH</option>
               <option value="TWO_CLEAR">2-CLEAR POINTS</option>
             </select>
-            <div class="hint">2-clear means “win by two”.</div>
           </div>
         </div>
 
@@ -461,7 +502,7 @@
       </div>
     </section>
 
-    <!-- 2.5) PLAYER CHECK-IN (ANDROID NFC) -->
+    <!-- 2.5) PLAYER CHECK-IN -->
     <section class="card" id="cardCheckin">
       <div class="cardHeader">
         <div>
@@ -487,18 +528,10 @@
         </div>
 
         <div id="nfcStatus" class="nfcStatus">NFC idle.</div>
-
-        <div class="hint">
-          Tag formats supported (best for testing first):<br>
-          • Text: <code>p1234</code><br>
-          • Text JSON: <code>{"player_id":"p1234"}</code><br>
-          • URL: <code>https://…?pid=p1234</code> or <code>?player_id=p1234</code><br>
-          Sends: <code>CHECKIN {"player_id":"..."}</code>
-        </div>
       </div>
     </section>
 
-    <!-- 3) UPLOAD TO PUCK -->
+    <!-- 3) UPLOAD -->
     <section class="card" id="cardUpload">
       <div class="cardHeader">
         <div>
@@ -509,11 +542,10 @@
       </div>
       <div class="cardBody">
         <button id="btnUploadProfile" class="accent" disabled>Upload match to PlayPUCK</button>
-        <div class="hint">Sends <b>PROFILE_SELECT</b> with the payload from your selections (or JSON override).</div>
       </div>
     </section>
 
-    <!-- 4) START GAME -->
+    <!-- 4) START -->
     <section class="card" id="cardStart">
       <div class="cardHeader">
         <div>
@@ -524,20 +556,26 @@
       </div>
       <div class="cardBody">
         <button id="btnStartGame" class="good" disabled>Start game</button>
-        <div class="hint">Sends <b>START_GAME</b>.</div>
       </div>
     </section>
 
-    <!-- 5) SCORE GAME -->
+    <!-- 5) SCORE -->
     <section class="card" id="cardScore">
       <div class="cardHeader">
         <div>
           <h2>Score game</h2>
-          <p>Team A / Team B scoring buttons.</p>
+          <p>Team A / Team B rally winner buttons (puck applies rules).</p>
         </div>
         <div class="stepBadge">5</div>
       </div>
+
       <div class="cardBody">
+        <!-- GAME OVER banner -->
+        <div id="gameOverBanner" class="gameOver">
+          GAME OVER — <span id="gameOverWinner">—</span>
+          <small id="gameOverSub">Final score: —</small>
+        </div>
+
         <div class="scoreboard">
           <div class="scoreTile">
             <h3>Team A</h3>
@@ -549,14 +587,21 @@
           </div>
         </div>
 
+        <div class="infoRow">
+          <span class="infoChip" id="infoServe">Serve: —</span>
+          <span class="infoChip" id="infoServerNum">Server: —</span>
+          <span class="infoChip" id="infoMode">Mode: —</span>
+          <span class="infoChip" id="infoTarget">First to: —</span>
+        </div>
+
         <div class="twoCol" style="margin-top:10px;">
-          <button id="btnScoreA" class="accent" disabled>+1 Team A</button>
-          <button id="btnScoreB" class="accent" disabled>+1 Team B</button>
+          <button id="btnScoreA" class="accent" disabled>Rally won by A</button>
+          <button id="btnScoreB" class="accent" disabled>Rally won by B</button>
         </div>
 
         <div class="hint">
-          Default mapping used here: <b>SCORE</b> with payload <code>{"team":"A|B","delta":±1}</code>.
-          Change if your firmware expects different commands.
+          Buttons send <b>SCORE</b> with payload <code>{"team":"A|B","delta":1}</code> meaning:
+          <b>“Team won the rally”</b>. The puck applies SIDEOUT/RALLY rules and notifies STATE/GAME_OVER.
         </div>
       </div>
     </section>
@@ -566,7 +611,7 @@
       <div class="cardHeader">
         <div>
           <h2>Edit score</h2>
-          <p>Adjust scores up/down (admin correction).</p>
+          <p>Admin correction (puck stays authoritative).</p>
         </div>
         <div class="stepBadge">6</div>
       </div>
@@ -594,10 +639,6 @@
             <input id="setBVal" type="number" inputmode="numeric" min="0" step="1" value="0">
           </div>
         </div>
-
-        <div class="hint">
-          Default mapping used here: <b>SCORE_SET</b> with payload <code>{"team":"A|B","value":n}</code>.
-        </div>
       </div>
     </section>
 
@@ -618,7 +659,6 @@
   </div>
 </main>
 
-<!-- ✅ Toast -->
 <div id="toast" class="toast" aria-live="polite">
   <span class="tick" aria-hidden="true">
     <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
@@ -627,16 +667,12 @@
 </div>
 
 <script>
-/**
- * PlayPUCK BLE UUIDs
- */
 const BLE = {
   SERVICE_UUID: '0000ffff-0000-1000-8000-00805f9b34fb',
-  TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb', // phone -> puck
-  RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb', // puck -> phone (notify)
+  TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb',
+  RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb',
 };
 
-// ---- UI helpers
 const el = (id) => document.getElementById(id);
 const logEl = el('log');
 const connStatus = el('connStatus');
@@ -652,33 +688,26 @@ function log(msg){
   const ts = new Date().toLocaleTimeString();
   logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
 }
-
 function showToast(t){
   toastText.textContent = t;
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'),1300);
 }
-
 function vibrate(pattern){
-  try{
-    if(navigator.vibrate) navigator.vibrate(pattern);
-  }catch(_){}
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(_){}
 }
-
 function showBanner(html){
   bleBanner.innerHTML = html;
   bleBanner.style.display = 'block';
 }
-
 function hideBanner(){
   bleBanner.style.display = 'none';
   bleBanner.innerHTML = '';
 }
-
 function looksLikeBleBusy(errMsg){
   const m = String(errMsg || '').toLowerCase();
   return (
-    m.includes('gatt') && m.includes('busy') ||
+    (m.includes('gatt') && m.includes('busy')) ||
     m.includes('operation already in progress') ||
     m.includes('failed to connect') ||
     m.includes('networkerror') ||
@@ -687,7 +716,6 @@ function looksLikeBleBusy(errMsg){
   );
 }
 
-// ---- UI refs
 const btnConnect = el('btnConnect');
 const btnDisconnect = el('btnDisconnect');
 
@@ -723,102 +751,49 @@ const scoreBEl = el('scoreB');
 const setAVal = el('setAVal');
 const setBVal = el('setBVal');
 
-/* ---- Check-in (NFC / manual) refs ---- */
 const btnNfcScan = el('btnNfcScan');
 const btnNfcStop = el('btnNfcStop');
 const nfcStatusEl = el('nfcStatus');
 const checkinPlayerId = el('checkinPlayerId');
 const btnCheckinManual = el('btnCheckinManual');
 
-// ---- BLE state
+// New UI bits
+const gameOverBanner = el('gameOverBanner');
+const gameOverWinner = el('gameOverWinner');
+const gameOverSub = el('gameOverSub');
+const infoServe = el('infoServe');
+const infoServerNum = el('infoServerNum');
+const infoMode = el('infoMode');
+const infoTarget = el('infoTarget');
+
 let device = null;
 let server = null;
 let service = null;
 let txChar = null;
 let rxChar = null;
 
-/* ---- Web NFC state ---- */
 let ndef = null;
 let nfcActive = false;
 
-/* ---- Failure / reconnect state ---- */
 let hadConnectFailure = false;
 let reconnectTimer = null;
 let reconnectBackoffMs = 900;
 const reconnectBackoffMaxMs = 12000;
 
-function setNfcStatus(t){
-  if(!nfcStatusEl) return;
-  nfcStatusEl.textContent = t;
-}
+// Local view-model ONLY (comes from STATE)
+let lastState = {
+  a: 0, b: 0,
+  serving: null,
+  server_num: null,
+  mode: null,
+  format: null,
+  win_points: null,
+  win_rule: null,
+  game_over: false
+};
 
-function setReconnectPill(text){
-  reconnectPill.textContent = `Reconnect: ${text}`;
-}
-
-/**
- * Connect button turns WHITE + disabled when connected.
- * Disconnect button turns PURPLE when connected.
- */
-function setConnectedUI(connected){
-  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
-  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
-  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
-  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
-
-  // Button colour swap
-  if(connected){
-    btnConnect.className = 'secondary';
-    btnConnect.disabled = true;
-
-    btnDisconnect.className = 'accent';
-    btnDisconnect.disabled = false;
-
-    // Auto-hide banner on success
-    hideBanner();
-    hadConnectFailure = false;
-    setReconnectPill('—');
-  }else{
-    btnConnect.className = 'accent';
-    btnConnect.disabled = false;
-
-    btnDisconnect.className = 'secondary';
-    btnDisconnect.disabled = true;
-
-    // Banner only after a failed attempt
-    if(hadConnectFailure){
-      // keep whatever banner text we set in the catch
-      if(!bleBanner.innerHTML){
-        showBanner(`<strong>Connection failed</strong><br>Try again.`);
-      }
-    }else{
-      hideBanner();
-    }
-  }
-
-  btnSendWifi.disabled = !connected;
-  btnUploadProfile.disabled = !connected;
-  btnStartGame.disabled = !connected;
-
-  btnScoreA.disabled = !connected;
-  btnScoreB.disabled = !connected;
-
-  btnAminus.disabled = !connected;
-  btnAplus.disabled  = !connected;
-  btnAset.disabled   = !connected;
-
-  btnBminus.disabled = !connected;
-  btnBplus.disabled  = !connected;
-  btnBset.disabled   = !connected;
-
-  // Enable manual check-in only when connected
-  btnCheckinManual.disabled = !connected;
-
-  // NFC scan requires both: connected BLE + Web NFC support
-  const webNfcSupported = ('NDEFReader' in window);
-  btnNfcScan.disabled = !(connected && webNfcSupported);
-  btnNfcStop.disabled = !nfcActive;
-}
+function setNfcStatus(t){ if(nfcStatusEl) nfcStatusEl.textContent = t; }
+function setReconnectPill(text){ reconnectPill.textContent = `Reconnect: ${text}`; }
 
 function enc(str){ return new TextEncoder().encode(str); }
 
@@ -837,20 +812,92 @@ function setScore(a,b){
   setBVal.value = String(b);
 }
 
+function setGameOverUI(isOver, winner, a, b){
+  if(isOver){
+    gameOverBanner.style.display = 'block';
+    gameOverWinner.textContent = winner ? `${winner} WINS` : '—';
+    gameOverSub.textContent = `Final score: A ${a} - ${b} B`;
+    // disable rally buttons
+    btnScoreA.disabled = true;
+    btnScoreB.disabled = true;
+  }else{
+    gameOverBanner.style.display = 'none';
+    gameOverWinner.textContent = '—';
+    gameOverSub.textContent = 'Final score: —';
+    // rally buttons enabled/disabled by connection + state below
+  }
+}
+
+function renderStateUI(){
+  setScore(lastState.a ?? 0, lastState.b ?? 0);
+
+  const serve = lastState.serving ? `Serve: ${lastState.serving}` : 'Serve: —';
+  infoServe.textContent = serve;
+
+  // server_num exists only for doubles+sideout in puck sketch
+  infoServerNum.textContent = lastState.server_num ? `Server: ${lastState.server_num}` : 'Server: —';
+
+  const mode = lastState.mode ? `Mode: ${lastState.mode}` : 'Mode: —';
+  infoMode.textContent = mode;
+
+  const tgt = lastState.win_points ? `First to: ${lastState.win_points}` : 'First to: —';
+  infoTarget.textContent = tgt;
+
+  setGameOverUI(!!lastState.game_over, (lastState.winner || null), lastState.a ?? 0, lastState.b ?? 0);
+
+  // If connected and not game over, allow rally scoring
+  if(txChar && !lastState.game_over){
+    btnScoreA.disabled = false;
+    btnScoreB.disabled = false;
+  }
+}
+
 function parseRx(text){
-  // Optional: parse incoming messages from PlayPUCK
-  // Example:
-  // SCORE {"a":3,"b":2}
+  // We now accept:
+  //  STATE {...}
+  //  GAME_OVER {...}
+  // (Still logs ACK/ECHO etc.)
   try{
-    const parts = text.trim().split(' ');
-    const cmd = parts[0];
-    const json = parts.slice(1).join(' ');
-    if(!json) return;
-    const obj = JSON.parse(json);
-    if(cmd === 'SCORE' && typeof obj.a === 'number' && typeof obj.b === 'number'){
-      setScore(obj.a, obj.b);
+    const trimmed = text.trim();
+    const sp = trimmed.indexOf(' ');
+    const cmd = sp >= 0 ? trimmed.slice(0, sp) : trimmed;
+    const json = sp >= 0 ? trimmed.slice(sp + 1) : '';
+
+    if(cmd === 'STATE' && json){
+      const obj = JSON.parse(json);
+
+      lastState.a = (typeof obj.a === 'number') ? obj.a : lastState.a;
+      lastState.b = (typeof obj.b === 'number') ? obj.b : lastState.b;
+      if(typeof obj.serving === 'string') lastState.serving = obj.serving;
+      if(typeof obj.server_num === 'number') lastState.server_num = obj.server_num;
+      if(typeof obj.mode === 'string') lastState.mode = obj.mode;
+      if(typeof obj.format === 'string') lastState.format = obj.format;
+      if(typeof obj.win_points === 'number') lastState.win_points = obj.win_points;
+      if(typeof obj.win_rule === 'string') lastState.win_rule = obj.win_rule;
+      if(typeof obj.game_over === 'boolean') lastState.game_over = obj.game_over;
+
+      // clear winner if state says not over
+      if(!lastState.game_over) lastState.winner = null;
+
+      renderStateUI();
+      return;
     }
-  }catch(_){}
+
+    if(cmd === 'GAME_OVER' && json){
+      const obj = JSON.parse(json);
+      // winner, a, b
+      if(typeof obj.winner === 'string') lastState.winner = obj.winner;
+      if(typeof obj.a === 'number') lastState.a = obj.a;
+      if(typeof obj.b === 'number') lastState.b = obj.b;
+      lastState.game_over = true;
+
+      renderStateUI();
+      vibrate([80,40,80,40,200]); // celebratory buzz
+      showToast(`Game Over — ${lastState.winner || ''}`);
+      return;
+    }
+
+  }catch(_){ /* ignore */ }
 }
 
 /* ---------- MATCH PAYLOAD (presets) ---------- */
@@ -877,15 +924,11 @@ function buildMatchPayload(){
 
 function syncJsonPreview(){
   if(customOverride.value === 'OFF'){
-    try{
-      matchJson.value = JSON.stringify(buildMatchPayload(), null, 2);
-    }catch(_){}
+    try{ matchJson.value = JSON.stringify(buildMatchPayload(), null, 2); }catch(_){}
   }
 }
-
 [matchType, scoringMode, winPointsPreset, winRule, customOverride, matchId]
   .forEach(x => x.addEventListener('change', syncJsonPreview));
-
 syncJsonPreview();
 
 /* ---------- CHECK-IN (manual + NFC) ---------- */
@@ -913,25 +956,20 @@ function decodeRecordText(record){
   const dec = new TextDecoder((record.encoding || 'utf-8'));
   return dec.decode(record.data);
 }
-
 function tryExtractPlayerIdFromText(text){
   const t = String(text || '').trim();
   if(!t) return null;
-
   try{
     const obj = JSON.parse(t);
     if(obj && (obj.player_id || obj.pid)){
       return String(obj.player_id || obj.pid);
     }
   }catch(_){}
-
   return t;
 }
-
 function tryExtractPlayerIdFromUrl(urlText){
   const t = String(urlText || '').trim();
   if(!t) return null;
-
   try{
     const u = new URL(t);
     return u.searchParams.get('pid') || u.searchParams.get('player_id');
@@ -1026,7 +1064,7 @@ if(!('NDEFReader' in window)){
   setNfcStatus('NFC available. Connect BLE, then tap “Tap NFC to check in”.');
 }
 
-/* ---------- AUTO-RECONNECT (exponential backoff) ---------- */
+/* ---------- AUTO-RECONNECT ---------- */
 function resetReconnect(){
   reconnectBackoffMs = 900;
   if(reconnectTimer){
@@ -1034,7 +1072,6 @@ function resetReconnect(){
     reconnectTimer = null;
   }
 }
-
 function scheduleReconnect(reason){
   if(reconnectTimer) return;
   if(!device){
@@ -1077,8 +1114,11 @@ async function connectWithExistingDevice(label){
   setConnectedUI(true);
   log('Connected ✅');
   showToast('Connected ✅');
-  vibrate([40,30,40]); // ✅ haptic
+  vibrate([40,30,40]);
   resetReconnect();
+
+  // Ask puck for a state snapshot (optional)
+  try{ await bleSend('PING'); }catch(_){}
 }
 
 async function tryReconnect(fromTimer){
@@ -1091,6 +1131,71 @@ async function tryReconnect(fromTimer){
     log(`Reconnect error: ${e.message}`);
     setConnectedUI(false);
     scheduleReconnect('still disconnected');
+  }
+}
+
+/**
+ * Connect button turns WHITE + disabled when connected.
+ * Disconnect button turns PURPLE when connected.
+ */
+function setConnectedUI(connected){
+  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
+  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
+  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
+  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
+
+  if(connected){
+    btnConnect.className = 'secondary';
+    btnConnect.disabled = true;
+
+    btnDisconnect.className = 'accent';
+    btnDisconnect.disabled = false;
+
+    hideBanner();
+    hadConnectFailure = false;
+    setReconnectPill('—');
+  }else{
+    btnConnect.className = 'accent';
+    btnConnect.disabled = false;
+
+    btnDisconnect.className = 'secondary';
+    btnDisconnect.disabled = true;
+
+    if(hadConnectFailure){
+      if(!bleBanner.innerHTML){
+        showBanner(`<strong>Connection failed</strong><br>Try again.`);
+      }
+    }else{
+      hideBanner();
+    }
+  }
+
+  btnSendWifi.disabled = !connected;
+  btnUploadProfile.disabled = !connected;
+  btnStartGame.disabled = !connected;
+
+  // Rally buttons are only enabled when connected AND not game_over.
+  btnScoreA.disabled = !connected || !!lastState.game_over;
+  btnScoreB.disabled = !connected || !!lastState.game_over;
+
+  btnAminus.disabled = !connected;
+  btnAplus.disabled  = !connected;
+  btnAset.disabled   = !connected;
+
+  btnBminus.disabled = !connected;
+  btnBplus.disabled  = !connected;
+  btnBset.disabled   = !connected;
+
+  btnCheckinManual.disabled = !connected;
+
+  const webNfcSupported = ('NDEFReader' in window);
+  btnNfcScan.disabled = !(connected && webNfcSupported);
+  btnNfcStop.disabled = !nfcActive;
+
+  if(!connected){
+    // If disconnected, don't show stale game over banner
+    // (leave scores visible, but hide banner)
+    setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
   }
 }
 
@@ -1110,13 +1215,9 @@ btnConnect.addEventListener('click', async () => {
 
     device.addEventListener('gattserverdisconnected', () => {
       log('Disconnected.');
-      vibrate([60]); // short "drop" haptic
+      vibrate([60]);
       setConnectedUI(false);
-
-      // If BLE drops, stop NFC handlers so UI doesn't imply it can send
       if(nfcActive) stopNfcScan();
-
-      // Auto-reconnect loop (only on unexpected drop)
       scheduleReconnect('link dropped');
     });
 
@@ -1128,9 +1229,8 @@ btnConnect.addEventListener('click', async () => {
 
     const msg = err?.message || String(err);
     log(`Connect error: ${msg}`);
-    vibrate([120,40,120]); // failure haptic
+    vibrate([120,40,120]);
 
-    // Show appropriate banner text
     if(looksLikeBleBusy(msg)){
       showBanner(`
         <strong>BLE Busy</strong><br>
@@ -1160,11 +1260,11 @@ btnConnect.addEventListener('click', async () => {
 
 btnDisconnect.addEventListener('click', async () => {
   try{
-    resetReconnect(); // manual disconnect stops reconnect attempts
+    resetReconnect();
     setReconnectPill('—');
 
     if(device?.gatt?.connected) device.gatt.disconnect();
-    vibrate([50,20,50]); // "manual disconnect" haptic
+    vibrate([50,20,50]);
     setConnectedUI(false);
     if(nfcActive) stopNfcScan();
   }catch(e){
@@ -1172,7 +1272,6 @@ btnDisconnect.addEventListener('click', async () => {
   }
 });
 
-// Try one reconnect when returning to tab (doesn't spam)
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && device && !device.gatt?.connected){
     tryReconnect(false);
@@ -1180,7 +1279,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ---------- STEP BUTTONS ---------- */
-// 1) Wi-Fi set up
 btnSendWifi.addEventListener('click', async () => {
   try{
     const ssid = wifiSsid.value.trim();
@@ -1192,7 +1290,6 @@ btnSendWifi.addEventListener('click', async () => {
   }
 });
 
-// 3) Upload to PlayPUCK (PROFILE_SELECT)
 btnUploadProfile.addEventListener('click', async () => {
   try{
     const payload = buildMatchPayload();
@@ -1202,82 +1299,72 @@ btnUploadProfile.addEventListener('click', async () => {
   }
 });
 
-// 4) Start game
 btnStartGame.addEventListener('click', async () => {
   try{
+    // reset local view model banner immediately; authoritative state arrives via STATE
+    lastState.game_over = false;
+    lastState.winner = null;
+    setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
     await bleSend('START_GAME');
   }catch(e){
     log(`Start error: ${e.message}`);
   }
 });
 
-// 5) Score game
+// 5) Score game (NO LOCAL SCORE CHANGE)
 btnScoreA.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
   }catch(e){
     log(`Score A error: ${e.message}`);
   }
 });
-
 btnScoreB.addEventListener('click', async () => {
   try{
     await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
   }catch(e){
     log(`Score B error: ${e.message}`);
   }
 });
 
-// 6) Edit score
+// 6) Edit score (NO LOCAL SCORE CHANGE)
 btnAminus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'A', delta: -1 });
-    setScore(Math.max(0, Number(scoreAEl.textContent) - 1), Number(scoreBEl.textContent));
-  }catch(e){ log(`A- error: ${e.message}`); }
+  try{ await bleSend('SCORE', { team: 'A', delta: -1 }); }
+  catch(e){ log(`A- error: ${e.message}`); }
 });
-
 btnAplus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
-  }catch(e){ log(`A+ error: ${e.message}`); }
+  try{ await bleSend('SCORE', { team: 'A', delta: 1 }); }
+  catch(e){ log(`A+ error: ${e.message}`); }
 });
-
 btnAset.addEventListener('click', async () => {
   try{
     const v = Math.max(0, Math.floor(Number(setAVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'A', value: v });
-    setScore(v, Number(scoreBEl.textContent));
   }catch(e){ log(`A set error: ${e.message}`); }
 });
 
 btnBminus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'B', delta: -1 });
-    setScore(Number(scoreAEl.textContent), Math.max(0, Number(scoreBEl.textContent) - 1));
-  }catch(e){ log(`B- error: ${e.message}`); }
+  try{ await bleSend('SCORE', { team: 'B', delta: -1 }); }
+  catch(e){ log(`B- error: ${e.message}`); }
 });
-
 btnBplus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
-  }catch(e){ log(`B+ error: ${e.message}`); }
+  try{ await bleSend('SCORE', { team: 'B', delta: 1 }); }
+  catch(e){ log(`B+ error: ${e.message}`); }
 });
-
 btnBset.addEventListener('click', async () => {
   try{
     const v = Math.max(0, Math.floor(Number(setBVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'B', value: v });
-    setScore(Number(scoreAEl.textContent), v);
   }catch(e){ log(`B set error: ${e.message}`); }
 });
 
-// Start disabled until connected
+// Initial
 setConnectedUI(false);
 setReconnectPill('—');
+infoServe.textContent = 'Serve: —';
+infoServerNum.textContent = 'Server: —';
+infoMode.textContent = 'Mode: —';
+infoTarget.textContent = 'First to: —';
 log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
