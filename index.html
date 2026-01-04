@@ -249,6 +249,19 @@
       letter-spacing: .6px;
     }
 
+    /* NFC status pill-ish */
+    .nfcStatus{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
     @media (max-width: 460px){
       .twoCol, .threeCol{ grid-template-columns: 1fr; }
       .scoreboard{ grid-template-columns: 1fr; }
@@ -393,6 +406,43 @@
           <textarea id="matchJson"
             placeholder='{"format":"DOUBLES","scoring":"SIDEOUT","win_points":11,"win_rule":"SUDDEN_DEATH"}'></textarea>
           <div class="hint">If override is ON, this JSON is uploaded exactly (plus match_id if provided).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.5) PLAYER CHECK-IN (ANDROID NFC) -->
+    <section class="card" id="cardCheckin">
+      <div class="cardHeader">
+        <div>
+          <h2>Player check-in (NFC → BLE)</h2>
+          <p>Android Chrome/Edge only. Tap a tag to send <b>CHECKIN</b> to the PlayPUCK.</p>
+        </div>
+        <div class="stepBadge">2.5</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <button id="btnNfcScan" class="accent" disabled>Tap NFC to check in</button>
+          <button id="btnNfcStop" class="secondary" disabled>Stop scan</button>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <div>
+            <label for="checkinPlayerId">Manual player_id (test)</label>
+            <input id="checkinPlayerId" placeholder="e.g. p1234 or UUID">
+          </div>
+          <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+            <button id="btnCheckinManual" class="good" disabled>Send CHECKIN</button>
+          </div>
+        </div>
+
+        <div id="nfcStatus" class="nfcStatus">NFC idle.</div>
+
+        <div class="hint">
+          Tag formats supported (best for testing first):<br>
+          • Text: <code>p1234</code><br>
+          • Text JSON: <code>{"player_id":"p1234"}</code><br>
+          • URL: <code>https://…?pid=p1234</code> or <code>?player_id=p1234</code><br>
+          Sends: <code>CHECKIN {"player_id":"..."}</code>
         </div>
       </div>
     </section>
@@ -576,12 +626,28 @@ const scoreBEl = el('scoreB');
 const setAVal = el('setAVal');
 const setBVal = el('setBVal');
 
+/* ---- Check-in (NFC / manual) refs ---- */
+const btnNfcScan = el('btnNfcScan');
+const btnNfcStop = el('btnNfcStop');
+const nfcStatusEl = el('nfcStatus');
+const checkinPlayerId = el('checkinPlayerId');
+const btnCheckinManual = el('btnCheckinManual');
+
 // ---- BLE state
 let device = null;
 let server = null;
 let service = null;
 let txChar = null;
 let rxChar = null;
+
+/* ---- Web NFC state ---- */
+let ndef = null;
+let nfcActive = false;
+
+function setNfcStatus(t){
+  if(!nfcStatusEl) return;
+  nfcStatusEl.textContent = t;
+}
 
 function setConnectedUI(connected){
   connStatus.textContent = connected ? 'Connected' : 'Disconnected';
@@ -605,6 +671,14 @@ function setConnectedUI(connected){
   btnBminus.disabled = !connected;
   btnBplus.disabled  = !connected;
   btnBset.disabled   = !connected;
+
+  // Enable manual check-in only when connected
+  btnCheckinManual.disabled = !connected;
+
+  // NFC scan requires both: connected BLE + Web NFC support
+  const webNfcSupported = ('NDEFReader' in window);
+  btnNfcScan.disabled = !(connected && webNfcSupported);
+  btnNfcStop.disabled = !nfcActive;
 }
 
 function enc(str){ return new TextEncoder().encode(str); }
@@ -679,6 +753,154 @@ function syncJsonPreview(){
 // Initial seed
 syncJsonPreview();
 
+/* ---------- CHECK-IN (manual + NFC) ---------- */
+
+async function sendCheckin(playerIdRaw){
+  const playerId = String(playerIdRaw || '').trim();
+  if(!playerId){
+    log('Check-in: player_id is empty.');
+    setNfcStatus('Enter a player_id or tap a tag.');
+    return;
+  }
+  try{
+    await bleSend('CHECKIN', { player_id: playerId });
+    setNfcStatus(`✅ Sent CHECKIN for: ${playerId}`);
+  }catch(e){
+    log(`Check-in send error: ${e.message}`);
+    setNfcStatus(`❌ BLE send failed: ${e.message}`);
+  }
+}
+
+btnCheckinManual.addEventListener('click', async () => {
+  await sendCheckin(checkinPlayerId.value);
+});
+
+function decodeRecordText(record){
+  // Web NFC: record.data is a DataView
+  const dec = new TextDecoder((record.encoding || 'utf-8'));
+  return dec.decode(record.data);
+}
+
+function tryExtractPlayerIdFromText(text){
+  const t = String(text || '').trim();
+  if(!t) return null;
+
+  // JSON: {"player_id":"..."} (or {"pid":"..."})
+  try{
+    const obj = JSON.parse(t);
+    if(obj && (obj.player_id || obj.pid)){
+      return String(obj.player_id || obj.pid);
+    }
+  }catch(_){}
+
+  // plain text: p1234 / UUID / etc
+  return t;
+}
+
+function tryExtractPlayerIdFromUrl(urlText){
+  const t = String(urlText || '').trim();
+  if(!t) return null;
+
+  try{
+    const u = new URL(t);
+    return u.searchParams.get('pid') || u.searchParams.get('player_id');
+  }catch(_){
+    return null;
+  }
+}
+
+async function startNfcScan(){
+  if(!('NDEFReader' in window)){
+    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
+    return;
+  }
+  if(!txChar){
+    setNfcStatus('Connect to the PlayPUCK first (BLE).');
+    return;
+  }
+
+  try{
+    ndef = new NDEFReader();
+    setNfcStatus('Requesting NFC permission…');
+    await ndef.scan(); // must be triggered by user gesture
+    nfcActive = true;
+    setNfcStatus('NFC ready — tap a player tag.');
+
+    // Update stop button state
+    btnNfcStop.disabled = false;
+    btnNfcScan.disabled = true;
+
+    ndef.onreading = async (event) => {
+      try{
+        let playerId = null;
+
+        for(const record of event.message.records){
+          if(record.recordType === 'text'){
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if(record.recordType === 'url'){
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          } else {
+            // Ignore other record types for now
+          }
+
+          if(playerId) break;
+        }
+
+        if(!playerId){
+          setNfcStatus('Tag read, but no player_id found in supported records.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+        await sendCheckin(playerId);
+
+      }catch(e){
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
+      }
+    };
+
+    ndef.onreadingerror = () => {
+      setNfcStatus('NFC reading error — try again.');
+      log('NFC reading error.');
+    };
+
+  }catch(err){
+    nfcActive = false;
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    log(`NFC error: ${err?.message || err}`);
+  }
+}
+
+function stopNfcScan(){
+  // Web NFC currently has no explicit stop API; we can disable handlers + state.
+  nfcActive = false;
+  if(ndef){
+    ndef.onreading = null;
+    ndef.onreadingerror = null;
+  }
+  btnNfcStop.disabled = true;
+  btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+  setNfcStatus('NFC stopped. Tap “Tap NFC to check in” to start again.');
+  log('NFC scan stopped (handlers removed).');
+}
+
+btnNfcScan.addEventListener('click', startNfcScan);
+btnNfcStop.addEventListener('click', stopNfcScan);
+
+// Initial NFC availability message
+if(!('NDEFReader' in window)){
+  setNfcStatus('Web NFC not available on this device/browser (Android Chrome/Edge required).');
+} else {
+  setNfcStatus('NFC available. Connect BLE, then tap “Tap NFC to check in”.');
+}
+
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
 
 btnConnect.addEventListener('click', async () => {
@@ -693,6 +915,8 @@ btnConnect.addEventListener('click', async () => {
     device.addEventListener('gattserverdisconnected', () => {
       log('Disconnected.');
       setConnectedUI(false);
+      // If BLE drops, stop NFC handlers so UI doesn't imply it can send
+      if(nfcActive) stopNfcScan();
     });
 
     server = await device.gatt.connect();
@@ -716,6 +940,10 @@ btnConnect.addEventListener('click', async () => {
     setConnectedUI(true);
     log('Connected ✅');
     rssiPill.textContent = 'RSSI: (not available in WebBLE)';
+
+    // Refresh NFC buttons once connected
+    setConnectedUI(true);
+
   }catch(err){
     log(`Connect error: ${err.message}`);
   }
@@ -725,6 +953,7 @@ btnDisconnect.addEventListener('click', async () => {
   try{
     if(device?.gatt?.connected) device.gatt.disconnect();
     setConnectedUI(false);
+    if(nfcActive) stopNfcScan();
   }catch(e){
     log(`Disconnect error: ${e.message}`);
   }
