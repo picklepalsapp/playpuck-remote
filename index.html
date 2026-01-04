@@ -906,10 +906,11 @@ if(!('NDEFReader' in window)){
 btnConnect.addEventListener('click', async () => {
   try{
     log('Requesting BLE device…');
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [BLE.SERVICE_UUID] }],
-      optionalServices: [BLE.SERVICE_UUID]
-    });
+device = await navigator.bluetooth.requestDevice({
+  acceptAllDevices: true,
+  optionalServices: [BLE.SERVICE_UUID]
+});
+
 
     deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
     device.addEventListener('gattserverdisconnected', () => {
@@ -1062,3 +1063,4 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
