@@ -7,265 +7,168 @@
 
   <style>
     :root{
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #475569;
-      --border: #e2e8f0;
-      --shadow: 0 8px 30px rgba(2,8,23,.08);
-      --accent: #635bff;
-      --accent2: #10b981;
-      --danger: #ef4444;
-      --warn: #f59e0b;
-      --btn: #111827;
-      --btnText: #ffffff;
-      --chip: #eef2ff;
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --border:#e2e8f0;
+      --shadow:0 8px 30px rgba(2,8,23,.08);
+      --accent:#635bff;      /* purply blue */
+      --success:#22c55e;
+      --chip:#eef2ff;
     }
 
-    *{ box-sizing: border-box; }
-    html, body { height: 100%; }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: linear-gradient(180deg, #ffffff 0%, var(--bg) 65%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg,#fff 0%, var(--bg) 65%);
       color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     header{
-      padding: 16px 16px 10px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      background: rgba(255,255,255,.85);
+      padding:16px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      background: rgba(255,255,255,.9);
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
+      border-bottom:1px solid var(--border);
     }
+
     header h1{
       margin:0;
-      font-size: 18px;
-      letter-spacing: .2px;
+      font-size:18px;
       display:flex;
-      gap:10px;
+      justify-content:space-between;
       align-items:center;
-      justify-content: space-between;
-    }
-    header .status{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: var(--chip);
-      color: var(--muted);
-      border: 1px solid rgba(99,91,255,.15);
-      white-space: nowrap;
+      gap:10px;
     }
 
-    main{
-      padding: 14px 14px 26px;
-      max-width: 760px;
-      margin: 0 auto;
+    .status{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--chip);
+      border:1px solid rgba(99,91,255,.15);
+      color:var(--muted);
+      white-space:nowrap;
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
+    main{ padding:14px; max-width:760px; margin:0 auto; }
 
     .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .card .cardHeader{
-      padding: 14px 14px 10px;
-      display:flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
-    }
-    .card .cardHeader h2{
-      margin:0;
-      font-size: 15px;
-      line-height: 1.2;
-    }
-    .card .cardHeader p{
-      margin: 6px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .stepBadge{
-      font-size: 12px;
-      font-weight: 700;
-      color: #1f2937;
-      background: #f1f5f9;
-      border: 1px solid var(--border);
-      padding: 6px 10px;
-      border-radius: 999px;
-      min-width: 46px;
-      text-align:center;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+      overflow:hidden;
     }
 
-    .card .cardBody{ padding: 14px; }
-
-    .row{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
+    .cardHeader{
+      padding:14px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg,#ffffff 0%, #fbfbff 100%);
     }
 
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 6px;
-      font-weight: 600;
-    }
+    .cardHeader h2{ margin:0; font-size:15px; }
 
-    input, select, textarea{
-      width: 100%;
-      padding: 12px 12px;
-      font-size: 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      outline: none;
-      box-shadow: 0 1px 0 rgba(2,8,23,.02);
-    }
-    textarea{ min-height: 110px; resize: vertical; }
+    .cardBody{ padding:14px; }
 
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(99,91,255,.5);
-      box-shadow: 0 0 0 4px rgba(99,91,255,.12);
-    }
-
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .threeCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
+    .twoCol{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
     button{
       -webkit-tap-highlight-color: transparent;
-      appearance: none;
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 16px;
-      font-weight: 700;
+      appearance:none;
+      width:100%;
+      min-height:48px;
+      border-radius:14px;
+      border:0;
+      padding:12px 14px;
+      font-size:16px;
+      font-weight:800;
       cursor:pointer;
-      width: 100%;
-      min-height: 48px;
-      background: var(--btn);
-      color: var(--btnText);
-      box-shadow: 0 8px 18px rgba(17,24,39,.12);
+      box-shadow:0 8px 18px rgba(17,24,39,.12);
       transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
     }
     button:active{ transform: translateY(1px); }
+    button:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+
+    button.accent{ background:var(--accent); color:#fff; }
     button.secondary{
-      background: #ffffff;
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 18px rgba(2,8,23,.06);
-    }
-    button.accent{ background: var(--accent); }
-    button.good{ background: var(--accent2); }
-    button.warn{ background: var(--warn); }
-    button.danger{ background: var(--danger); }
-
-    button:disabled{
-      opacity: .55;
-      cursor:not-allowed;
-      box-shadow: none;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .log{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      background: #0b1220;
-      color: #dbeafe;
-      border-radius: 14px;
-      padding: 12px;
-      border: 1px solid rgba(226,232,240,.14);
-      max-height: 200px;
-      overflow:auto;
-      white-space: pre-wrap;
+      background:#fff;
+      border:1px solid var(--border);
+      color:var(--text);
+      box-shadow:0 8px 18px rgba(2,8,23,.06);
     }
 
     .hint{
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.35;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+      line-height:1.4;
     }
 
-    .scoreboard{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
+    .bleBanner{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      background:#fee2e2;
+      border:1px solid #fecaca;
+      color:#7f1d1d;
+      font-size:13px;
+      line-height:1.35;
     }
-    .scoreTile{
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
-    }
-    .scoreTile h3{
-      margin:0;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .scoreVal{
-      margin-top: 8px;
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: .6px;
+    .bleBanner strong{ font-weight:900; }
+    .bleBanner ul{ margin:8px 0 0 18px; padding:0; }
+
+    .log{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size:12px;
+      background:#0b1220;
+      color:#dbeafe;
+      border-radius:14px;
+      padding:12px;
+      border:1px solid rgba(226,232,240,.14);
+      max-height:220px;
+      overflow:auto;
+      white-space:pre-wrap;
     }
 
-    /* NFC status pill-ish */
-    .nfcStatus{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1.35;
+    /* ✅ Green tick toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      z-index:9999;
+      display:none;
+      align-items:center;
+      gap:10px;
+      background:#0b1220;
+      color:#e5e7eb;
+      border:1px solid rgba(226,232,240,.14);
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow:0 18px 40px rgba(2,8,23,.25);
+      pointer-events:none;
     }
-
-    @media (max-width: 460px){
-      .twoCol, .threeCol{ grid-template-columns: 1fr; }
-      .scoreboard{ grid-template-columns: 1fr; }
+    .toast.show{ display:flex; animation: toastIn .18s ease-out; }
+    @keyframes toastIn{
+      from{ transform: translateX(-50%) translateY(8px); opacity:0; }
+      to{ transform: translateX(-50%) translateY(0); opacity:1; }
     }
+    .tick{
+      width:22px;height:22px;border-radius:999px;
+      background:rgba(34,197,94,.16);
+      border:1px solid rgba(34,197,94,.35);
+      display:grid;place-items:center;
+    }
+    .tick svg{ width:14px;height:14px;stroke:var(--success);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round; }
   </style>
 </head>
 
@@ -278,789 +181,255 @@
 </header>
 
 <main>
-  <div class="grid">
+  <section class="card">
+    <div class="cardHeader"><h2>BLE Connection</h2></div>
 
-    <!-- 0) CONNECTION -->
-    <section class="card" id="cardConnect">
-      <div class="cardHeader">
-        <div>
-          <h2>BLE Connection</h2>
-          <p>Connect to the PlayPUCK, then follow the steps in order.</p>
-        </div>
-        <div class="stepBadge">0</div>
-      </div>
-      <div class="cardBody">
-        <div class="twoCol">
-          <button id="btnConnect" class="accent">Connect</button>
-          <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
-        </div>
-
-        <div class="row" style="margin-top:10px;">
-          <span class="pill" id="deviceNamePill">Device: —</span>
-          <span class="pill" id="rssiPill">RSSI: —</span>
-        </div>
-
-        <p class="hint">
-          Note: Web Bluetooth availability varies by phone/browser. If WebBLE isn’t supported on your device,
-          this UI can still be used as your “screen spec” for a wrapped app.
-        </p>
-      </div>
-    </section>
-
-    <!-- 1) WIFI SETUP -->
-    <section class="card" id="cardWifi">
-      <div class="cardHeader">
-        <div>
-          <h2>Wi-Fi set up</h2>
-          <p>Send SSID + password to the PlayPUCK.</p>
-        </div>
-        <div class="stepBadge">1</div>
-      </div>
-      <div class="cardBody">
-        <div class="twoCol">
-          <div>
-            <label for="wifiSsid">Wi-Fi SSID</label>
-            <input id="wifiSsid" autocomplete="username" placeholder="e.g. HomeWiFi">
-          </div>
-          <div>
-            <label for="wifiPass">Wi-Fi Password</label>
-            <input id="wifiPass" type="password" autocomplete="current-password" placeholder="••••••••">
-          </div>
-        </div>
-
-        <div style="margin-top:10px;">
-          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to PlayPUCK</button>
-          <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code> (change command if needed).</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2) MATCH SELECTION -->
-    <section class="card" id="cardMatch">
-      <div class="cardHeader">
-        <div>
-          <h2>Match selection</h2>
-          <p>Choose rules/preset before uploading to the PlayPUCK.</p>
-        </div>
-        <div class="stepBadge">2</div>
+    <div class="cardBody">
+      <div class="twoCol">
+        <button id="btnConnect" class="accent">Connect</button>
+        <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
       </div>
 
-      <div class="cardBody">
-        <div class="twoCol">
-          <div>
-            <label for="matchType">Format</label>
-            <select id="matchType">
-              <option value="DOUBLES" selected>DOUBLES</option>
-              <option value="SINGLES">SINGLES</option>
-            </select>
-          </div>
+      <div id="bleBanner" class="bleBanner"></div>
 
-          <div>
-            <label for="scoringMode">Scoring</label>
-            <select id="scoringMode">
-              <option value="SIDEOUT" selected>SIDEOUT</option>
-              <option value="RALLY">RALLY</option>
-            </select>
-          </div>
-        </div>
+      <p class="hint">
+        PlayPUCK supports <strong>one BLE connection at a time</strong>. If you used <strong>nRF Connect</strong>,
+        disconnect and force-close it (swipe away).
+      </p>
+    </div>
+  </section>
 
-        <div class="twoCol" style="margin-top:10px;">
-          <div>
-            <label for="winPointsPreset">First to…</label>
-            <select id="winPointsPreset">
-              <option value="7">7</option>
-              <option value="11" selected>11</option>
-              <option value="15">15</option>
-              <option value="21">21</option>
-            </select>
-            <div class="hint">For anything else (e.g. 13), use the JSON override below.</div>
-          </div>
-
-          <div>
-            <label for="winRule">Win rule</label>
-            <select id="winRule">
-              <option value="SUDDEN_DEATH" selected>SUDDEN DEATH</option>
-              <option value="TWO_CLEAR">2-CLEAR POINTS</option>
-            </select>
-            <div class="hint">2-clear means “win by two”.</div>
-          </div>
-        </div>
-
-        <div class="twoCol" style="margin-top:10px;">
-          <div>
-            <label for="matchId">Match ID (optional)</label>
-            <input id="matchId" placeholder="e.g. OKEHAMPTON-2026-01-03-001">
-          </div>
-
-          <div>
-            <label for="customOverride">Custom override</label>
-            <select id="customOverride">
-              <option value="OFF" selected>Use presets above</option>
-              <option value="ON">Override with JSON below</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="margin-top:10px;">
-          <label for="matchJson">Match / Rules JSON</label>
-          <textarea id="matchJson"
-            placeholder='{"format":"DOUBLES","scoring":"SIDEOUT","win_points":11,"win_rule":"SUDDEN_DEATH"}'></textarea>
-          <div class="hint">If override is ON, this JSON is uploaded exactly (plus match_id if provided).</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2.5) PLAYER CHECK-IN (ANDROID NFC) -->
-    <section class="card" id="cardCheckin">
-      <div class="cardHeader">
-        <div>
-          <h2>Player check-in (NFC → BLE)</h2>
-          <p>Android Chrome/Edge only. Tap a tag to send <b>CHECKIN</b> to the PlayPUCK.</p>
-        </div>
-        <div class="stepBadge">2.5</div>
-      </div>
-      <div class="cardBody">
-        <div class="twoCol">
-          <button id="btnNfcScan" class="accent" disabled>Tap NFC to check in</button>
-          <button id="btnNfcStop" class="secondary" disabled>Stop scan</button>
-        </div>
-
-        <div class="twoCol" style="margin-top:10px;">
-          <div>
-            <label for="checkinPlayerId">Manual player_id (test)</label>
-            <input id="checkinPlayerId" placeholder="e.g. p1234 or UUID">
-          </div>
-          <div style="display:flex; flex-direction:column; justify-content:flex-end;">
-            <button id="btnCheckinManual" class="good" disabled>Send CHECKIN</button>
-          </div>
-        </div>
-
-        <div id="nfcStatus" class="nfcStatus">NFC idle.</div>
-
-        <div class="hint">
-          Tag formats supported (best for testing first):<br>
-          • Text: <code>p1234</code><br>
-          • Text JSON: <code>{"player_id":"p1234"}</code><br>
-          • URL: <code>https://…?pid=p1234</code> or <code>?player_id=p1234</code><br>
-          Sends: <code>CHECKIN {"player_id":"..."}</code>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3) UPLOAD TO PUCK -->
-    <section class="card" id="cardUpload">
-      <div class="cardHeader">
-        <div>
-          <h2>Upload to PlayPUCK</h2>
-          <p>Send match profile to the PlayPUCK (PROFILE_SELECT).</p>
-        </div>
-        <div class="stepBadge">3</div>
-      </div>
-      <div class="cardBody">
-        <button id="btnUploadProfile" class="accent" disabled>Upload match to PlayPUCK</button>
-        <div class="hint">Sends <b>PROFILE_SELECT</b> with the payload from your selections (or JSON override).</div>
-      </div>
-    </section>
-
-    <!-- 4) START GAME -->
-    <section class="card" id="cardStart">
-      <div class="cardHeader">
-        <div>
-          <h2>Start game</h2>
-          <p>Tell the PlayPUCK to start the match (START_GAME).</p>
-        </div>
-        <div class="stepBadge">4</div>
-      </div>
-      <div class="cardBody">
-        <button id="btnStartGame" class="good" disabled>Start game</button>
-        <div class="hint">Sends <b>START_GAME</b>.</div>
-      </div>
-    </section>
-
-    <!-- 5) SCORE GAME -->
-    <section class="card" id="cardScore">
-      <div class="cardHeader">
-        <div>
-          <h2>Score game</h2>
-          <p>Team A / Team B scoring buttons.</p>
-        </div>
-        <div class="stepBadge">5</div>
-      </div>
-      <div class="cardBody">
-        <div class="scoreboard">
-          <div class="scoreTile">
-            <h3>Team A</h3>
-            <div id="scoreA" class="scoreVal">0</div>
-          </div>
-          <div class="scoreTile">
-            <h3>Team B</h3>
-            <div id="scoreB" class="scoreVal">0</div>
-          </div>
-        </div>
-
-        <div class="twoCol" style="margin-top:10px;">
-          <button id="btnScoreA" class="accent" disabled>+1 Team A</button>
-          <button id="btnScoreB" class="accent" disabled>+1 Team B</button>
-        </div>
-
-        <div class="hint">
-          Default mapping used here: <b>SCORE</b> with payload <code>{"team":"A|B","delta":±1}</code>.
-          Change if your firmware expects different commands.
-        </div>
-      </div>
-    </section>
-
-    <!-- 6) EDIT SCORE -->
-    <section class="card" id="cardEdit">
-      <div class="cardHeader">
-        <div>
-          <h2>Edit score</h2>
-          <p>Adjust scores up/down (admin correction).</p>
-        </div>
-        <div class="stepBadge">6</div>
-      </div>
-      <div class="cardBody">
-        <div class="twoCol">
-          <div class="threeCol">
-            <button id="btnAminus" class="secondary" disabled>− A</button>
-            <button id="btnAplus" class="secondary" disabled>+ A</button>
-            <button id="btnAset" class="warn" disabled>Set A</button>
-          </div>
-          <div class="threeCol">
-            <button id="btnBminus" class="secondary" disabled>− B</button>
-            <button id="btnBplus" class="secondary" disabled>+ B</button>
-            <button id="btnBset" class="warn" disabled>Set B</button>
-          </div>
-        </div>
-
-        <div class="twoCol" style="margin-top:10px;">
-          <div>
-            <label for="setAVal">Set Team A to…</label>
-            <input id="setAVal" type="number" inputmode="numeric" min="0" step="1" value="0">
-          </div>
-          <div>
-            <label for="setBVal">Set Team B to…</label>
-            <input id="setBVal" type="number" inputmode="numeric" min="0" step="1" value="0">
-          </div>
-        </div>
-
-        <div class="hint">
-          Default mapping used here: <b>SCORE_SET</b> with payload <code>{"team":"A|B","value":n}</code>.
-        </div>
-      </div>
-    </section>
-
-    <!-- LOG -->
-    <section class="card">
-      <div class="cardHeader">
-        <div>
-          <h2>Debug log</h2>
-          <p>Messages sent/received.</p>
-        </div>
-        <div class="stepBadge">LOG</div>
-      </div>
-      <div class="cardBody">
-        <div id="log" class="log"></div>
-      </div>
-    </section>
-
-  </div>
+  <section class="card">
+    <div class="cardHeader"><h2>Debug log</h2></div>
+    <div class="cardBody">
+      <div id="log" class="log"></div>
+    </div>
+  </section>
 </main>
 
+<div id="toast" class="toast" aria-live="polite">
+  <span class="tick" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+  </span>
+  <span id="toastText">Connected</span>
+</div>
+
 <script>
-/**
- * IMPORTANT:
- * Replace these UUIDs with your PlayPUCK BLE service/characteristics.
- */
-const BLE = {
-  SERVICE_UUID: '0000ffff-0000-1000-8000-00805f9b34fb', // <-- CHANGE ME
-  TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb', // phone -> puck
-  RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb', // puck -> phone (notify)
+const BLE={
+  SERVICE_UUID:'0000ffff-0000-1000-8000-00805f9b34fb',
+  TX_CHAR_UUID:'0000ff01-0000-1000-8000-00805f9b34fb',
+  RX_CHAR_UUID:'0000ff02-0000-1000-8000-00805f9b34fb'
 };
 
-// ---- UI helpers
-const el = (id) => document.getElementById(id);
-const logEl = el('log');
-const connStatus = el('connStatus');
-const deviceNamePill = el('deviceNamePill');
-const rssiPill = el('rssiPill');
+const logEl=document.getElementById('log');
+const connStatus=document.getElementById('connStatus');
+const btnConnect=document.getElementById('btnConnect');
+const btnDisconnect=document.getElementById('btnDisconnect');
+const bleBanner=document.getElementById('bleBanner');
+const toast=document.getElementById('toast');
+const toastText=document.getElementById('toastText');
 
-function log(msg){
-  const ts = new Date().toLocaleTimeString();
-  logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
+let device=null,server=null,service=null,txChar=null,rxChar=null;
+
+let hadConnectFailure=false;
+let reconnectBackoffMs=800;         // starts small
+const reconnectBackoffMaxMs=12000;  // cap
+let reconnectTimer=null;
+
+function log(m){
+  const ts=new Date().toLocaleTimeString();
+  logEl.textContent=`[${ts}] ${m}\n`+logEl.textContent;
 }
 
-// ---- UI refs
-const btnConnect = el('btnConnect');
-const btnDisconnect = el('btnDisconnect');
-
-const wifiSsid = el('wifiSsid');
-const wifiPass = el('wifiPass');
-const btnSendWifi = el('btnSendWifi');
-
-const matchType = el('matchType');
-const scoringMode = el('scoringMode');
-const winPointsPreset = el('winPointsPreset');
-const winRule = el('winRule');
-const matchId = el('matchId');
-const customOverride = el('customOverride');
-const matchJson = el('matchJson');
-
-const btnUploadProfile = el('btnUploadProfile');
-const btnStartGame = el('btnStartGame');
-
-const btnScoreA = el('btnScoreA');
-const btnScoreB = el('btnScoreB');
-
-const btnAminus = el('btnAminus');
-const btnAplus  = el('btnAplus');
-const btnAset   = el('btnAset');
-
-const btnBminus = el('btnBminus');
-const btnBplus  = el('btnBplus');
-const btnBset   = el('btnBset');
-
-const scoreAEl = el('scoreA');
-const scoreBEl = el('scoreB');
-
-const setAVal = el('setAVal');
-const setBVal = el('setBVal');
-
-/* ---- Check-in (NFC / manual) refs ---- */
-const btnNfcScan = el('btnNfcScan');
-const btnNfcStop = el('btnNfcStop');
-const nfcStatusEl = el('nfcStatus');
-const checkinPlayerId = el('checkinPlayerId');
-const btnCheckinManual = el('btnCheckinManual');
-
-// ---- BLE state
-let device = null;
-let server = null;
-let service = null;
-let txChar = null;
-let rxChar = null;
-
-/* ---- Web NFC state ---- */
-let ndef = null;
-let nfcActive = false;
-
-function setNfcStatus(t){
-  if(!nfcStatusEl) return;
-  nfcStatusEl.textContent = t;
+function showToast(t){
+  toastText.textContent=t;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1300);
 }
 
-function setConnectedUI(connected){
-  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
-  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
-  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
-  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
-
-  btnDisconnect.disabled = !connected;
-
-  btnSendWifi.disabled = !connected;
-  btnUploadProfile.disabled = !connected;
-  btnStartGame.disabled = !connected;
-
-  btnScoreA.disabled = !connected;
-  btnScoreB.disabled = !connected;
-
-  btnAminus.disabled = !connected;
-  btnAplus.disabled  = !connected;
-  btnAset.disabled   = !connected;
-
-  btnBminus.disabled = !connected;
-  btnBplus.disabled  = !connected;
-  btnBset.disabled   = !connected;
-
-  // Enable manual check-in only when connected
-  btnCheckinManual.disabled = !connected;
-
-  // NFC scan requires both: connected BLE + Web NFC support
-  const webNfcSupported = ('NDEFReader' in window);
-  btnNfcScan.disabled = !(connected && webNfcSupported);
-  btnNfcStop.disabled = !nfcActive;
-}
-
-function enc(str){ return new TextEncoder().encode(str); }
-
-async function bleSend(command, payloadObj=null){
-  if(!txChar) throw new Error('Not connected / TX characteristic missing.');
-  const payload = payloadObj ? JSON.stringify(payloadObj) : '';
-  const line = payload ? `${command} ${payload}` : `${command}`;
-  await txChar.writeValue(enc(line));
-  log(`→ ${line}`);
-}
-
-function setScore(a,b){
-  scoreAEl.textContent = String(a);
-  scoreBEl.textContent = String(b);
-  setAVal.value = String(a);
-  setBVal.value = String(b);
-}
-
-function parseRx(text){
-  // Optional: parse incoming messages from PlayPUCK
-  // Example:
-  // SCORE {"a":3,"b":2}
+function vibrate(pattern){
   try{
-    const parts = text.trim().split(' ');
-    const cmd = parts[0];
-    const json = parts.slice(1).join(' ');
-    if(!json) return;
-    const obj = JSON.parse(json);
-    if(cmd === 'SCORE' && typeof obj.a === 'number' && typeof obj.b === 'number'){
-      setScore(obj.a, obj.b);
-    }
+    if(navigator.vibrate) navigator.vibrate(pattern);
   }catch(_){}
 }
 
-/* ---------- MATCH PAYLOAD (presets) ---------- */
-
-function buildMatchPayload(){
-  // If override is ON, upload JSON exactly
-  if(customOverride.value === 'ON'){
-    let obj;
-    try { obj = JSON.parse(matchJson.value); }
-    catch { throw new Error('Custom JSON invalid.'); }
-    const id = matchId.value.trim();
-    if(id) obj.match_id = id;
-    return obj;
-  }
-
-  // Preset-driven payload (adjust key names if your firmware uses different ones)
-  const id = matchId.value.trim() || null;
-  const payload = {
-    format: matchType.value,                   // "SINGLES" | "DOUBLES"
-    scoring: scoringMode.value,                // "SIDEOUT" | "RALLY"
-    win_points: Number(winPointsPreset.value), // 7 | 11 | 15 | 21
-    win_rule: winRule.value,                   // "SUDDEN_DEATH" | "TWO_CLEAR"
-  };
-  if(id) payload.match_id = id;
-  return payload;
+function showBanner(html){
+  bleBanner.innerHTML=html;
+  bleBanner.style.display='block';
 }
 
-function syncJsonPreview(){
-  if(customOverride.value === 'OFF'){
-    try{
-      matchJson.value = JSON.stringify(buildMatchPayload(), null, 2);
-    }catch(_){}
-  }
+function hideBanner(){
+  bleBanner.style.display='none';
+  bleBanner.innerHTML='';
 }
 
-[matchType, scoringMode, winPointsPreset, winRule, customOverride, matchId]
-  .forEach(x => x.addEventListener('change', syncJsonPreview));
+function scheduleReconnect(reason){
+  // don't queue multiple
+  if(reconnectTimer) return;
 
-// Initial seed
-syncJsonPreview();
-
-/* ---------- CHECK-IN (manual + NFC) ---------- */
-
-async function sendCheckin(playerIdRaw){
-  const playerId = String(playerIdRaw || '').trim();
-  if(!playerId){
-    log('Check-in: player_id is empty.');
-    setNfcStatus('Enter a player_id or tap a tag.');
+  // Only attempt if we have a device handle from a prior user selection
+  if(!device){
+    log('Auto-reconnect: no previously selected device yet.');
     return;
   }
+
+  const wait=reconnectBackoffMs;
+  reconnectBackoffMs=Math.min(Math.floor(reconnectBackoffMs*1.7), reconnectBackoffMaxMs);
+
+  log(`Auto-reconnect scheduled in ${Math.round(wait/100)/10}s (${reason})`);
+  reconnectTimer=setTimeout(async ()=>{
+    reconnectTimer=null;
+    await tryReconnect(true);
+  }, wait);
+}
+
+function resetReconnectBackoff(){
+  reconnectBackoffMs=800;
+  if(reconnectTimer){
+    clearTimeout(reconnectTimer);
+    reconnectTimer=null;
+  }
+}
+
+function setConnectedUI(c){
+  connStatus.textContent=c?'Connected':'Disconnected';
+
+  if(c){
+    // Connect -> white disabled; Disconnect -> purple enabled
+    btnConnect.className='secondary';
+    btnConnect.disabled=true;
+
+    btnDisconnect.className='accent';
+    btnDisconnect.disabled=false;
+
+    // Auto-hide banner on success
+    hideBanner();
+    hadConnectFailure=false;
+
+    resetReconnectBackoff();
+  }else{
+    // Connect -> purple enabled; Disconnect -> white disabled
+    btnConnect.className='accent';
+    btnConnect.disabled=false;
+
+    btnDisconnect.className='secondary';
+    btnDisconnect.disabled=true;
+
+    // Banner only shows AFTER a failure
+    if(hadConnectFailure){
+      showBanner(`
+        <strong>Connection failed</strong><br>
+        If PlayPUCK won’t connect, it’s often still connected in <strong>nRF Connect</strong> or another BLE app.<br><br>
+        <ul>
+          <li>Disconnect in that app</li>
+          <li>Force-close it (swipe away)</li>
+          <li>Toggle Bluetooth off/on</li>
+        </ul>
+      `);
+    } else {
+      hideBanner();
+    }
+  }
+}
+
+async function connectWithExistingDevice(sourceLabel){
+  log(`Connecting (${sourceLabel})…`);
+  server = await device.gatt.connect();
+
+  log('Getting service…');
+  service = await server.getPrimaryService(BLE.SERVICE_UUID);
+
+  log('Getting characteristics…');
+  txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+  rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+
   try{
-    await bleSend('CHECKIN', { player_id: playerId });
-    setNfcStatus(`✅ Sent CHECKIN for: ${playerId}`);
+    log('Starting notifications…');
+    await rxChar.startNotifications();
+    rxChar.addEventListener('characteristicvaluechanged', (e) => {
+      const txt = new TextDecoder().decode(e.target.value);
+      log(`← ${txt}`);
+    });
   }catch(e){
-    log(`Check-in send error: ${e.message}`);
-    setNfcStatus(`❌ BLE send failed: ${e.message}`);
+    log(`RX notifications not enabled: ${e.message}`);
   }
+
+  setConnectedUI(true);
+  log('Connected ✅');
+  showToast('Connected ✅');
+  vibrate([40, 30, 40]); // short haptic "tick"
 }
 
-btnCheckinManual.addEventListener('click', async () => {
-  await sendCheckin(checkinPlayerId.value);
-});
-
-function decodeRecordText(record){
-  // Web NFC: record.data is a DataView
-  const dec = new TextDecoder((record.encoding || 'utf-8'));
-  return dec.decode(record.data);
-}
-
-function tryExtractPlayerIdFromText(text){
-  const t = String(text || '').trim();
-  if(!t) return null;
-
-  // JSON: {"player_id":"..."} (or {"pid":"..."})
+async function tryReconnect(fromTimer){
   try{
-    const obj = JSON.parse(t);
-    if(obj && (obj.player_id || obj.pid)){
-      return String(obj.player_id || obj.pid);
+    if(!device) return;
+
+    if(device.gatt?.connected){
+      // already back
+      return;
     }
-  }catch(_){}
 
-  // plain text: p1234 / UUID / etc
-  return t;
+    await connectWithExistingDevice(fromTimer ? 'auto-reconnect' : 'reconnect');
+  }catch(e){
+    hadConnectFailure=true;
+    log(`Reconnect error: ${e.message}`);
+    setConnectedUI(false);
+
+    // Keep trying (backoff)
+    scheduleReconnect('still disconnected');
+  }
 }
 
-function tryExtractPlayerIdFromUrl(urlText){
-  const t = String(urlText || '').trim();
-  if(!t) return null;
-
+async function manualConnect(){
   try{
-    const u = new URL(t);
-    return u.searchParams.get('pid') || u.searchParams.get('player_id');
-  }catch(_){
-    return null;
-  }
-}
+    hideBanner();
+    hadConnectFailure=false;
 
-async function startNfcScan(){
-  if(!('NDEFReader' in window)){
-    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
-    return;
-  }
-  if(!txChar){
-    setNfcStatus('Connect to the PlayPUCK first (BLE).');
-    return;
-  }
-
-  try{
-    ndef = new NDEFReader();
-    setNfcStatus('Requesting NFC permission…');
-    await ndef.scan(); // must be triggered by user gesture
-    nfcActive = true;
-    setNfcStatus('NFC ready — tap a player tag.');
-
-    // Update stop button state
-    btnNfcStop.disabled = false;
-    btnNfcScan.disabled = true;
-
-    ndef.onreading = async (event) => {
-      try{
-        let playerId = null;
-
-        for(const record of event.message.records){
-          if(record.recordType === 'text'){
-            const txt = decodeRecordText(record);
-            playerId = tryExtractPlayerIdFromText(txt);
-          } else if(record.recordType === 'url'){
-            const urlTxt = decodeRecordText(record);
-            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
-          } else {
-            // Ignore other record types for now
-          }
-
-          if(playerId) break;
-        }
-
-        if(!playerId){
-          setNfcStatus('Tag read, but no player_id found in supported records.');
-          log('NFC: Tag read, but player_id not extracted.');
-          return;
-        }
-
-        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
-        log(`NFC → player_id=${playerId}`);
-        await sendCheckin(playerId);
-
-      }catch(e){
-        log(`NFC onreading error: ${e.message}`);
-        setNfcStatus(`NFC read error: ${e.message}`);
-      }
-    };
-
-    ndef.onreadingerror = () => {
-      setNfcStatus('NFC reading error — try again.');
-      log('NFC reading error.');
-    };
-
-  }catch(err){
-    nfcActive = false;
-    btnNfcStop.disabled = true;
-    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
-    setNfcStatus(`NFC error: ${err?.message || err}`);
-    log(`NFC error: ${err?.message || err}`);
-  }
-}
-
-function stopNfcScan(){
-  // Web NFC currently has no explicit stop API; we can disable handlers + state.
-  nfcActive = false;
-  if(ndef){
-    ndef.onreading = null;
-    ndef.onreadingerror = null;
-  }
-  btnNfcStop.disabled = true;
-  btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
-  setNfcStatus('NFC stopped. Tap “Tap NFC to check in” to start again.');
-  log('NFC scan stopped (handlers removed).');
-}
-
-btnNfcScan.addEventListener('click', startNfcScan);
-btnNfcStop.addEventListener('click', stopNfcScan);
-
-// Initial NFC availability message
-if(!('NDEFReader' in window)){
-  setNfcStatus('Web NFC not available on this device/browser (Android Chrome/Edge required).');
-} else {
-  setNfcStatus('NFC available. Connect BLE, then tap “Tap NFC to check in”.');
-}
-
-/* ---------- BLE CONNECT / DISCONNECT ---------- */
-
-btnConnect.addEventListener('click', async () => {
-  try{
     log('Requesting BLE device…');
-device = await navigator.bluetooth.requestDevice({
-  acceptAllDevices: true,
-  optionalServices: [BLE.SERVICE_UUID]
-});
 
-
-    deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
-    device.addEventListener('gattserverdisconnected', () => {
-      log('Disconnected.');
-      setConnectedUI(false);
-      // If BLE drops, stop NFC handlers so UI doesn't imply it can send
-      if(nfcActive) stopNfcScan();
+    device = await navigator.bluetooth.requestDevice({
+      filters:[{ namePrefix:'PlayPUCK' }],
+      optionalServices:[BLE.SERVICE_UUID]
     });
 
-    server = await device.gatt.connect();
-    service = await server.getPrimaryService(BLE.SERVICE_UUID);
+    device.addEventListener('gattserverdisconnected',()=>{
+      log('Disconnected');
+      setConnectedUI(false);
+      // auto-reconnect loop
+      scheduleReconnect('link dropped');
+    });
 
-    txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
-    rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
-
-    // Notifications
-    try{
-      await rxChar.startNotifications();
-      rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-        const txt = new TextDecoder().decode(ev.target.value);
-        log(`← ${txt}`);
-        parseRx(txt);
-      });
-    }catch(e){
-      log(`RX notifications not enabled: ${e.message}`);
-    }
-
-    setConnectedUI(true);
-    log('Connected ✅');
-    rssiPill.textContent = 'RSSI: (not available in WebBLE)';
-
-    // Refresh NFC buttons once connected
-    setConnectedUI(true);
-
-  }catch(err){
-    log(`Connect error: ${err.message}`);
+    await connectWithExistingDevice('manual');
+  }catch(e){
+    hadConnectFailure=true;
+    log(`Connect error: ${e.message}`);
+    setConnectedUI(false);
   }
-});
+}
 
-btnDisconnect.addEventListener('click', async () => {
+btnConnect.addEventListener('click', manualConnect);
+
+btnDisconnect.addEventListener('click', ()=>{
   try{
     if(device?.gatt?.connected) device.gatt.disconnect();
-    setConnectedUI(false);
-    if(nfcActive) stopNfcScan();
   }catch(e){
     log(`Disconnect error: ${e.message}`);
   }
+  setConnectedUI(false);
+  resetReconnectBackoff(); // manual disconnect should stop reconnect attempts
 });
 
-/* ---------- STEP BUTTONS ---------- */
-
-// 1) Wi-Fi set up
-btnSendWifi.addEventListener('click', async () => {
-  try{
-    const ssid = wifiSsid.value.trim();
-    const pass = wifiPass.value;
-    if(!ssid) return log('Enter Wi-Fi SSID first.');
-    await bleSend('WIFI_SET', { ssid, pass });
-  }catch(e){
-    log(`Wi-Fi send error: ${e.message}`);
+// Optional: if the page becomes visible again, try reconnecting once (no spam)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && device && !device.gatt?.connected){
+    tryReconnect(false);
   }
 });
 
-// 3) Upload to PlayPUCK (PROFILE_SELECT)
-btnUploadProfile.addEventListener('click', async () => {
-  try{
-    const payload = buildMatchPayload();
-    await bleSend('PROFILE_SELECT', payload);
-  }catch(e){
-    log(`Upload error: ${e.message}`);
-  }
-});
-
-// 4) Start game
-btnStartGame.addEventListener('click', async () => {
-  try{
-    await bleSend('START_GAME');
-  }catch(e){
-    log(`Start error: ${e.message}`);
-  }
-});
-
-// 5) Score game
-btnScoreA.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
-  }catch(e){
-    log(`Score A error: ${e.message}`);
-  }
-});
-
-btnScoreB.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
-  }catch(e){
-    log(`Score B error: ${e.message}`);
-  }
-});
-
-// 6) Edit score
-btnAminus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'A', delta: -1 });
-    setScore(Math.max(0, Number(scoreAEl.textContent) - 1), Number(scoreBEl.textContent));
-  }catch(e){ log(`A- error: ${e.message}`); }
-});
-
-btnAplus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'A', delta: 1 });
-    setScore(Number(scoreAEl.textContent) + 1, Number(scoreBEl.textContent));
-  }catch(e){ log(`A+ error: ${e.message}`); }
-});
-
-btnAset.addEventListener('click', async () => {
-  try{
-    const v = Math.max(0, Math.floor(Number(setAVal.value || 0)));
-    await bleSend('SCORE_SET', { team: 'A', value: v });
-    setScore(v, Number(scoreBEl.textContent));
-  }catch(e){ log(`A set error: ${e.message}`); }
-});
-
-btnBminus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'B', delta: -1 });
-    setScore(Number(scoreAEl.textContent), Math.max(0, Number(scoreBEl.textContent) - 1));
-  }catch(e){ log(`B- error: ${e.message}`); }
-});
-
-btnBplus.addEventListener('click', async () => {
-  try{
-    await bleSend('SCORE', { team: 'B', delta: 1 });
-    setScore(Number(scoreAEl.textContent), Number(scoreBEl.textContent) + 1);
-  }catch(e){ log(`B+ error: ${e.message}`); }
-});
-
-btnBset.addEventListener('click', async () => {
-  try{
-    const v = Math.max(0, Math.floor(Number(setBVal.value || 0)));
-    await bleSend('SCORE_SET', { team: 'B', value: v });
-    setScore(Number(scoreAEl.textContent), v);
-  }catch(e){ log(`B set error: ${e.message}`); }
-});
-
-// Start disabled until connected
+// Initial
 setConnectedUI(false);
-log('Ready. Connect to a PlayPUCK to begin.');
+log('Ready. Tap Connect.');
 </script>
+
 </body>
 </html>
-
