@@ -229,151 +229,163 @@
       grid-template-columns: 1fr;
       gap: 10px;
     }
-    @media(min-width: 740px){
+    @media(min-width: 540px){
       .twoCol{ grid-template-columns: 1fr 1fr; }
     }
 
     .hint{
-      font-size: 12px;
-      color: var(--muted2);
-      margin-top: 8px;
-      line-height: 1.2rem;
-    }
-
-    .kv{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
       margin-top: 10px;
-    }
-    .k{
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 14px;
-      padding: 10px 12px;
-    }
-    .k .t{
-      font-size: 11px;
       color: var(--muted2);
-      margin-bottom: 5px;
-    }
-    .k .v{
-      font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(255,255,255,.9);
-      word-break: break-word;
-    }
-
-    .scores{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .scoreBox{
-      border-radius: 18px;
-      padding: 14px 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      text-align:center;
-    }
-    .scoreBox .team{
-      font-size: 12px;
-      color: var(--muted2);
-      margin-bottom: 8px;
-    }
-    .scoreBox .score{
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: .5px;
-      line-height: 1;
-    }
-    .scoreBox .meta{
-      font-family: var(--mono);
-      font-size: 12px;
-      margin-top: 8px;
-      color: rgba(255,255,255,.82);
-    }
-
-    .log{
-      font-family: var(--mono);
       font-size: 12px;
       line-height: 1.25rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      padding: 14px 14px 16px;
-      max-height: 420px;
-      overflow:auto;
-      background: rgba(0,0,0,.18);
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .logToolbar{
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      gap: 10px;
-      padding: 12px 14px 0;
-    }
-    .logToolbar .left{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items:center;
     }
     .chip{
-      background: var(--chip);
-      border: 1px solid rgba(99,102,241,.22);
-      padding: 6px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 8px;
       border-radius: 999px;
-      font-size: 12px;
-      color: rgba(255,255,255,.90);
-    }
-    .nfcStatus{
+      background: rgba(99,102,241,.10);
+      border: 1px solid rgba(99,102,241,.22);
+      color: rgba(255,255,255,.88);
       font-family: var(--mono);
-      font-size: 12px;
-      color: rgba(255,255,255,.86);
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
+      font-size: 11px;
+      margin-right: 6px;
+      margin-top: 6px;
+      white-space: nowrap;
     }
 
     .banner{
       display:none;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(245,158,11,.28);
-      background: rgba(245,158,11,.12);
+      margin-top: 10px;
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.28);
       color: rgba(255,255,255,.92);
-      line-height: 1.25rem;
-      box-shadow: 0 14px 30px rgba(0,0,0,.28);
+      border-radius: 14px;
+      padding: 12px 12px;
+      font-size: 12px;
+      line-height: 1.35rem;
     }
     .banner.show{ display:block; }
 
-    /* GAME OVER banner (new) */
-    .gameOverBanner{
-      display:none;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(239,68,68,.35);
-      background: rgba(239,68,68,.10);
-      box-shadow: 0 14px 30px rgba(0,0,0,.28);
+    .scoreboard{
+      display:flex;
+      justify-content:space-between;
+      align-items:stretch;
+      gap: 10px;
+      margin-top: 10px;
     }
-    .gameOverBanner.show{ display:block; }
-    .gameOverTitle{
-      font-weight: 900;
-      letter-spacing: .2px;
-      font-size: 14px;
-      margin: 0 0 4px;
+    .scoreBox{
+      flex:1;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      padding: 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      min-height: 86px;
     }
-    .gameOverSub{
+    .scoreBox .team{
       font-size: 12px;
-      color: rgba(255,255,255,.80);
-      margin: 0;
-      line-height: 1.2rem;
+      color: var(--muted2);
+      letter-spacing: .2px;
+    }
+    .scoreBox .score{
+      font-size: 42px;
+      font-family: var(--mono);
+      font-weight: 700;
+      line-height: 1;
+      margin-top: 6px;
+    }
+    .scoreBox .serve{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: auto;
+    }
+
+    .gameOver{
+      display:none;
+      margin-top: 10px;
+      border-radius: 16px;
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.26);
+      padding: 12px 12px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    .gameOver.show{ display:block; }
+    .gameOver small{
+      display:block;
+      margin-top: 4px;
+      color: rgba(255,255,255,.78);
+      font-weight: 650;
+      letter-spacing: .1px;
+    }
+
+    .logToolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .logToolbar .left{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    .log{
+      margin-top: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.30);
+      padding: 12px 12px;
+      height: 320px;
+      overflow:auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.25rem;
+      white-space: pre-wrap;
+    }
+
+    .summary{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(min-width: 540px){
+      .summary{ grid-template-columns: 1fr 1fr; }
+    }
+    .k{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+    }
+    .k .t{
+      font-size: 12px;
+      color: var(--muted2);
+    }
+    .k .v{
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nfcStatus{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.88);
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
     }
   </style>
 </head>
@@ -386,43 +398,39 @@
         <div class="logo"></div>
         <div>
           <h1>PlayPUCK Remote</h1>
-          <div class="sub">Web Bluetooth remote (Chrome/Edge Desktop + Android)</div>
+          <div class="sub">Web BLE control panel (no app) • best in Chrome/Edge</div>
         </div>
       </div>
 
-      <div class="pillRow">
-        <div class="pill"><span class="dot" id="dotBle"></span><span id="connStatus">Disconnected</span></div>
-        <div class="pill" id="deviceNamePill">Device: —</div>
-        <div class="pill" id="reconnectPill">Reconnect: —</div>
+      <div>
+        <div class="pillRow">
+          <div class="pill"><span class="dot bad" id="dotBle"></span><span id="connStatus">Disconnected</span></div>
+          <div class="pill" id="deviceNamePill">Device: —</div>
+          <div class="pill" id="reconnectPill">Reconnect: —</div>
+        </div>
+
+        <div class="btnRow" style="margin-top:10px;">
+          <button class="accent" id="btnConnect">Connect</button>
+          <button class="secondary" id="btnDisconnect" disabled>Disconnect</button>
+          <button class="secondary" id="btnClearLog">Clear log</button>
+        </div>
       </div>
     </div>
 
-    <div class="btnRow">
-      <button id="btnConnect" class="accent">Connect</button>
-      <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
-      <button id="btnClearLog" class="secondary">Clear log</button>
-    </div>
-
     <div class="banner" id="bleBanner"></div>
-    <div class="gameOverBanner" id="gameOverBanner">
-      <div class="gameOverTitle">GAME OVER — <span id="gameOverWinner">—</span></div>
-      <p class="gameOverSub" id="gameOverSub">—</p>
-    </div>
   </div>
 </header>
 
-<div class="wrap">
-  <main>
+<main>
+  <div class="wrap">
     <div class="grid">
-      <!-- LEFT: controls -->
       <div>
-
-        <!-- 1) WIFI (optional) -->
+        <!-- 1) WIFI -->
         <section class="card" id="cardWifi">
           <div class="cardHeader">
             <div>
-              <h2>Wi-Fi setup (optional)</h2>
-              <p>Send Wi-Fi credentials to the PlayPUCK.</p>
+              <h2>Wi-Fi setup</h2>
+              <p>Send SSID/password/timezone to the PlayPUCK.</p>
             </div>
             <div class="stepBadge">1</div>
           </div>
@@ -437,7 +445,6 @@
                 <input id="pass" placeholder="Wi-Fi password">
               </div>
             </div>
-
             <div class="twoCol" style="margin-top:10px;">
               <div>
                 <label for="tz">Timezone</label>
@@ -532,8 +539,8 @@
     <section class="card" id="cardTags">
       <div class="cardHeader">
         <div>
-          <h2>Tag tools (TAG_BIND / TAG_TAP)</h2>
-          <p>Manual tag commands to test bindings + tap events.</p>
+          <h2>Tag tools (ROLE BINDINGS)</h2>
+          <p>Register a tag’s <b>role</b> (persisted on the puck) and assign its <b>team</b> for this match (RAM). Then use TAG_TAP to score.</p>
         </div>
         <div class="stepBadge">2.6</div>
       </div>
@@ -545,153 +552,186 @@
             <input id="tagUid" placeholder="e.g. 04:AA:BB:CC:DD:EE:FF">
           </div>
           <div>
-            <label for="tagAction">Bind action</label>
-            <select id="tagAction">
-              <option value="TEAM_A" selected>TEAM A</option>
-              <option value="TEAM_B">TEAM B</option>
-              <option value="CHECKIN">CHECKIN</option>
-              <option value="NONE">NONE</option>
+            <label for="tagRole">Role (persisted)</label>
+            <select id="tagRole">
+              <option value="PLAYER" selected>PLAYER</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="REF">REF</option>
+              <option value="NONE">NONE (unregister)</option>
             </select>
           </div>
         </div>
 
         <div class="twoCol" style="margin-top:10px;">
-          <button id="btnTagBind" class="accent" disabled>Bind UID → action</button>
-          <button id="btnTagTap" class="good" disabled>Send TAG_TAP</button>
+          <button id="btnTagRegister" class="accent" disabled>TAG_REGISTER (save role)</button>
+          <button id="btnTagTap" class="good" disabled>TAG_TAP (score / check-in)</button>
         </div>
 
-        <div style="margin-top:10px;">
-          <button id="btnTagClear" class="danger" disabled>Clear all bindings</button>
-          <div class="hint">Sends <b>TAG_CLEAR {"all":true}</b>.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3) UPLOAD -->
-    <section class="card" id="cardUpload" style="margin-top:14px;">
-      <div class="cardHeader">
-        <div>
-          <h2>Upload to PlayPUCK</h2>
-          <p>Send match profile to the PlayPUCK (PROFILE_SELECT).</p>
-        </div>
-        <div class="stepBadge">3</div>
-      </div>
-      <div class="cardBody">
-        <button id="btnUploadProfile" class="accent" disabled style="width:100%;">Upload Profile</button>
-        <div class="hint">Command: <span class="chip">PROFILE_SELECT {…}</span></div>
-      </div>
-    </section>
-
-    <!-- 4) START GAME -->
-    <section class="card" id="cardStart" style="margin-top:14px;">
-      <div class="cardHeader">
-        <div>
-          <h2>Start game</h2>
-          <p>Start/reset the game on the PlayPUCK.</p>
-        </div>
-        <div class="stepBadge">4</div>
-      </div>
-      <div class="cardBody">
-        <button id="btnStartGame" class="good" disabled style="width:100%;">Start Game</button>
-        <div class="hint">Command: <span class="chip">START_GAME</span></div>
-      </div>
-    </section>
-
-    <!-- 5) SCORE -->
-    <section class="card" id="cardScore" style="margin-top:14px;">
-      <div class="cardHeader">
-        <div>
-          <h2>Score game</h2>
-          <p>Send rally results (Team A or Team B won the rally).</p>
-        </div>
-        <div class="stepBadge">5</div>
-      </div>
-      <div class="cardBody">
-        <div class="twoCol">
-          <button id="btnScoreA" class="accent" disabled>Team A won rally (+1)</button>
-          <button id="btnScoreB" class="accent" disabled>Team B won rally (+1)</button>
-        </div>
-        <div class="hint">Command: <span class="chip">SCORE {"team":"A|B","delta":1}</span></div>
-      </div>
-    </section>
-
-    <!-- 6) EDIT SCORE -->
-    <section class="card" id="cardEdit" style="margin-top:14px;">
-      <div class="cardHeader">
-        <div>
-          <h2>Edit score</h2>
-          <p>Admin adjustments: +/- or set exact values.</p>
-        </div>
-        <div class="stepBadge">6</div>
-      </div>
-      <div class="cardBody">
-
-        <div class="twoCol">
-          <div class="k">
-            <div class="t">Team A admin</div>
-            <div class="twoCol">
-              <button id="btnAminus" class="secondary" disabled>−1</button>
-              <button id="btnAplus" class="secondary" disabled>+1</button>
-            </div>
-            <div class="twoCol" style="margin-top:10px;">
-              <input id="setAVal" placeholder="Set A to…" type="number" min="0" value="0">
-              <button id="btnAset" class="secondary" disabled>Set</button>
-            </div>
+        <div class="twoCol" style="margin-top:10px;">
+          <div>
+            <label for="tagTeam">Team assignment (this match)</label>
+            <select id="tagTeam">
+              <option value="A" selected>Team A</option>
+              <option value="B">Team B</option>
+              <option value="NONE">NONE (remove assignment)</option>
+            </select>
           </div>
-
-          <div class="k">
-            <div class="t">Team B admin</div>
-            <div class="twoCol">
-              <button id="btnBminus" class="secondary" disabled>−1</button>
-              <button id="btnBplus" class="secondary" disabled>+1</button>
-            </div>
-            <div class="twoCol" style="margin-top:10px;">
-              <input id="setBVal" placeholder="Set B to…" type="number" min="0" value="0">
-              <button id="btnBset" class="secondary" disabled>Set</button>
-            </div>
+          <div style="display:flex; align-items:end;">
+            <button id="btnTagAssign" class="secondary" disabled style="width:100%;">TAG_ASSIGN (set team)</button>
           </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <button id="btnTagClearTeams" class="warn" disabled>Clear team assignments</button>
+          <button id="btnTagClearAll" class="danger" disabled>Clear roles + teams</button>
         </div>
 
         <div class="hint" style="margin-top:10px;">
-          SCORE admin delta: <span class="chip">SCORE {"team":"A|B","delta":-1|+1}</span><br>
-          SCORE set: <span class="chip">SCORE_SET {"team":"A|B","value":n}</span>
+          Sends:
+          <span class="chip">TAG_REGISTER {"uid":"…","role":"PLAYER"}</span>
+          <span class="chip">TAG_ASSIGN {"uid":"…","team":"A"}</span>
+          <span class="chip">TAG_TAP {"uid":"…","seq":1}</span>
+          <span class="chip">TAG_CLEAR_TEAMS {"all":true}</span>
+          <span class="chip">TAG_CLEAR_ALL {"all":true}</span>
         </div>
       </div>
     </section>
 
-      </div>
 
-      <!-- RIGHT: state + log -->
-      <div>
-        <section class="card" id="cardState">
+    <!-- 3) UPLOAD -->
+        <section class="card" id="cardUpload" style="margin-top:14px;">
           <div class="cardHeader">
             <div>
-              <h2>Live state</h2>
-              <p>Updates from the PlayPUCK (STATE / GAME_OVER / ACK).</p>
+              <h2>Upload to PlayPUCK</h2>
+              <p>Send match profile to the PlayPUCK (PROFILE_SELECT).</p>
             </div>
-            <div class="stepBadge">LIVE</div>
+            <div class="stepBadge">3</div>
           </div>
           <div class="cardBody">
-            <div class="scores">
+            <button id="btnUploadProfile" class="accent" disabled style="width:100%;">Upload Profile</button>
+            <div class="hint">Command: <span class="chip">PROFILE_SELECT {…}</span></div>
+          </div>
+        </section>
+
+        <!-- 4) START GAME -->
+        <section class="card" id="cardStart" style="margin-top:14px;">
+          <div class="cardHeader">
+            <div>
+              <h2>Start game</h2>
+              <p>Start/reset the game on the PlayPUCK.</p>
+            </div>
+            <div class="stepBadge">4</div>
+          </div>
+          <div class="cardBody">
+            <button id="btnStartGame" class="good" disabled style="width:100%;">Start Game</button>
+            <div class="hint">Command: <span class="chip">START_GAME</span></div>
+          </div>
+        </section>
+
+        <!-- 5) SCORE -->
+        <section class="card" id="cardScore" style="margin-top:14px;">
+          <div class="cardHeader">
+            <div>
+              <h2>Score game</h2>
+              <p>Send rally results (Team A or Team B won the rally). Puck applies the rules.</p>
+            </div>
+            <div class="stepBadge">5</div>
+          </div>
+
+          <div class="cardBody">
+
+            <!-- GAME OVER banner -->
+            <div id="gameOverBanner" class="gameOver">
+              GAME OVER — <span id="gameOverWinner">—</span>
+              <small id="gameOverSub">Final score: —</small>
+            </div>
+
+            <div class="scoreboard">
               <div class="scoreBox">
                 <div class="team">Team A</div>
                 <div class="score" id="scoreA">0</div>
-                <div class="meta" id="metaA">—</div>
+                <div class="serve" id="serveA">—</div>
               </div>
               <div class="scoreBox">
                 <div class="team">Team B</div>
                 <div class="score" id="scoreB">0</div>
-                <div class="meta" id="metaB">—</div>
+                <div class="serve" id="serveB">—</div>
               </div>
             </div>
 
-            <div class="kv">
+            <div class="twoCol" style="margin-top:10px;">
+              <button id="btnScoreA" class="accent" disabled>Team A won rally</button>
+              <button id="btnScoreB" class="accent" disabled>Team B won rally</button>
+            </div>
+
+            <div class="hint">Command: <span class="chip">SCORE {"team":"A|B","delta":1}</span></div>
+          </div>
+        </section>
+
+        <!-- 6) EDIT SCORE -->
+        <section class="card" id="cardEdit" style="margin-top:14px;">
+          <div class="cardHeader">
+            <div>
+              <h2>Edit score</h2>
+              <p>Admin adjustments. Puck remains authoritative.</p>
+            </div>
+            <div class="stepBadge">6</div>
+          </div>
+
+          <div class="cardBody">
+            <div class="twoCol">
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                <button id="btnAminus" class="secondary" disabled>− A</button>
+                <button id="btnAplus" class="secondary" disabled>+ A</button>
+                <button id="btnAset" class="warn" disabled>Set A</button>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                <button id="btnBminus" class="secondary" disabled>− B</button>
+                <button id="btnBplus" class="secondary" disabled>+ B</button>
+                <button id="btnBset" class="warn" disabled>Set B</button>
+              </div>
+            </div>
+
+            <div class="twoCol" style="margin-top:10px;">
+              <div>
+                <label for="setAVal">Set Team A to…</label>
+                <input id="setAVal" type="number" inputmode="numeric" min="0" step="1" value="0">
+              </div>
+              <div>
+                <label for="setBVal">Set Team B to…</label>
+                <input id="setBVal" type="number" inputmode="numeric" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="hint">
+              Commands:
+              <span class="chip">SCORE {"team":"A|B","delta":-1}</span>
+              <span class="chip">SCORE_SET {"team":"A|B","value":n}</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right column: summary + log -->
+      <div>
+
+        <section class="card">
+          <div class="cardHeader">
+            <div>
+              <h2>Live state</h2>
+              <p>Updated from PlayPUCK <b>STATE</b> messages.</p>
+            </div>
+            <div class="stepBadge">STATE</div>
+          </div>
+          <div class="cardBody">
+            <div class="summary">
               <div class="k">
                 <div class="t">Profile</div>
                 <div class="v" id="infoProfile">—</div>
               </div>
               <div class="k">
-                <div class="t">Serving</div>
+                <div class="t">Serve</div>
                 <div class="v" id="infoServe">—</div>
               </div>
               <div class="k">
@@ -705,22 +745,34 @@
             </div>
 
           </div>
+        </section>
 
-          <div class="logToolbar">
-            <div class="left">
-              <div class="chip" id="rxCounter">RX: 0</div>
-              <div class="chip" id="txCounter">TX: 0</div>
+        <section class="card" style="margin-top:14px;">
+          <div class="cardHeader">
+            <div>
+              <h2>Debug log</h2>
+              <p>Messages sent/received.</p>
             </div>
-            <div class="left">
-              <div class="chip" id="logHint">Messages sent/received.</div>
+            <div class="stepBadge">LOG</div>
+          </div>
+          <div class="cardBody">
+            <div class="logToolbar">
+              <div class="left">
+                <div class="chip" id="rxCounter">RX: 0</div>
+                <div class="chip" id="txCounter">TX: 0</div>
+              </div>
+              <div class="left">
+                <div class="chip" id="logHint">Messages sent/received.</div>
+              </div>
             </div>
           </div>
-          <div class="log" id="log">LOG\n</div>
+          <div class="log" id="log">LOG
+</div>
         </section>
       </div>
     </div>
-  </main>
-</div>
+  </div>
+</main>
 
 <script>
 /* ============================================================
@@ -787,10 +839,13 @@ const checkinPlayerId = el('checkinPlayerId');
 const btnCheckinManual = el('btnCheckinManual');
 
 const tagUid = el('tagUid');
-const tagAction = el('tagAction');
-const btnTagBind = el('btnTagBind');
+const tagRole = el('tagRole');
+const tagTeam = el('tagTeam');
+const btnTagRegister = el('btnTagRegister');
+const btnTagAssign = el('btnTagAssign');
 const btnTagTap = el('btnTagTap');
-const btnTagClear = el('btnTagClear');
+const btnTagClearTeams = el('btnTagClearTeams');
+const btnTagClearAll = el('btnTagClearAll');
 
 let tagSeq = 1;
 function normUid(u){ return String(u || '').trim().toUpperCase(); }
@@ -924,100 +979,164 @@ const PRESETS = {
 };
 
 function buildProfilePayload(){
-  let obj = null;
-
-  if(customOverride.value === 'ON'){
+  // Override mode
+  if(String(customOverride.value || 'OFF') === 'ON'){
+    let obj;
     try{
       obj = JSON.parse(matchJson.value || '{}');
     }catch(e){
-      showBanner(`<strong>Invalid JSON</strong><br>${e.message}`);
-      throw e;
+      throw new Error(`Invalid JSON override: ${e.message}`);
     }
-  }else{
-    obj = JSON.parse(JSON.stringify(PRESETS[preset.value] || PRESETS.D_SO_SD_11));
+    if(matchId.value.trim()) obj.match_id = matchId.value.trim();
+    return obj;
   }
 
-  const mid = String(matchId.value || '').trim();
-  if(mid) obj.match_id = mid;
-
-  // Normalize key name expected by the puck
-  // In your BLE code, phone sends: PROFILE_SELECT { "format":"SINGLES|DOUBLES", "scoring":"SIDEOUT|RALLY", ... }
-  obj.scoring = obj.scoring || obj.mode || 'SIDEOUT';
-  delete obj.mode;
-
+  // Preset mode
+  const p = PRESETS[preset.value] || PRESETS.D_SO_SD_11;
+  const obj = { ...p };
+  if(matchId.value.trim()) obj.match_id = matchId.value.trim();
   return obj;
 }
 
-// -------------------- BLE SEND helper --------------------
-async function bleSend(cmd, payloadObj=null){
-  if(!txChar) throw new Error('Not connected (TX characteristic missing).');
+// -------------------- BLE Helpers --------------------
+function enc(s){ return new TextEncoder().encode(String(s)); }
 
-  let msg = cmd;
-  if(payloadObj){
-    msg += ' ' + JSON.stringify(payloadObj);
-  }
+async function bleSend(command, payloadObj=null){
+  if(!txChar) throw new Error('Not connected / TX characteristic missing.');
+  const payload = payloadObj ? JSON.stringify(payloadObj) : '';
+  const line = payload ? `${command} ${payload}` : `${command}`;
+  incTx();
+  log(`→ ${line}`);
+  await txChar.writeValue(enc(line));
+}
 
-  const enc = new TextEncoder();
-  const data = enc.encode(msg);
+// -------------------- BLE Connect/Disconnect --------------------
+btnConnect.addEventListener('click', async () => {
+  hideBanner();
+  hadConnectFailure = false;
 
-  // Prefer writeWithoutResponse if available
-  const canWNR = txChar.properties.writeWithoutResponse;
   try{
-    if(canWNR){
-      await txChar.writeValueWithoutResponse(data);
-    }else{
-      await txChar.writeValue(data);
-    }
-    incTx();
-    log(`→ ${msg}`);
+    setReconnectPill('—');
+
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [BLE.SERVICE_UUID] }],
+      optionalServices: [BLE.SERVICE_UUID]
+    });
+
+    deviceNamePill.textContent = `Device: ${device.name || 'PlayPUCK'}`;
+
+    device.addEventListener('gattserverdisconnected', () => {
+      setConnectedUI(false);
+      log('Disconnected ❌');
+    });
+
+    server = await device.gatt.connect();
+    service = await server.getPrimaryService(BLE.SERVICE_UUID);
+
+    txChar = await service.getCharacteristic(BLE.TX_UUID);
+    rxChar = await service.getCharacteristic(BLE.RX_UUID);
+
+    await rxChar.startNotifications();
+    rxChar.addEventListener('characteristicvaluechanged', (e) => {
+      incRx();
+      const v = e.target.value;
+      const msg = new TextDecoder().decode(v);
+      log(`← ${msg}`);
+
+      // Parse STATE / GAME_OVER if present
+      if(msg.startsWith('STATE ')){
+        try{
+          const obj = JSON.parse(msg.slice(6));
+          // Some firmwares include {reason:"..."} inside STATE; keep it if present
+          lastState = { ...lastState, ...obj };
+          updateStateUI();
+        }catch(_){}
+      }else if(msg.startsWith('GAME_OVER ')){
+        try{
+          const obj = JSON.parse(msg.slice(10));
+          lastState.game_over = true;
+          lastState.winner = obj.winner;
+          lastState.a = obj.a;
+          lastState.b = obj.b;
+          updateStateUI();
+        }catch(_){}
+      }else{
+        // Some variants send ACK STATE {"reason":"..."} (not JSON state)
+        // No action required.
+      }
+    });
+
+    setConnectedUI(true);
+    log('Connected ✅');
+
+    // Optional: some firmwares support PING; web remote doesn’t need a UI for it.
+    // If the puck emits STATE on connect anyway, you're good.
+
   }catch(e){
-    throw e;
+    hadConnectFailure = true;
+    setConnectedUI(false);
+    showBanner(`<strong>Connection failed</strong><br>${e.message}`);
+    log(`Connect error: ${e.message}`);
   }
+});
+
+btnDisconnect.addEventListener('click', async () => {
+  try{
+    if(device?.gatt?.connected) device.gatt.disconnect();
+    setConnectedUI(false);
+    if(nfcActive) stopNfcScan();
+    log('Disconnected (manual)');
+  }catch(e){
+    log(`Disconnect error: ${e.message}`);
+  }
+});
+
+// -------------------- Connection UI --------------------
+function setConnectedUI(connected){
+  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
+  setDot(connected);
+
+  btnConnect.disabled = connected;
+  btnDisconnect.disabled = !connected;
+
+  btnSendWifi.disabled = !connected;
+  btnUploadProfile.disabled = !connected;
+  btnStartGame.disabled = !connected;
+
+  // Rally buttons are only enabled when connected AND not game_over.
+  btnScoreA.disabled = !connected || !!lastState.game_over;
+  btnScoreB.disabled = !connected || !!lastState.game_over;
+
+  btnAminus.disabled = !connected;
+  btnAplus.disabled  = !connected;
+  btnAset.disabled   = !connected;
+
+  btnBminus.disabled = !connected;
+  btnBplus.disabled  = !connected;
+  btnBset.disabled   = !connected;
+
+  btnCheckinManual.disabled = !connected;
+
+  btnTagRegister.disabled = !connected;
+  btnTagAssign.disabled   = !connected;
+  btnTagTap.disabled      = !connected;
+  btnTagClearTeams.disabled = !connected;
+  btnTagClearAll.disabled   = !connected;
+
+  const webNfcSupported = ('NDEFReader' in window);
+  btnNfcScan.disabled = !connected || !webNfcSupported;
+  btnNfcStop.disabled = !connected || !webNfcSupported || !nfcActive;
 }
 
-// -------------------- BLE RX parse --------------------
-function handleRxLine(line){
-  // line examples:
-  // "STATE {...}"
-  // "ACK SCORE {...}"
-  // "GAME_OVER {...}"
-  incRx();
-  log(`← ${line}`);
-
-  const s = String(line || '').trim();
-  if(!s) return;
-
-  if(s.startsWith('STATE ')){
-    try{
-      const json = JSON.parse(s.slice(6));
-      // Your puck sometimes sends STATE {"reason":"score",...} in the cleaned version.
-      // Accept either:
-      //   - old: STATE {...}
-      //   - new: STATE {"reason":"...","a":...}
-      lastState = Object.assign({}, lastState, json);
-      updateStateUI();
-    }catch(_){}
-  }
-
-  if(s.startsWith('GAME_OVER ')){
-    try{
-      const json = JSON.parse(s.slice(10));
-      const winner = json.winner || '—';
-      const a = json.a ?? lastState.a ?? 0;
-      const b = json.b ?? lastState.b ?? 0;
-      lastState.game_over = true;
-      lastState.winner = winner;
-      lastState.a = a; lastState.b = b;
-      updateStateUI();
-      setGameOverUI(true, winner, a, b);
-    }catch(_){}
-  }
-}
-
-// -------------------- NFC (Web NFC) --------------------
+// -------------------- NFC helpers --------------------
 function decodeRecordText(record){
-  const dec = new TextDecoder((record.encoding || 'utf-8'));
-  return dec.decode(record.data);
+  try{
+    const dec = new TextDecoder(record.encoding || 'utf-8');
+    return dec.decode(record.data);
+  }catch(_){
+    const dec = new TextDecoder('utf-8');
+    return dec.decode(record.data);
+  }
 }
 function tryExtractPlayerIdFromText(text){
   const t = String(text || '').trim();
@@ -1052,15 +1171,26 @@ btnCheckinManual.addEventListener('click', async () => {
   await sendCheckin(checkinPlayerId.value);
 });
 
-/* ---------- TAG TOOLS ---------- */
-btnTagBind.addEventListener('click', async () => {
+/* ---------- TAG TOOLS (ROLE BINDINGS) ---------- */
+btnTagRegister.addEventListener('click', async () => {
   const uid = normUid(tagUid.value);
-  const action = String(tagAction.value || '').trim();
-  if(!uid){ log('TAG_BIND: enter a UID first.'); return; }
+  const role = String(tagRole.value || '').trim();
+  if(!uid){ log('TAG_REGISTER: enter a UID first.'); return; }
   try{
-    await bleSend('TAG_BIND', { uid, action });
+    await bleSend('TAG_REGISTER', { uid, role });
   }catch(e){
-    log(`TAG_BIND error: ${e.message}`);
+    log(`TAG_REGISTER error: ${e.message}`);
+  }
+});
+
+btnTagAssign.addEventListener('click', async () => {
+  const uid = normUid(tagUid.value);
+  const team = String(tagTeam.value || '').trim(); // A|B|NONE
+  if(!uid){ log('TAG_ASSIGN: enter a UID first.'); return; }
+  try{
+    await bleSend('TAG_ASSIGN', { uid, team });
+  }catch(e){
+    log(`TAG_ASSIGN error: ${e.message}`);
   }
 });
 
@@ -1074,12 +1204,22 @@ btnTagTap.addEventListener('click', async () => {
   }
 });
 
-btnTagClear.addEventListener('click', async () => {
+btnTagClearTeams.addEventListener('click', async () => {
   try{
-    await bleSend('TAG_CLEAR', { all: true });
-    tagSeq = 1;
+    await bleSend('TAG_CLEAR_TEAMS', { all: true });
+    log('Cleared team assignments.');
   }catch(e){
-    log(`TAG_CLEAR error: ${e.message}`);
+    log(`TAG_CLEAR_TEAMS error: ${e.message}`);
+  }
+});
+
+btnTagClearAll.addEventListener('click', async () => {
+  try{
+    await bleSend('TAG_CLEAR_ALL', { all: true });
+    tagSeq = 1;
+    log('Cleared ALL tag roles + team assignments.');
+  }catch(e){
+    log(`TAG_CLEAR_ALL error: ${e.message}`);
   }
 });
 
@@ -1141,6 +1281,13 @@ btnNfcStop.addEventListener('click', async () => {
   setNfcStatus('NFC stopped.');
   setConnectedUI(!!txChar);
 });
+
+function stopNfcScan(){
+  nfcActive = false;
+  nfcReader = null;
+  setNfcStatus('NFC stopped.');
+  setConnectedUI(!!txChar);
+}
 
 // -------------------- BUTTON actions --------------------
 btnSendWifi.addEventListener('click', async () => {
@@ -1209,143 +1356,14 @@ btnBset.addEventListener('click', async () => {
   try{ await bleSend('SCORE_SET', { team:'B', value:v }); }catch(e){}
 });
 
-// -------------------- Connection UI --------------------
-function setConnectedUI(connected){
-  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
-  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
-  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
-  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
-
-  if(connected){
-    btnConnect.className = 'secondary';
-    btnConnect.disabled = true;
-
-    btnDisconnect.className = 'accent';
-    btnDisconnect.disabled = false;
-
-    hideBanner();
-    hadConnectFailure = false;
-    setReconnectPill('—');
-  }else{
-    btnConnect.className = 'accent';
-    btnConnect.disabled = false;
-
-    btnDisconnect.className = 'secondary';
-    btnDisconnect.disabled = true;
-
-    if(hadConnectFailure){
-      if(!bleBanner.innerHTML){
-        showBanner(`<strong>Connection failed</strong><br>Try again.`);
-      }
-    }else{
-      hideBanner();
-    }
-  }
-
-  btnSendWifi.disabled = !connected;
-  btnUploadProfile.disabled = !connected;
-  btnStartGame.disabled = !connected;
-
-  // Rally buttons are only enabled when connected AND not game_over.
-  btnScoreA.disabled = !connected || !!lastState.game_over;
-  btnScoreB.disabled = !connected || !!lastState.game_over;
-
-  btnAminus.disabled = !connected;
-  btnAplus.disabled  = !connected;
-  btnAset.disabled   = !connected;
-
-  btnBminus.disabled = !connected;
-  btnBplus.disabled  = !connected;
-  btnBset.disabled   = !connected;
-
-  btnCheckinManual.disabled = !connected;
-  btnTagBind.disabled = !connected;
-  btnTagTap.disabled  = !connected;
-  btnTagClear.disabled = !connected;
-
-
-  const webNfcSupported = ('NDEFReader' in window);
-  btnNfcScan.disabled = !(connected && webNfcSupported);
-  btnNfcStop.disabled = !nfcActive;
-
-  if(!connected){
-    // If disconnected, don't show stale game over banner
-    // (leave scores visible, but hide banner)
-    setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
-  }
-}
-
-// -------------------- BLE CONNECT / DISCONNECT --------------------
-btnConnect.addEventListener('click', async () => {
-  try{
-    hideBanner();
-    hadConnectFailure = false;
-
-    log('Requesting BLE device…');
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [BLE.SERVICE_UUID] }],
-      optionalServices: [BLE.SERVICE_UUID]
-    });
-
-    deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
-
-    device.addEventListener('gattserverdisconnected', async () => {
-      setDot(false);
-      setConnectedUI(false);
-      log('Disconnected ❌');
-
-      // optional auto reconnect? keep it manual for safety
-      setReconnectPill('tap Connect');
-    });
-
-    server = await device.gatt.connect();
-    service = await server.getPrimaryService(BLE.SERVICE_UUID);
-
-    txChar = await service.getCharacteristic(BLE.TX_UUID);
-    rxChar = await service.getCharacteristic(BLE.RX_UUID);
-
-    rxChar.addEventListener('characteristicvaluechanged', (event) => {
-      const v = event.target.value;
-      const dec = new TextDecoder('utf-8');
-      const line = dec.decode(v);
-      handleRxLine(line);
-    });
-    await rxChar.startNotifications();
-
-    setDot(true);
-    setConnectedUI(true);
-    log('Connected ✅');
-
-    // Try a PING to prompt a STATE snapshot if the puck supports it.
-    try{
-      await bleSend('PING');
-    }catch(_){}
-
-  }catch(e){
-    hadConnectFailure = true;
-    setDot(false);
-    setConnectedUI(false);
-    showBanner(`<strong>Couldn’t connect</strong><br>${e.message}<br><span style="opacity:.85">Tip: Use Chrome/Edge and make sure Bluetooth is on.</span>`);
-    log(`Connect error: ${e.message}`);
-  }
-});
-
-btnDisconnect.addEventListener('click', async () => {
-  try{
-    if(device && device.gatt && device.gatt.connected){
-      device.gatt.disconnect();
-    }
-  }catch(_){}
-  txChar = null; rxChar = null; service = null; server = null;
-  setDot(false);
-  setConnectedUI(false);
-  log('Disconnected (manual).');
-});
-
-// Init
-setDot(false);
+// Initial
 setConnectedUI(false);
-updateStateUI();
+setReconnectPill('—');
+infoServe.textContent = '—';
+infoMode.textContent = '—';
+infoProfile.textContent = '—';
+infoWin.textContent = '—';
+log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
