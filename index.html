@@ -1407,7 +1407,7 @@ btnSendWifi.addEventListener('click', async () => {
     const ssid = wifiSsid.value.trim();
     const pass = wifiPass.value;
     if(!ssid) return log('Enter Wi-Fi SSID first.');
-    await bleSend('WIFI_SET', { ssid, pass });
+    await bleSend('WIFI', { ssid, pass });
   }catch(e){
     log(`Wi-Fi send error: ${e.message}`);
   }
@@ -1491,3 +1491,4 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
