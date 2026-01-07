@@ -352,6 +352,27 @@
     }
     .tick svg{ width:14px;height:14px;stroke:var(--success);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round; }
 
+    /* Small checkbox row */
+    .checkRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+    }
+    .checkRow input[type="checkbox"]{
+      width:20px;height:20px;
+      margin:0;
+      accent-color: var(--accent);
+    }
+    .checkRow span{
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
     @media (max-width: 460px){
       .twoCol, .threeCol{ grid-template-columns: 1fr; }
       .scoreboard{ grid-template-columns: 1fr; }
@@ -393,6 +414,16 @@
           <span class="pill" id="reconnectPill">Reconnect: —</span>
         </div>
 
+        <div style="margin-top:10px;">
+          <div class="checkRow">
+            <input id="autoReconnect" type="checkbox" checked>
+            <span>Auto-reconnect BLE (recommended)</span>
+          </div>
+          <div class="hint">
+            If OFF, the portal will not auto-reconnect after a drop or when the browser/tab returns to the foreground.
+          </div>
+        </div>
+
         <p class="hint">
           Note: Web Bluetooth availability varies by phone/browser.
           PlayPUCK supports <b>one BLE connection at a time</b> — if you used <b>nRF Connect</b>, disconnect and force-close it.
@@ -405,12 +436,24 @@
       <div class="cardHeader">
         <div>
           <h2>Wi-Fi set up</h2>
-          <p>Send SSID + password to the PlayPUCK.</p>
+          <p>Send SSID + password to the PlayPUCK. You can save known networks on this device.</p>
         </div>
         <div class="stepBadge">1</div>
       </div>
       <div class="cardBody">
-        <div class="twoCol">
+
+        <div>
+          <label for="savedWifi">Saved networks</label>
+          <select id="savedWifi">
+            <option value="" selected>— Select a saved SSID —</option>
+          </select>
+          <div class="hint">
+            Saved Wi-Fi is stored in <b>localStorage</b> on this device/browser.
+            ⚠️ Passwords stored here are not secure on shared devices.
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
           <div>
             <label for="wifiSsid">Wi-Fi SSID</label>
             <input id="wifiSsid" autocomplete="username" placeholder="e.g. HomeWiFi">
@@ -422,9 +465,23 @@
         </div>
 
         <div style="margin-top:10px;">
-          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to PlayPUCK</button>
-          <div class="hint">Sends <b>WIFI_SET</b> with payload <code>{"ssid","pass"}</code>.</div>
+          <div class="checkRow">
+            <input id="showWifiPass" type="checkbox">
+            <span>Show password characters</span>
+          </div>
         </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <button id="btnSendWifi" class="good" disabled>Send Wi-Fi to PlayPUCK</button>
+          <button id="btnSaveWifi" class="secondary">Save / Update Wi-Fi</button>
+        </div>
+
+        <div class="twoCol" style="margin-top:10px;">
+          <button id="btnForgetWifi" class="warn">Forget selected SSID</button>
+          <button id="btnClearWifi" class="danger">Clear ALL saved Wi-Fi</button>
+        </div>
+
+        <div class="hint">Sends <b>WIFI</b> with payload <code>{"ssid","pass"}</code>.</div>
       </div>
     </section>
 
@@ -610,17 +667,23 @@
       </div>
     </section>
 
-    <!-- 4) START -->
+    <!-- 4) START / END -->
     <section class="card" id="cardStart">
       <div class="cardHeader">
         <div>
-          <h2>Start game</h2>
-          <p>Tell the PlayPUCK to start the match (START_GAME).</p>
+          <h2>Start / End game</h2>
+          <p>Start (START_GAME) or end (END_GAME) the match.</p>
         </div>
         <div class="stepBadge">4</div>
       </div>
       <div class="cardBody">
-        <button id="btnStartGame" class="good" disabled>Start game</button>
+        <div class="twoCol">
+          <button id="btnStartGame" class="good" disabled>Start game</button>
+          <button id="btnEndGame" class="danger" disabled>End game</button>
+        </div>
+        <div class="hint">
+          End game sends <b>END_GAME</b>. (Firmware must implement it; puck remains authoritative.)
+        </div>
       </div>
     </section>
 
@@ -751,7 +814,6 @@ const toastText = el('toastText');
 
 function log(msg){
   const ts = new Date().toLocaleTimeString();
-  // newest at top (as your current remote does)
   logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
 }
 function showToast(t){
@@ -784,10 +846,16 @@ function looksLikeBleBusy(errMsg){
 
 const btnConnect = el('btnConnect');
 const btnDisconnect = el('btnDisconnect');
+const autoReconnect = el('autoReconnect');
 
+const savedWifi = el('savedWifi');
 const wifiSsid = el('wifiSsid');
 const wifiPass = el('wifiPass');
+const showWifiPass = el('showWifiPass');
 const btnSendWifi = el('btnSendWifi');
+const btnSaveWifi = el('btnSaveWifi');
+const btnForgetWifi = el('btnForgetWifi');
+const btnClearWifi = el('btnClearWifi');
 
 const matchType = el('matchType');
 const scoringMode = el('scoringMode');
@@ -799,6 +867,7 @@ const matchJson = el('matchJson');
 
 const btnUploadProfile = el('btnUploadProfile');
 const btnStartGame = el('btnStartGame');
+const btnEndGame = el('btnEndGame');
 
 const btnScoreA = el('btnScoreA');
 const btnScoreB = el('btnScoreB');
@@ -858,7 +927,133 @@ let reconnectTimer = null;
 let reconnectBackoffMs = 900;
 const reconnectBackoffMaxMs = 12000;
 
-/* -------------------- LAST STATE (AUTHORITATIVE FROM PUCK) -------------------- */
+/* ---------- localStorage keys ---------- */
+const LS_WIFI_KEY = 'playpuck_wifi_saved_v1';
+const LS_STATE_KEY = 'playpuck_last_state_v1';
+const LS_AUTORECON_KEY = 'playpuck_auto_reconnect_v1';
+
+function safeJsonParse(s, fallback){
+  try{ return JSON.parse(s); }catch(_){ return fallback; }
+}
+
+/* ---------- Saved Wi-Fi ---------- */
+function loadSavedWifi(){
+  const arr = safeJsonParse(localStorage.getItem(LS_WIFI_KEY) || '[]', []);
+  return Array.isArray(arr) ? arr : [];
+}
+function saveSavedWifi(arr){
+  localStorage.setItem(LS_WIFI_KEY, JSON.stringify(arr || []));
+}
+function renderSavedWifiDropdown(selectedSsid=''){
+  const arr = loadSavedWifi()
+    .slice()
+    .sort((a,b)=>String(a.ssid||'').localeCompare(String(b.ssid||'')));
+
+  // rebuild options
+  savedWifi.innerHTML = '';
+  const opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '— Select a saved SSID —';
+  savedWifi.appendChild(opt0);
+
+  for(const item of arr){
+    const ssid = String(item.ssid || '');
+    if(!ssid) continue;
+    const o = document.createElement('option');
+    o.value = ssid;
+    o.textContent = ssid;
+    if(selectedSsid && selectedSsid === ssid) o.selected = true;
+    savedWifi.appendChild(o);
+  }
+}
+function upsertWifi(ssid, pass){
+  ssid = String(ssid||'').trim();
+  pass = String(pass||'');
+  if(!ssid) throw new Error('SSID is empty.');
+
+  const arr = loadSavedWifi();
+  const idx = arr.findIndex(x => String(x.ssid||'') === ssid);
+  const entry = { ssid, pass, updated_at: Date.now() };
+
+  if(idx >= 0) arr[idx] = entry;
+  else arr.push(entry);
+
+  saveSavedWifi(arr);
+  renderSavedWifiDropdown(ssid);
+}
+function forgetWifi(ssid){
+  ssid = String(ssid||'').trim();
+  if(!ssid) return;
+  const arr = loadSavedWifi().filter(x => String(x.ssid||'') !== ssid);
+  saveSavedWifi(arr);
+  renderSavedWifiDropdown('');
+}
+function clearAllWifi(){
+  saveSavedWifi([]);
+  renderSavedWifiDropdown('');
+}
+
+savedWifi.addEventListener('change', () => {
+  const ssid = savedWifi.value;
+  if(!ssid) return;
+  const arr = loadSavedWifi();
+  const found = arr.find(x => String(x.ssid||'') === ssid);
+  if(found){
+    wifiSsid.value = String(found.ssid||'');
+    wifiPass.value = String(found.pass||'');
+    log(`Loaded saved Wi-Fi: ${ssid}`);
+  }
+});
+
+btnSaveWifi.addEventListener('click', () => {
+  try{
+    upsertWifi(wifiSsid.value, wifiPass.value);
+    showToast('Saved Wi-Fi ✅');
+    log(`Saved Wi-Fi: ${wifiSsid.value.trim()}`);
+  }catch(e){
+    log(`Save Wi-Fi error: ${e.message}`);
+  }
+});
+btnForgetWifi.addEventListener('click', () => {
+  const ssid = savedWifi.value || wifiSsid.value.trim();
+  if(!ssid) return log('Forget Wi-Fi: select or enter an SSID first.');
+  forgetWifi(ssid);
+  showToast('Forgot Wi-Fi');
+  log(`Forgot saved Wi-Fi: ${ssid}`);
+});
+btnClearWifi.addEventListener('click', () => {
+  clearAllWifi();
+  showToast('Cleared Wi-Fi');
+  log('Cleared ALL saved Wi-Fi.');
+});
+
+showWifiPass.addEventListener('change', () => {
+  wifiPass.type = showWifiPass.checked ? 'text' : 'password';
+});
+
+/* ---------- Auto-reconnect toggle persistence ---------- */
+function loadAutoReconnect(){
+  const v = localStorage.getItem(LS_AUTORECON_KEY);
+  if(v === null) return true; // default ON
+  return v === '1';
+}
+function saveAutoReconnect(v){
+  localStorage.setItem(LS_AUTORECON_KEY, v ? '1' : '0');
+}
+autoReconnect.checked = loadAutoReconnect();
+autoReconnect.addEventListener('change', () => {
+  saveAutoReconnect(autoReconnect.checked);
+  if(!autoReconnect.checked){
+    resetReconnect();
+    setReconnectPill('OFF');
+    log('Auto-reconnect disabled.');
+  }else{
+    setReconnectPill('—');
+    log('Auto-reconnect enabled.');
+  }
+});
+
+/* ---------- Local view-model ONLY (comes from STATE) ---------- */
 let lastState = {
   a: 0, b: 0,
   serving: null,
@@ -871,28 +1066,15 @@ let lastState = {
   winner: null
 };
 
-/* -------------------- PERSIST LAST STATE -------------------- */
-const LAST_STATE_KEY = 'playpuck_last_state_v1';
-
-function saveLastState(){
+function persistLastState(){
   try{
-    localStorage.setItem(LAST_STATE_KEY, JSON.stringify(lastState));
+    localStorage.setItem(LS_STATE_KEY, JSON.stringify(lastState));
   }catch(_){}
 }
-
-function loadLastState(){
-  try{
-    const raw = localStorage.getItem(LAST_STATE_KEY);
-    if(!raw) return false;
-    const obj = JSON.parse(raw);
-    if(!obj || typeof obj !== 'object') return false;
-    // Shallow merge only known keys
-    for(const k of Object.keys(lastState)){
-      if(k in obj) lastState[k] = obj[k];
-    }
-    return true;
-  }catch(_){
-    return false;
+function restoreLastState(){
+  const obj = safeJsonParse(localStorage.getItem(LS_STATE_KEY) || 'null', null);
+  if(obj && typeof obj === 'object'){
+    lastState = Object.assign({}, lastState, obj);
   }
 }
 
@@ -934,13 +1116,9 @@ function renderStateUI(){
   setScore(lastState.a ?? 0, lastState.b ?? 0);
 
   infoServe.textContent = lastState.serving ? `Serve: ${lastState.serving}` : 'Serve: —';
-  infoServerNum.textContent = (typeof lastState.server_num === 'number' && lastState.server_num > 0)
-    ? `Server: ${lastState.server_num}`
-    : 'Server: —';
+  infoServerNum.textContent = lastState.server_num ? `Server: ${lastState.server_num}` : 'Server: —';
   infoMode.textContent = lastState.mode ? `Mode: ${lastState.mode}` : 'Mode: —';
-  infoTarget.textContent = (typeof lastState.win_points === 'number')
-    ? `First to: ${lastState.win_points}`
-    : 'First to: —';
+  infoTarget.textContent = lastState.win_points ? `First to: ${lastState.win_points}` : 'First to: —';
 
   setGameOverUI(!!lastState.game_over, (lastState.winner || null), lastState.a ?? 0, lastState.b ?? 0);
 
@@ -950,59 +1128,9 @@ function renderStateUI(){
   }
 }
 
-/* -------------------- RX ROBUST BUFFERING --------------------
-   WebBluetooth notifications can arrive:
-   - split across multiple packets
-   - multiple messages in one packet
-   - with or without newlines
-   We buffer and split.
----------------------------------------------------------------- */
-const _rxDecoder = new TextDecoder('utf-8');
-let _rxBuf = '';
-
-function feedRxText(chunk){
-  if(!chunk) return;
-  _rxBuf += chunk;
-  _rxBuf = _rxBuf.replace(/\r/g, '');
-
-  // 1) newline split
-  let nl;
-  while((nl = _rxBuf.indexOf('\n')) >= 0){
-    const line = _rxBuf.slice(0, nl).trim();
-    _rxBuf = _rxBuf.slice(nl + 1);
-    if(line){
-      log(`← ${line}`);
-      parseRx(line);
-    }
-  }
-
-  // 2) heuristic: complete JSON line with no newline
-  const t = _rxBuf.trim();
-  if((t.startsWith('STATE ') || t.startsWith('GAME_OVER ') || t.startsWith('ACK ')) && t.endsWith('}')){
-    _rxBuf = '';
-    log(`← ${t}`);
-    parseRx(t);
-  }
-}
-
 function parseRx(text){
   try{
-    /* -------- HARDEN: split multi-lines / concatenated packets -------- */
-    const raw = String(text || '');
-    if(raw.includes('\n')){
-      raw.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line => parseRx(line));
-      return;
-    }
-    if(
-      ((raw.match(/STATE /g) || []).length +
-       (raw.match(/GAME_OVER /g) || []).length +
-       (raw.match(/ACK /g) || []).length) > 1
-    ){
-      raw.split(/(?=STATE |GAME_OVER |ACK )/g).map(s=>s.trim()).filter(Boolean).forEach(part => parseRx(part));
-      return;
-    }
-
-    const trimmed = raw.trim();
+    const trimmed = text.trim();
     const sp = trimmed.indexOf(' ');
     const cmd = sp >= 0 ? trimmed.slice(0, sp) : trimmed;
     const json = sp >= 0 ? trimmed.slice(sp + 1) : '';
@@ -1023,7 +1151,7 @@ function parseRx(text){
       if(!lastState.game_over) lastState.winner = null;
 
       renderStateUI();
-      saveLastState();   // ✅ persist latest authoritative state
+      persistLastState();
       return;
     }
 
@@ -1035,7 +1163,8 @@ function parseRx(text){
       lastState.game_over = true;
 
       renderStateUI();
-      saveLastState();   // ✅ persist game-over state
+      persistLastState();
+
       vibrate([80,40,80,40,200]);
       showToast(`Game Over — ${lastState.winner || ''}`);
       return;
@@ -1158,7 +1287,6 @@ async function startNfcScan(){
         }
 
         if(!playerId){
-          // fallback: use serialNumber if available
           if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
         }
 
@@ -1274,6 +1402,10 @@ function resetReconnect(){
   }
 }
 function scheduleReconnect(reason){
+  if(!autoReconnect.checked){
+    setReconnectPill('OFF');
+    return;
+  }
   if(reconnectTimer) return;
   if(!device){
     setReconnectPill('—');
@@ -1303,15 +1435,11 @@ async function connectWithExistingDevice(label){
 
   try{
     await rxChar.startNotifications();
-
-    // IMPORTANT: remove any prior listeners when reconnecting (safety)
-    // We can’t reliably remove anonymous listeners, but we can avoid duplicates
-    // by using a named handler and re-adding once after startNotifications.
     rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-      const chunk = _rxDecoder.decode(ev.target.value);
-      feedRxText(chunk);
+      const txt = new TextDecoder().decode(ev.target.value);
+      log(`← ${txt}`);
+      parseRx(txt);
     });
-
   }catch(e){
     log(`RX notifications not enabled: ${e.message}`);
   }
@@ -1322,12 +1450,12 @@ async function connectWithExistingDevice(label){
   vibrate([40,30,40]);
   resetReconnect();
 
-  // Ask puck for a state snapshot (optional)
   try{ await bleSend('PING'); }catch(_){}
 }
 
 async function tryReconnect(fromTimer){
   try{
+    if(!autoReconnect.checked) return;
     if(!device) return;
     if(device.gatt?.connected) return;
     await connectWithExistingDevice(fromTimer ? 'auto' : 'reconnect');
@@ -1358,7 +1486,9 @@ function setConnectedUI(connected){
 
     hideBanner();
     hadConnectFailure = false;
-    setReconnectPill('—');
+
+    if(autoReconnect.checked) setReconnectPill('—');
+    else setReconnectPill('OFF');
   }else{
     btnConnect.className = 'accent';
     btnConnect.disabled = false;
@@ -1378,6 +1508,7 @@ function setConnectedUI(connected){
   btnSendWifi.disabled = !connected;
   btnUploadProfile.disabled = !connected;
   btnStartGame.disabled = !connected;
+  btnEndGame.disabled = !connected;
 
   btnScoreA.disabled = !connected || !!lastState.game_over;
   btnScoreB.disabled = !connected || !!lastState.game_over;
@@ -1404,7 +1535,7 @@ function setConnectedUI(connected){
   btnNfcStop.disabled = !nfcActive;
 
   if(!connected){
-    setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
+    setGameOverUI(!!lastState.game_over, lastState.winner || null, lastState.a ?? 0, lastState.b ?? 0);
   }
 }
 
@@ -1470,7 +1601,7 @@ btnConnect.addEventListener('click', async () => {
 btnDisconnect.addEventListener('click', async () => {
   try{
     resetReconnect();
-    setReconnectPill('—');
+    setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
 
     if(device?.gatt?.connected) device.gatt.disconnect();
     vibrate([50,20,50]);
@@ -1482,7 +1613,7 @@ btnDisconnect.addEventListener('click', async () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible' && device && !device.gatt?.connected){
+  if(document.visibilityState === 'visible' && autoReconnect.checked && device && !device.gatt?.connected){
     tryReconnect(false);
   }
 });
@@ -1513,10 +1644,19 @@ btnStartGame.addEventListener('click', async () => {
     lastState.game_over = false;
     lastState.winner = null;
     setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
-    saveLastState(); // ✅ persist reset
+    persistLastState();
     await bleSend('START_GAME');
   }catch(e){
     log(`Start error: ${e.message}`);
+  }
+});
+
+btnEndGame.addEventListener('click', async () => {
+  try{
+    await bleSend('END_GAME');
+    showToast('Sent END_GAME');
+  }catch(e){
+    log(`End game error: ${e.message}`);
   }
 });
 
@@ -1567,21 +1707,14 @@ btnBset.addEventListener('click', async () => {
   }catch(e){ log(`B set error: ${e.message}`); }
 });
 
-/* -------------------- INITIAL -------------------- */
-setConnectedUI(false);
-setReconnectPill('—');
-infoServe.textContent = 'Serve: —';
-infoServerNum.textContent = 'Server: —';
-infoMode.textContent = 'Mode: —';
-infoTarget.textContent = 'First to: —';
+/* ---------- Boot ---------- */
+renderSavedWifiDropdown('');
+restoreLastState();
+renderStateUI();
 
-// ✅ Restore last known state immediately (even before BLE connect)
-if(loadLastState()){
-  renderStateUI();
-  log('Restored last state from localStorage.');
-} else {
-  log('Ready. Connect to a PlayPUCK to begin.');
-}
+setConnectedUI(false);
+setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
+log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
