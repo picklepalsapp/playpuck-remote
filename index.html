@@ -1653,10 +1653,10 @@ btnConnect.addEventListener('click', async () => {
     hadConnectFailure = false;
 
     log('Requesting BLE device…');
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [BLE.SERVICE_UUID] }],
-      optionalServices: [BLE.SERVICE_UUID]
-    });
+device = await navigator.bluetooth.requestDevice({
+  acceptAllDevices: true,
+  optionalServices: [0xFFFF]
+});
 
     deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
