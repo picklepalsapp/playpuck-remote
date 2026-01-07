@@ -484,7 +484,7 @@
       <div class="cardHeader">
         <div>
           <h2>Match selection</h2>
-          <p>Choose rules/preset before uploading to the PlayPUCK.</p>
+          <p>Choose rules/preset. Use Step 3 to upload (pre-game) or use the mid-game apply button during a live match.</p>
         </div>
         <div class="stepBadge">2</div>
       </div>
@@ -551,10 +551,10 @@
           <div class="hint">If override is ON, this JSON is uploaded exactly (plus match_id if provided).</div>
         </div>
 
-        <!-- ✅ NEW: Pause + Mid-match apply -->
+        <!-- Pause + Mid-match apply -->
         <div style="margin-top:10px;">
           <div class="twoCol">
-            <button id="btnApplyProfileMidMatch" class="warn" disabled>Apply match/rules update now</button>
+            <button id="btnApplyProfileMidMatch" class="warn" disabled>Apply rules update (mid-game)</button>
             <button id="btnPauseToggle" class="secondary" disabled>Pause game</button>
           </div>
 
@@ -569,9 +569,9 @@
           </div>
 
           <div class="hint">
-            Applies rules mid-match by sending <b>PROFILE_SELECT</b> again.
-            If auto-pause is enabled: <code>PAUSE_GAME → PROFILE_SELECT → RESUME_GAME</code>.
-            (Portal pause lock still works even if firmware does not implement PAUSE/RESUME yet.)
+            <b>Mid-game apply</b> sends <b>PROFILE_SELECT</b> again (does not reset scores).<br>
+            If auto-pause is enabled: <code>PAUSE_GAME → PROFILE_SELECT → RESUME_GAME</code>.<br>
+            <b>Pause state is authoritative from the puck</b> via <code>STATE {"paused":...}</code>.
           </div>
         </div>
       </div>
@@ -609,7 +609,7 @@
       </div>
     </section>
 
-    <!-- 2.6) TAG TOOLS (ROLE BINDINGS) -->
+    <!-- 2.6) TAG TOOLS -->
     <section class="card" id="cardTags">
       <div class="cardHeader">
         <div>
@@ -671,17 +671,20 @@
       </div>
     </section>
 
-    <!-- 3) UPLOAD -->
+    <!-- 3) UPLOAD (pre-game) -->
     <section class="card" id="cardUpload">
       <div class="cardHeader">
         <div>
-          <h2>Upload to PlayPUCK</h2>
-          <p>Send match profile to the PlayPUCK (PROFILE_SELECT).</p>
+          <h2>Upload match (pre-game)</h2>
+          <p>
+            Sends the selected match profile to the PlayPUCK (<b>PROFILE_SELECT</b>) before you press <b>Start game</b>.
+            Use “Apply rules update (mid-game)” only if you must change rules during a live match.
+          </p>
         </div>
         <div class="stepBadge">3</div>
       </div>
       <div class="cardBody">
-        <button id="btnUploadProfile" class="accent" disabled>Upload match to PlayPUCK</button>
+        <button id="btnUploadProfile" class="accent" disabled>Upload match to PlayPUCK (PROFILE_SELECT)</button>
       </div>
     </section>
 
@@ -746,8 +749,8 @@
         </div>
 
         <div class="hint">
-          Buttons send <b>SCORE</b> with payload <code>{"team":"A|B","delta":1}</code> meaning:
-          <b>“Team won the rally”</b>. The puck applies SIDEOUT/RALLY rules and notifies STATE/GAME_OVER.
+          Buttons send <b>SCORE</b> with payload <code>{"team":"A|B","delta":1}</code>.
+          The puck applies SIDEOUT/RALLY rules and notifies STATE/GAME_OVER.
         </div>
       </div>
     </section>
@@ -757,7 +760,7 @@
       <div class="cardHeader">
         <div>
           <h2>Edit score</h2>
-          <p>Admin correction (puck stays authoritative).</p>
+          <p>Admin correction (puck stays authoritative). Locked while paused.</p>
         </div>
         <div class="stepBadge">6</div>
       </div>
@@ -931,7 +934,7 @@ const infoServerNum = el('infoServerNum');
 const infoMode = el('infoMode');
 const infoTarget = el('infoTarget');
 
-// ✅ NEW: pause UI
+// Pause UI (authoritative from puck STATE.paused)
 const btnPauseToggle = el('btnPauseToggle');
 const pausePill = el('pausePill');
 const infoPaused = el('infoPaused');
@@ -1077,7 +1080,7 @@ autoReconnect.addEventListener('change', () => {
   }
 });
 
-/* ---------- Local view-model ONLY (comes from STATE) ---------- */
+/* ---------- Local view-model (comes from STATE) ---------- */
 let lastState = {
   a: 0, b: 0,
   serving: null,
@@ -1086,6 +1089,7 @@ let lastState = {
   format: null,
   win_points: null,
   win_rule: null,
+  paused: false,      // ✅ authoritative pause
   game_over: false,
   winner: null
 };
@@ -1099,6 +1103,9 @@ function restoreLastState(){
   const obj = safeJsonParse(localStorage.getItem(LS_STATE_KEY) || 'null', null);
   if(obj && typeof obj === 'object'){
     lastState = Object.assign({}, lastState, obj);
+    // harden types
+    lastState.paused = !!lastState.paused;
+    lastState.game_over = !!lastState.game_over;
   }
 }
 
@@ -1134,11 +1141,10 @@ function setGameOverUI(isOver, winner, a, b){
   }
 }
 
-/* ---------- ✅ Pause (portal lock) ---------- */
-let paused = false;
-
+/* ---------- Pause UI (authoritative) ---------- */
 function renderPauseUI(){
   if(!pausePill || !infoPaused || !btnPauseToggle) return;
+  const paused = !!lastState.paused;
   const txt = paused ? 'ON' : 'OFF';
   pausePill.textContent = `Pause: ${txt}`;
   infoPaused.textContent = `Paused: ${txt}`;
@@ -1147,35 +1153,26 @@ function renderPauseUI(){
   btnPauseToggle.className = paused ? 'good' : 'secondary';
 }
 
-async function setPaused(nextPaused, reason){
-  paused = !!nextPaused;
-  renderPauseUI();
-  renderStateUI();
-
+btnPauseToggle.addEventListener('click', async () => {
   if(!txChar){
-    log(`Pause toggled locally (${paused ? 'PAUSED' : 'UNPAUSED'}) — not connected.`);
+    log('Pause toggle: not connected.');
     return;
   }
-
   try{
+    const paused = !!lastState.paused;
     if(paused){
-      await bleSend('PAUSE_GAME');
-      log(`Pause requested (${reason || 'manual'}).`);
-      showToast('Paused');
-      vibrate([40,30,40]);
-    }else{
       await bleSend('RESUME_GAME');
-      log(`Resume requested (${reason || 'manual'}).`);
-      showToast('Live');
+      showToast('Resume sent');
       vibrate([30,40,30]);
+    }else{
+      await bleSend('PAUSE_GAME');
+      showToast('Pause sent');
+      vibrate([40,30,40]);
     }
+    // UI updates when next STATE arrives (authoritative)
   }catch(e){
-    log(`Pause cmd send error (still ${paused ? 'PAUSED' : 'UNPAUSED'} locally): ${e.message}`);
+    log(`Pause cmd send error: ${e.message}`);
   }
-}
-
-btnPauseToggle.addEventListener('click', async () => {
-  await setPaused(!paused, 'toggle');
 });
 
 /* ---------- Render state ---------- */
@@ -1189,22 +1186,24 @@ function renderStateUI(){
 
   setGameOverUI(!!lastState.game_over, (lastState.winner || null), lastState.a ?? 0, lastState.b ?? 0);
 
-  const canAct = !!txChar && !lastState.game_over && !paused;
+  const isPaused = !!lastState.paused;
+  const canScore = !!txChar && !lastState.game_over && !isPaused;
 
-  btnScoreA.disabled = !canAct;
-  btnScoreB.disabled = !canAct;
+  btnScoreA.disabled = !canScore;
+  btnScoreB.disabled = !canScore;
 
-  // edit score should be locked while paused too
-  btnAminus.disabled = !(!!txChar && !paused);
-  btnAplus.disabled  = !(!!txChar && !paused);
-  btnAset.disabled   = !(!!txChar && !paused);
+  // edit score locked while paused or game over
+  const canEdit = !!txChar && !isPaused && !lastState.game_over;
+  btnAminus.disabled = !canEdit;
+  btnAplus.disabled  = !canEdit;
+  btnAset.disabled   = !canEdit;
 
-  btnBminus.disabled = !(!!txChar && !paused);
-  btnBplus.disabled  = !(!!txChar && !paused);
-  btnBset.disabled   = !(!!txChar && !paused);
+  btnBminus.disabled = !canEdit;
+  btnBplus.disabled  = !canEdit;
+  btnBset.disabled   = !canEdit;
 
-  // TAG_TAP locked when paused
-  btnTagTap.disabled = !(!!txChar && !paused);
+  // TAG_TAP locked when paused or game over
+  btnTagTap.disabled = !(!!txChar && !isPaused && !lastState.game_over);
 
   renderPauseUI();
 }
@@ -1219,14 +1218,15 @@ function parseRx(text){
     if(cmd === 'STATE' && json){
       const obj = JSON.parse(json);
 
-      lastState.a = (typeof obj.a === 'number') ? obj.a : lastState.a;
-      lastState.b = (typeof obj.b === 'number') ? obj.b : lastState.b;
+      if(typeof obj.a === 'number') lastState.a = obj.a;
+      if(typeof obj.b === 'number') lastState.b = obj.b;
       if(typeof obj.serving === 'string') lastState.serving = obj.serving;
       if(typeof obj.server_num === 'number') lastState.server_num = obj.server_num;
       if(typeof obj.mode === 'string') lastState.mode = obj.mode;
       if(typeof obj.format === 'string') lastState.format = obj.format;
       if(typeof obj.win_points === 'number') lastState.win_points = obj.win_points;
       if(typeof obj.win_rule === 'string') lastState.win_rule = obj.win_rule;
+      if(typeof obj.paused === 'boolean') lastState.paused = obj.paused;     // ✅ authoritative pause
       if(typeof obj.game_over === 'boolean') lastState.game_over = obj.game_over;
 
       if(!lastState.game_over) lastState.winner = null;
@@ -1250,8 +1250,6 @@ function parseRx(text){
       showToast(`Game Over — ${lastState.winner || ''}`);
       return;
     }
-
-    // If later firmware sends something like STATE {"paused":true}, we can wire it in here.
 
   }catch(_){ /* ignore */ }
 }
@@ -1287,7 +1285,7 @@ function syncJsonPreview(){
   .forEach(x => x.addEventListener('change', syncJsonPreview));
 syncJsonPreview();
 
-/* ---------- ✅ Mid-match apply ---------- */
+/* ---------- Mid-match apply ---------- */
 btnApplyProfileMidMatch.addEventListener('click', async () => {
   if(!txChar){
     log('Cannot apply update: not connected.');
@@ -1296,12 +1294,10 @@ btnApplyProfileMidMatch.addEventListener('click', async () => {
 
   try{
     const payload = buildMatchPayload();
-
     const autoPause = !!chkAutoPauseApply?.checked;
-    const wasPaused = paused;
 
-    if(autoPause && !paused){
-      await setPaused(true, 'auto_apply');
+    if(autoPause && !lastState.paused){
+      await bleSend('PAUSE_GAME');
       await new Promise(r => setTimeout(r, 180));
     }
 
@@ -1310,9 +1306,9 @@ btnApplyProfileMidMatch.addEventListener('click', async () => {
     showToast('Rules updated');
     vibrate([40,20,40,20,80]);
 
-    if(autoPause && !wasPaused){
+    if(autoPause && lastState.paused){
       await new Promise(r => setTimeout(r, 180));
-      await setPaused(false, 'auto_apply');
+      await bleSend('RESUME_GAME');
     }
   }catch(e){
     log(`Apply update error: ${e.message}`);
@@ -1456,7 +1452,7 @@ if(!('NDEFReader' in window)){
   setNfcStatus('NFC available. Connect BLE, then tap “Tap NFC to check in”.');
 }
 
-/* ---------- TAG TOOLS (ROLE BINDINGS) ---------- */
+/* ---------- TAG TOOLS ---------- */
 btnTagRegister.addEventListener('click', async () => {
   try{
     const uid = normUid(tagUid.value);
@@ -1481,9 +1477,15 @@ btnTagAssign.addEventListener('click', async () => {
 
 btnTagTap.addEventListener('click', async () => {
   try{
-    if(paused){
-      log('TAG_TAP blocked: game is paused (portal lock).');
-      showToast('Paused — scoring locked');
+    if(lastState.paused){
+      log('TAG_TAP blocked: puck is paused.');
+      showToast('Paused — locked');
+      vibrate([60]);
+      return;
+    }
+    if(lastState.game_over){
+      log('TAG_TAP blocked: game over.');
+      showToast('Game Over');
       vibrate([60]);
       return;
     }
@@ -1627,7 +1629,6 @@ function setConnectedUI(connected){
   btnStartGame.disabled = !connected;
   btnEndGame.disabled = !connected;
 
-  // ✅ NEW: enable pause + apply buttons when connected
   btnPauseToggle.disabled = !connected;
   btnApplyProfileMidMatch.disabled = !connected;
 
@@ -1642,7 +1643,6 @@ function setConnectedUI(connected){
   btnNfcScan.disabled = !(connected && webNfcSupported);
   btnNfcStop.disabled = !nfcActive;
 
-  // scoring/edit locks depend on paused + game_over
   renderStateUI();
 }
 
@@ -1741,6 +1741,7 @@ btnUploadProfile.addEventListener('click', async () => {
   try{
     const payload = buildMatchPayload();
     await bleSend('PROFILE_SELECT', payload);
+    showToast('Uploaded profile');
   }catch(e){
     log(`Upload error: ${e.message}`);
   }
@@ -1752,13 +1753,8 @@ btnStartGame.addEventListener('click', async () => {
     lastState.winner = null;
     persistLastState();
 
-    // optional: starting a new game should unpause portal lock
-    if(paused){
-      paused = false;
-      renderPauseUI();
-    }
-
     setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
+
     await bleSend('START_GAME');
     renderStateUI();
   }catch(e){
@@ -1778,7 +1774,8 @@ btnEndGame.addEventListener('click', async () => {
 // Score game (blocked when paused)
 btnScoreA.addEventListener('click', async () => {
   try{
-    if(paused){ log('Score blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Score blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Score blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'A', delta: 1 });
   }catch(e){
     log(`Score A error: ${e.message}`);
@@ -1786,7 +1783,8 @@ btnScoreA.addEventListener('click', async () => {
 });
 btnScoreB.addEventListener('click', async () => {
   try{
-    if(paused){ log('Score blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Score blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Score blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'B', delta: 1 });
   }catch(e){
     log(`Score B error: ${e.message}`);
@@ -1796,19 +1794,22 @@ btnScoreB.addEventListener('click', async () => {
 // Edit score (blocked when paused)
 btnAminus.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'A', delta: -1 });
   }catch(e){ log(`A- error: ${e.message}`); }
 });
 btnAplus.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'A', delta: 1 });
   }catch(e){ log(`A+ error: ${e.message}`); }
 });
 btnAset.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     const v = Math.max(0, Math.floor(Number(setAVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'A', value: v });
   }catch(e){ log(`A set error: ${e.message}`); }
@@ -1816,19 +1817,22 @@ btnAset.addEventListener('click', async () => {
 
 btnBminus.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'B', delta: -1 });
   }catch(e){ log(`B- error: ${e.message}`); }
 });
 btnBplus.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     await bleSend('SCORE', { team: 'B', delta: 1 });
   }catch(e){ log(`B+ error: ${e.message}`); }
 });
 btnBset.addEventListener('click', async () => {
   try{
-    if(paused){ log('Edit blocked: paused.'); showToast('Paused'); return; }
+    if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
+    if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
     const v = Math.max(0, Math.floor(Number(setBVal.value || 0)));
     await bleSend('SCORE_SET', { team: 'B', value: v });
   }catch(e){ log(`B set error: ${e.message}`); }
