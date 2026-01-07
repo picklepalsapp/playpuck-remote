@@ -817,7 +817,7 @@
 
 <script>
 const BLE = {
- SERVICE_UUID: 0xFFFF,
+  SERVICE_UUID: 0xFFFF,
   TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb',
   RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb',
 };
@@ -833,17 +833,19 @@ const bleBanner = el('bleBanner');
 const toast = el('toast');
 const toastText = el('toastText');
 
-function log(msg){
+function log(msg) {
   const ts = new Date().toLocaleTimeString();
   logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
 }
-function showToast(t){
+
+function showToast(t) {
   toastText.textContent = t;
   toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),1300);
+  setTimeout(() => toast.classList.remove('show'), 1300);
 }
-function vibrate(pattern){
-  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(_){}
+
+function vibrate(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {}
 }
 function showBanner(html){
   bleBanner.innerHTML = html;
@@ -1114,11 +1116,11 @@ function setReconnectPill(text){ reconnectPill.textContent = `Reconnect: ${text}
 
 function enc(str){ return new TextEncoder().encode(str); }
 
-async function bleSend(command, payloadObj=null){
-  if(!txChar) throw new Error('Not connected / TX characteristic missing.');
+async function bleSend(command, payloadObj = null) {
+  if (!txChar) throw new Error('Not connected / TX characteristic missing.');
   const payload = payloadObj ? JSON.stringify(payloadObj) : '';
   const line = payload ? `${command} ${payload}` : `${command}`;
-  await txChar.writeValue(enc(line));
+  await txChar.writeValue(new TextEncoder().encode(line));
   log(`→ ${line}`);
 }
 
@@ -1548,7 +1550,7 @@ function scheduleReconnect(reason){
   }, wait);
 }
 
-async function connectWithExistingDevice(label){
+async function connectWithExistingDevice(label) {
   setReconnectPill(label);
   server = await device.gatt.connect();
   service = await server.getPrimaryService(BLE.SERVICE_UUID);
@@ -1556,33 +1558,33 @@ async function connectWithExistingDevice(label){
   txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
   rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
 
-  try{
+  try {
     await rxChar.startNotifications();
     rxChar.addEventListener('characteristicvaluechanged', (ev) => {
       const txt = new TextDecoder().decode(ev.target.value);
       log(`← ${txt}`);
       parseRx(txt);
     });
-  }catch(e){
+  } catch (e) {
     log(`RX notifications not enabled: ${e.message}`);
   }
 
   setConnectedUI(true);
   log('Connected ✅');
   showToast('Connected ✅');
-  vibrate([40,30,40]);
+  vibrate([40, 30, 40]);
   resetReconnect();
 
-  try{ await bleSend('PING'); }catch(_){}
+  try { await bleSend('PING'); } catch (_) {}
 }
 
-async function tryReconnect(fromTimer){
-  try{
-    if(!autoReconnect.checked) return;
-    if(!device) return;
-    if(device.gatt?.connected) return;
+async function tryReconnect(fromTimer) {
+  try {
+    if (!autoReconnect.checked) return;
+    if (!device) return;
+    if (device.gatt?.connected) return;
     await connectWithExistingDevice(fromTimer ? 'auto' : 'reconnect');
-  }catch(e){
+  } catch (e) {
     hadConnectFailure = true;
     log(`Reconnect error: ${e.message}`);
     setConnectedUI(false);
@@ -1590,13 +1592,13 @@ async function tryReconnect(fromTimer){
   }
 }
 
-function setConnectedUI(connected){
+function setConnectedUI(connected) {
   connStatus.textContent = connected ? 'Connected' : 'Disconnected';
   connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
   connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
   connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
 
-  if(connected){
+  if (connected) {
     btnConnect.className = 'secondary';
     btnConnect.disabled = true;
 
@@ -1606,20 +1608,20 @@ function setConnectedUI(connected){
     hideBanner();
     hadConnectFailure = false;
 
-    if(autoReconnect.checked) setReconnectPill('—');
+    if (autoReconnect.checked) setReconnectPill('—');
     else setReconnectPill('OFF');
-  }else{
+  } else {
     btnConnect.className = 'accent';
     btnConnect.disabled = false;
 
     btnDisconnect.className = 'secondary';
     btnDisconnect.disabled = true;
 
-    if(hadConnectFailure){
-      if(!bleBanner.innerHTML){
+    if (hadConnectFailure) {
+      if (!bleBanner.innerHTML) {
         showBanner(`<strong>Connection failed</strong><br>Try again.`);
       }
-    }else{
+    } else {
       hideBanner();
     }
   }
@@ -1850,6 +1852,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
