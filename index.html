@@ -1539,31 +1539,31 @@ function scheduleReconnect(reason){
   }, wait);
 }
 
+let txChar = null;
+let rxChar = null;
+
 async function connectWithExistingDevice(label) {
-  setReconnectPill(label);
+  // Ensure the connection is successful
   server = await device.gatt.connect();
   service = await server.getPrimaryService(BLE.SERVICE_UUID);
-
   txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
   rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+  
+  // Setup RX notifications
+  await rxChar.startNotifications();
+  rxChar.addEventListener('characteristicvaluechanged', (ev) => {
+    const txt = new TextDecoder().decode(ev.target.value);
+    log(`← ${txt}`);
+    parseRx(txt);
+  });
 
-  try {
-    await rxChar.startNotifications();
-    rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-      const txt = new TextDecoder().decode(ev.target.value);
-      log(`← ${txt}`);
-      parseRx(txt);
-    });
-  } catch (e) {
-    log(`RX notifications not enabled: ${e.message}`);
-  }
-
+  // Update the UI and state
   setConnectedUI(true);
   log('Connected ✅');
   showToast('Connected ✅');
   vibrate([40, 30, 40]);
   resetReconnect();
-
+  
   try { await bleSend('PING'); } catch (_) {}
 }
 
@@ -1639,15 +1639,15 @@ function setConnectedUI(connected) {
 
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
 btnConnect.addEventListener('click', async () => {
-  try{
-    hideBanner();
+  try {
+    hideBanner();  // Hide any error banner if visible
     hadConnectFailure = false;
 
     log('Requesting BLE device…');
-device = await navigator.bluetooth.requestDevice({
-  acceptAllDevices: true,
-  optionalServices: [0xFFFF]
-});
+    device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [BLE.SERVICE_UUID]
+    });
 
     deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
@@ -1655,21 +1655,20 @@ device = await navigator.bluetooth.requestDevice({
       log('Disconnected.');
       vibrate([60]);
       setConnectedUI(false);
-      if(nfcActive) stopNfcScan();
+      if (nfcActive) stopNfcScan();
       scheduleReconnect('link dropped');
     });
 
     await connectWithExistingDevice('manual');
     rssiPill.textContent = 'RSSI: (not available in WebBLE)';
 
-  }catch(err){
+  } catch (err) {
     hadConnectFailure = true;
-
     const msg = err?.message || String(err);
     log(`Connect error: ${msg}`);
-    vibrate([120,40,120]);
+    vibrate([120, 40, 120]);
 
-    if(looksLikeBleBusy(msg)){
+    if (looksLikeBleBusy(msg)) {
       showBanner(`
         <strong>BLE Busy</strong><br>
         PlayPUCK can only connect to <strong>one</strong> BLE app at a time.<br><br>
@@ -1680,7 +1679,7 @@ device = await navigator.bluetooth.requestDevice({
           <li>Then press Connect again</li>
         </ul>
       `);
-    }else{
+    } else {
       showBanner(`
         <strong>Connection failed</strong><br>
         If PlayPUCK doesn’t appear or won’t connect, it’s often still connected in another BLE app.<br><br>
@@ -1841,6 +1840,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
