@@ -1318,123 +1318,102 @@ btnApplyProfileMidMatch.addEventListener('click', async () => {
 });
 
 /* ---------- CHECK-IN (manual + NFC) ---------- */
-async function sendCheckin(playerIdRaw){
+async function sendCheckin(playerIdRaw) {
   const playerId = String(playerIdRaw || '').trim();
-  if(!playerId){
+  if (!playerId) {
     log('Check-in: player_id is empty.');
     setNfcStatus('Enter a player_id or tap a tag.');
     return;
   }
-  try{
+  try {
+    // Send the CHECKIN command with the player ID
     await bleSend('CHECKIN', { player_id: playerId });
     setNfcStatus(`✅ Sent CHECKIN for: ${playerId}`);
-  }catch(e){
+
+    // Reset the Tag UID field after successful check-in
+    tagUid.value = ''; // Clear the Tag UID field
+    checkinPlayerId.value = ''; // Clear the manual player ID field
+
+    // Re-enable the NFC scan button for the next check-in
+    btnNfcScan.disabled = false; // Enable NFC scan
+  } catch (e) {
     log(`Check-in send error: ${e.message}`);
     setNfcStatus(`❌ BLE send failed: ${e.message}`);
   }
 }
 
-btnCheckinManual.addEventListener('click', async () => {
-  await sendCheckin(checkinPlayerId.value);
-});
-
-function decodeRecordText(record){
-  const dec = new TextDecoder((record.encoding || 'utf-8'));
-  return dec.decode(record.data);
-}
-function tryExtractPlayerIdFromText(text){
-  const t = String(text || '').trim();
-  if(!t) return null;
-  try{
-    const obj = JSON.parse(t);
-    if(obj && (obj.player_id || obj.pid)){
-      return String(obj.player_id || obj.pid);
-    }
-  }catch(_){}
-  return t;
-}
-function tryExtractPlayerIdFromUrl(urlText){
-  const t = String(urlText || '').trim();
-  if(!t) return null;
-  try{
-    const u = new URL(t);
-    return u.searchParams.get('pid') || u.searchParams.get('player_id');
-  }catch(_){
-    return null;
-  }
-}
-
-async function startNfcScan(){
-  if(!('NDEFReader' in window)){
+// Reset NFC scan process
+function startNfcScan() {
+  if (!('NDEFReader' in window)) {
     setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
     return;
   }
-  if(!txChar){
+  if (!txChar) {
     setNfcStatus('Connect to the PlayPUCK first (BLE).');
     return;
   }
 
-  try{
+  try {
     ndef = new NDEFReader();
     setNfcStatus('Requesting NFC permission…');
     await ndef.scan();
     nfcActive = true;
     setNfcStatus('NFC ready — tap a player tag.');
 
+    // Enable the stop scan button and disable the start scan button
     btnNfcStop.disabled = false;
-    btnNfcScan.disabled = true;
+    btnNfcScan.disabled = true; // Disable NFC scan while scanning
 
-   ndef.onreading = async (event) => {
-  try {
-    let playerId = null;
+    ndef.onreading = async (event) => {
+      try {
+        let playerId = null;
 
-    // Loop through the records in the NFC tag
-    for (const record of event.message.records) {
-      if (record.recordType === 'text') {
-        const txt = decodeRecordText(record);
-        playerId = tryExtractPlayerIdFromText(txt);
-      } else if (record.recordType === 'url') {
-        const urlTxt = decodeRecordText(record);
-        playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+        // Loop through the records in the NFC tag
+        for (const record of event.message.records) {
+          if (record.recordType === 'text') {
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if (record.recordType === 'url') {
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          }
+
+          if (playerId) break;
+        }
+
+        // If no playerId found from text or URL, try extracting it from the serial number
+        if (!playerId) {
+          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        }
+
+        // If no playerId is found
+        if (!playerId) {
+          setNfcStatus('Tag read, but no player_id found.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        // Set the UID field in the input to the extracted playerId
+        tagUid.value = playerId; // Auto-populate UID field
+
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+
+        // Proceed to send CHECKIN command with the playerId
+        await sendCheckin(playerId);
+
+      } catch (e) {
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
       }
-
-      if (playerId) break;
-    }
-
-    // If no playerId found from text or URL, try extracting it from the serial number
-    if (!playerId) {
-      if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
-    }
-
-    // If no playerId is found
-    if (!playerId) {
-      setNfcStatus('Tag read, but no player_id found.');
-      log('NFC: Tag read, but player_id not extracted.');
-      return;
-    }
-
-    // Set the UID field in the input to the extracted playerId
-    tagUid.value = playerId; // This is the key line for auto-population
-
-    setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
-    log(`NFC → player_id=${playerId}`);
-
-    // Proceed to send CHECKIN command with the playerId
-    await sendCheckin(playerId);
-
-  } catch (e) {
-    log(`NFC onreading error: ${e.message}`);
-    setNfcStatus(`NFC read error: ${e.message}`);
-  }
-};
-
+    };
 
     ndef.onreadingerror = () => {
       setNfcStatus('NFC reading error — try again.');
       log('NFC reading error.');
     };
 
-  }catch(err){
+  } catch (err) {
     nfcActive = false;
     btnNfcStop.disabled = true;
     btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
@@ -1862,6 +1841,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
