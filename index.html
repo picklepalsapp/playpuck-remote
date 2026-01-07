@@ -1318,87 +1318,132 @@ btnApplyProfileMidMatch.addEventListener('click', async () => {
 });
 
 /* ---------- CHECK-IN (manual + NFC) ---------- */
-async function sendCheckin(playerIdRaw) {
+async function sendCheckin(playerIdRaw){
   const playerId = String(playerIdRaw || '').trim();
-  if (!playerId) {
+  if(!playerId){
     log('Check-in: player_id is empty.');
     setNfcStatus('Enter a player_id or tap a tag.');
     return;
   }
-  try {
+  try{
     await bleSend('CHECKIN', { player_id: playerId });
     setNfcStatus(`✅ Sent CHECKIN for: ${playerId}`);
-
-    tagUid.value = '';  // Clear the Tag UID field
-    checkinPlayerId.value = ''; // Reset manual player ID field
-    btnNfcScan.disabled = false; // Enable NFC scan button
-  } catch (e) {
+  }catch(e){
     log(`Check-in send error: ${e.message}`);
     setNfcStatus(`❌ BLE send failed: ${e.message}`);
   }
 }
 
-// Reset NFC scan process
-async function startNfcScan() {
-  if (!('NDEFReader' in window)) {
+btnCheckinManual.addEventListener('click', async () => {
+  await sendCheckin(checkinPlayerId.value);
+});
+
+function decodeRecordText(record){
+  const dec = new TextDecoder((record.encoding || 'utf-8'));
+  return dec.decode(record.data);
+}
+function tryExtractPlayerIdFromText(text){
+  const t = String(text || '').trim();
+  if(!t) return null;
+  try{
+    const obj = JSON.parse(t);
+    if(obj && (obj.player_id || obj.pid)){
+      return String(obj.player_id || obj.pid);
+    }
+  }catch(_){}
+  return t;
+}
+function tryExtractPlayerIdFromUrl(urlText){
+  const t = String(urlText || '').trim();
+  if(!t) return null;
+  try{
+    const u = new URL(t);
+    return u.searchParams.get('pid') || u.searchParams.get('player_id');
+  }catch(_){
+    return null;
+  }
+}
+
+async function startNfcScan(){
+  if(!('NDEFReader' in window)){
     setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
     return;
   }
-  if (!txChar) {
+  if(!txChar){
     setNfcStatus('Connect to the PlayPUCK first (BLE).');
     return;
   }
 
-  try {
+  try{
     ndef = new NDEFReader();
     setNfcStatus('Requesting NFC permission…');
     await ndef.scan();
     nfcActive = true;
     setNfcStatus('NFC ready — tap a player tag.');
 
+    btnNfcStop.disabled = false;
+    btnNfcScan.disabled = true;
+
     ndef.onreading = async (event) => {
-      let playerId = null;
+      try{
+        let playerId = null;
 
-      // Loop through the records in the NFC tag
-      for (const record of event.message.records) {
-        if (record.recordType === 'text') {
-          const txt = new TextDecoder().decode(record.data);
-          playerId = txt.trim();
+        for(const record of event.message.records){
+          if(record.recordType === 'text'){
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if(record.recordType === 'url'){
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          }
+          if(playerId) break;
         }
-        if (playerId) break;
-      }
 
-      // If no playerId found from text, try extracting it from serialNumber
-      if (!playerId) {
-        if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
-      }
+        if(!playerId){
+          if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        }
 
-      // Send check-in if playerId is found
-      if (playerId) {
-        tagUid.value = playerId;  // Auto-populate the UID field
-        await sendCheckin(playerId); // Send the check-in
-      } else {
-        setNfcStatus('Tag read, but no player_id found.');
+        if(!playerId){
+          setNfcStatus('Tag read, but no player_id found.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+        await sendCheckin(playerId);
+
+      }catch(e){
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
       }
     };
-  } catch (err) {
+
+    ndef.onreadingerror = () => {
+      setNfcStatus('NFC reading error — try again.');
+      log('NFC reading error.');
+    };
+
+  }catch(err){
     nfcActive = false;
-    setNfcStatus(`NFC error: ${err.message}`);
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    log(`NFC error: ${err?.message || err}`);
   }
 }
 
-function stopNfcScan() {
+function stopNfcScan(){
   nfcActive = false;
-  if (ndef) {
+  if(ndef){
     ndef.onreading = null;
     ndef.onreadingerror = null;
   }
   btnNfcStop.disabled = true;
-  btnNfcScan.disabled = false; // Re-enable NFC scan button
+  btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
   setNfcStatus('NFC stopped. Tap “Tap NFC to check in” to start again.');
-  log('NFC scan stopped.');
+  log('NFC scan stopped (handlers removed).');
 }
-
 
 btnNfcScan.addEventListener('click', startNfcScan);
 btnNfcStop.addEventListener('click', stopNfcScan);
@@ -1505,34 +1550,32 @@ function scheduleReconnect(reason){
   }, wait);
 }
 
-let txChar = null;
-let rxChar = null;
-
 async function connectWithExistingDevice(label) {
+  setReconnectPill(label);
+  server = await device.gatt.connect();
+  service = await server.getPrimaryService(BLE.SERVICE_UUID);
+
+  txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+  rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+
   try {
-    server = await device.gatt.connect();
-    service = await server.getPrimaryService(BLE.SERVICE_UUID);
-    txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
-    rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
-    
     await rxChar.startNotifications();
     rxChar.addEventListener('characteristicvaluechanged', (ev) => {
       const txt = new TextDecoder().decode(ev.target.value);
       log(`← ${txt}`);
-      parseRx(txt); // Handle received messages
+      parseRx(txt);
     });
-
-    setConnectedUI(true);
-    log('Connected ✅');
-    showToast('Connected ✅');
-    vibrate([40, 30, 40]);
-    resetReconnect();
-
-    try { await bleSend('PING'); } catch (_) {}
-  } catch (err) {
-    log(`Connect error: ${err.message}`);
-    showToast(`Connection failed: ${err.message}`);
+  } catch (e) {
+    log(`RX notifications not enabled: ${e.message}`);
   }
+
+  setConnectedUI(true);
+  log('Connected ✅');
+  showToast('Connected ✅');
+  vibrate([40, 30, 40]);
+  resetReconnect();
+
+  try { await bleSend('PING'); } catch (_) {}
 }
 
 async function tryReconnect(fromTimer) {
@@ -1556,15 +1599,32 @@ function setConnectedUI(connected) {
   connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
 
   if (connected) {
+    btnConnect.className = 'secondary';
     btnConnect.disabled = true;
+
+    btnDisconnect.className = 'accent';
     btnDisconnect.disabled = false;
-    btnNfcScan.disabled = false; // Enable NFC scanning
+
+    hideBanner();
+    hadConnectFailure = false;
+
+    if (autoReconnect.checked) setReconnectPill('—');
+    else setReconnectPill('OFF');
   } else {
+    btnConnect.className = 'accent';
     btnConnect.disabled = false;
+
+    btnDisconnect.className = 'secondary';
     btnDisconnect.disabled = true;
-    btnNfcScan.disabled = true; // Disable NFC scan when disconnected
+
+    if (hadConnectFailure) {
+      if (!bleBanner.innerHTML) {
+        showBanner(`<strong>Connection failed</strong><br>Try again.`);
+      }
+    } else {
+      hideBanner();
+    }
   }
-}
 
   btnSendWifi.disabled = !connected;
   btnUploadProfile.disabled = !connected;
@@ -1590,15 +1650,15 @@ function setConnectedUI(connected) {
 
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
 btnConnect.addEventListener('click', async () => {
-  try {
-    hideBanner();  // Hide any error banner if visible
+  try{
+    hideBanner();
     hadConnectFailure = false;
 
     log('Requesting BLE device…');
-    device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: [BLE.SERVICE_UUID]
-    });
+device = await navigator.bluetooth.requestDevice({
+  acceptAllDevices: true,
+  optionalServices: [0xFFFF]
+});
 
     deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
@@ -1606,20 +1666,21 @@ btnConnect.addEventListener('click', async () => {
       log('Disconnected.');
       vibrate([60]);
       setConnectedUI(false);
-      if (nfcActive) stopNfcScan();
+      if(nfcActive) stopNfcScan();
       scheduleReconnect('link dropped');
     });
 
     await connectWithExistingDevice('manual');
     rssiPill.textContent = 'RSSI: (not available in WebBLE)';
 
-  } catch (err) {
+  }catch(err){
     hadConnectFailure = true;
+
     const msg = err?.message || String(err);
     log(`Connect error: ${msg}`);
-    vibrate([120, 40, 120]);
+    vibrate([120,40,120]);
 
-    if (looksLikeBleBusy(msg)) {
+    if(looksLikeBleBusy(msg)){
       showBanner(`
         <strong>BLE Busy</strong><br>
         PlayPUCK can only connect to <strong>one</strong> BLE app at a time.<br><br>
@@ -1630,7 +1691,7 @@ btnConnect.addEventListener('click', async () => {
           <li>Then press Connect again</li>
         </ul>
       `);
-    } else {
+    }else{
       showBanner(`
         <strong>Connection failed</strong><br>
         If PlayPUCK doesn’t appear or won’t connect, it’s often still connected in another BLE app.<br><br>
@@ -1791,12 +1852,6 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
-
-
-
-
-
-
 
 
 
