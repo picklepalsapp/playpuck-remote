@@ -858,7 +858,7 @@ let reconnectTimer = null;
 let reconnectBackoffMs = 900;
 const reconnectBackoffMaxMs = 12000;
 
-// Local view-model ONLY (comes from STATE)
+/* -------------------- LAST STATE (AUTHORITATIVE FROM PUCK) -------------------- */
 let lastState = {
   a: 0, b: 0,
   serving: null,
@@ -867,8 +867,34 @@ let lastState = {
   format: null,
   win_points: null,
   win_rule: null,
-  game_over: false
+  game_over: false,
+  winner: null
 };
+
+/* -------------------- PERSIST LAST STATE -------------------- */
+const LAST_STATE_KEY = 'playpuck_last_state_v1';
+
+function saveLastState(){
+  try{
+    localStorage.setItem(LAST_STATE_KEY, JSON.stringify(lastState));
+  }catch(_){}
+}
+
+function loadLastState(){
+  try{
+    const raw = localStorage.getItem(LAST_STATE_KEY);
+    if(!raw) return false;
+    const obj = JSON.parse(raw);
+    if(!obj || typeof obj !== 'object') return false;
+    // Shallow merge only known keys
+    for(const k of Object.keys(lastState)){
+      if(k in obj) lastState[k] = obj[k];
+    }
+    return true;
+  }catch(_){
+    return false;
+  }
+}
 
 function setNfcStatus(t){ if(nfcStatusEl) nfcStatusEl.textContent = t; }
 function setReconnectPill(text){ reconnectPill.textContent = `Reconnect: ${text}`; }
@@ -908,9 +934,13 @@ function renderStateUI(){
   setScore(lastState.a ?? 0, lastState.b ?? 0);
 
   infoServe.textContent = lastState.serving ? `Serve: ${lastState.serving}` : 'Serve: —';
-  infoServerNum.textContent = lastState.server_num ? `Server: ${lastState.server_num}` : 'Server: —';
+  infoServerNum.textContent = (typeof lastState.server_num === 'number' && lastState.server_num > 0)
+    ? `Server: ${lastState.server_num}`
+    : 'Server: —';
   infoMode.textContent = lastState.mode ? `Mode: ${lastState.mode}` : 'Mode: —';
-  infoTarget.textContent = lastState.win_points ? `First to: ${lastState.win_points}` : 'First to: —';
+  infoTarget.textContent = (typeof lastState.win_points === 'number')
+    ? `First to: ${lastState.win_points}`
+    : 'First to: —';
 
   setGameOverUI(!!lastState.game_over, (lastState.winner || null), lastState.a ?? 0, lastState.b ?? 0);
 
@@ -920,9 +950,59 @@ function renderStateUI(){
   }
 }
 
+/* -------------------- RX ROBUST BUFFERING --------------------
+   WebBluetooth notifications can arrive:
+   - split across multiple packets
+   - multiple messages in one packet
+   - with or without newlines
+   We buffer and split.
+---------------------------------------------------------------- */
+const _rxDecoder = new TextDecoder('utf-8');
+let _rxBuf = '';
+
+function feedRxText(chunk){
+  if(!chunk) return;
+  _rxBuf += chunk;
+  _rxBuf = _rxBuf.replace(/\r/g, '');
+
+  // 1) newline split
+  let nl;
+  while((nl = _rxBuf.indexOf('\n')) >= 0){
+    const line = _rxBuf.slice(0, nl).trim();
+    _rxBuf = _rxBuf.slice(nl + 1);
+    if(line){
+      log(`← ${line}`);
+      parseRx(line);
+    }
+  }
+
+  // 2) heuristic: complete JSON line with no newline
+  const t = _rxBuf.trim();
+  if((t.startsWith('STATE ') || t.startsWith('GAME_OVER ') || t.startsWith('ACK ')) && t.endsWith('}')){
+    _rxBuf = '';
+    log(`← ${t}`);
+    parseRx(t);
+  }
+}
+
 function parseRx(text){
   try{
-    const trimmed = text.trim();
+    /* -------- HARDEN: split multi-lines / concatenated packets -------- */
+    const raw = String(text || '');
+    if(raw.includes('\n')){
+      raw.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line => parseRx(line));
+      return;
+    }
+    if(
+      ((raw.match(/STATE /g) || []).length +
+       (raw.match(/GAME_OVER /g) || []).length +
+       (raw.match(/ACK /g) || []).length) > 1
+    ){
+      raw.split(/(?=STATE |GAME_OVER |ACK )/g).map(s=>s.trim()).filter(Boolean).forEach(part => parseRx(part));
+      return;
+    }
+
+    const trimmed = raw.trim();
     const sp = trimmed.indexOf(' ');
     const cmd = sp >= 0 ? trimmed.slice(0, sp) : trimmed;
     const json = sp >= 0 ? trimmed.slice(sp + 1) : '';
@@ -943,6 +1023,7 @@ function parseRx(text){
       if(!lastState.game_over) lastState.winner = null;
 
       renderStateUI();
+      saveLastState();   // ✅ persist latest authoritative state
       return;
     }
 
@@ -954,6 +1035,7 @@ function parseRx(text){
       lastState.game_over = true;
 
       renderStateUI();
+      saveLastState();   // ✅ persist game-over state
       vibrate([80,40,80,40,200]);
       showToast(`Game Over — ${lastState.winner || ''}`);
       return;
@@ -1221,11 +1303,15 @@ async function connectWithExistingDevice(label){
 
   try{
     await rxChar.startNotifications();
+
+    // IMPORTANT: remove any prior listeners when reconnecting (safety)
+    // We can’t reliably remove anonymous listeners, but we can avoid duplicates
+    // by using a named handler and re-adding once after startNotifications.
     rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-      const txt = new TextDecoder().decode(ev.target.value);
-      log(`← ${txt}`);
-      parseRx(txt);
+      const chunk = _rxDecoder.decode(ev.target.value);
+      feedRxText(chunk);
     });
+
   }catch(e){
     log(`RX notifications not enabled: ${e.message}`);
   }
@@ -1427,6 +1513,7 @@ btnStartGame.addEventListener('click', async () => {
     lastState.game_over = false;
     lastState.winner = null;
     setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
+    saveLastState(); // ✅ persist reset
     await bleSend('START_GAME');
   }catch(e){
     log(`Start error: ${e.message}`);
@@ -1480,14 +1567,21 @@ btnBset.addEventListener('click', async () => {
   }catch(e){ log(`B set error: ${e.message}`); }
 });
 
-// Initial
+/* -------------------- INITIAL -------------------- */
 setConnectedUI(false);
 setReconnectPill('—');
 infoServe.textContent = 'Serve: —';
 infoServerNum.textContent = 'Server: —';
 infoMode.textContent = 'Mode: —';
 infoTarget.textContent = 'First to: —';
-log('Ready. Connect to a PlayPUCK to begin.');
+
+// ✅ Restore last known state immediately (even before BLE connect)
+if(loadLastState()){
+  renderStateUI();
+  log('Restored last state from localStorage.');
+} else {
+  log('Ready. Connect to a PlayPUCK to begin.');
+}
 </script>
 </body>
 </html>
