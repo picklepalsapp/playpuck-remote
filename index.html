@@ -977,39 +977,48 @@ async function startNfcScan(){
     btnNfcScan.disabled = true;
 
     ndef.onreading = async (event) => {
-      try{
-        let playerId = null;
+  try{
+    let playerId = null;
 
-        for(const record of event.message.records){
-          if(record.recordType === 'text'){
-            const txt = decodeRecordText(record);
-            playerId = tryExtractPlayerIdFromText(txt);
-          } else if(record.recordType === 'url'){
-            const urlTxt = decodeRecordText(record);
-            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
-          }
-          if(playerId) break;
-        }
-
-        if(!playerId){
-          if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
-        }
-
-        if(!playerId){
-          setNfcStatus('Tag read, but no player_id found.');
-          log('NFC: Tag read, but player_id not extracted.');
-          return;
-        }
-
-        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
-        log(`NFC → player_id=${playerId}`);
-        await sendCheckin(playerId);
-
-      }catch(e){
-        log(`NFC onreading error: ${e.message}`);
-        setNfcStatus(`NFC read error: ${e.message}`);
+    // Iterate through the records and try to extract playerId
+    for(const record of event.message.records){
+      if(record.recordType === 'text'){
+        const txt = decodeRecordText(record);
+        playerId = tryExtractPlayerIdFromText(txt);
+      } else if(record.recordType === 'url'){
+        const urlTxt = decodeRecordText(record);
+        playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
       }
-    };
+      if(playerId) break;
+    }
+
+    if(!playerId){
+      if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
+    }
+
+    if(!playerId){
+      setNfcStatus('Tag read, but no player_id found.');
+      log('NFC: Tag read, but player_id not extracted.');
+      return;
+    }
+
+    // Autofill the player ID to the check-in input
+    checkinPlayerId.value = playerId.trim(); // Make sure to trim it
+
+    // Enable the check-in button
+    btnCheckinManual.disabled = !checkinPlayerId.value.trim(); // Enable if playerId is not empty
+
+    setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN...`);
+    log(`NFC → player_id=${playerId}`);
+
+    // Send the playerId for check-in
+    await sendCheckin(playerId);
+
+  }catch(e){
+    log(`NFC onreading error: ${e.message}`);
+    setNfcStatus(`NFC read error: ${e.message}`);
+  }
+};
 
     ndef.onreadingerror = () => {
       setNfcStatus('NFC reading error — try again.');
@@ -1941,6 +1950,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
