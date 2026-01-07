@@ -1755,63 +1755,41 @@ function setConnectedUI(connected) {
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
 btnConnect.addEventListener('click', async () => {
     try {
-        hideBanner();
-        hadConnectFailure = false;
-
-        // Check if the device is already connected
-        if (device?.gatt?.connected) {
-            console.log('Device already connected!');
-            return; // Exit the function if the device is already connected
-        }
-
-        log('Requesting BLE device…');
+        log('Requesting BLE device...');
         device = await navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
-            optionalServices: [BLE.SERVICE_UUID], // Specify the service UUID
+            optionalServices: [BLE.SERVICE_UUID]
         });
 
         deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
-        device.addEventListener('gattserverdisconnected', () => {
-            log('Disconnected.');
-            vibrate([60]);
-            setConnectedUI(false);
-            if (nfcActive) stopNfcScan();
-            scheduleReconnect('link dropped');
+        // Set up connection to the GATT server
+        const server = await device.gatt.connect();
+        console.log("Connected to GATT server");
+
+        // Fetch services and characteristics
+        const service = await server.getPrimaryService(BLE.SERVICE_UUID);
+        txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+        rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+
+        console.log("GATT service and characteristics retrieved");
+
+        // Start receiving notifications from the RX characteristic
+        await rxChar.startNotifications();
+        rxChar.addEventListener('characteristicvaluechanged', (ev) => {
+            const txt = new TextDecoder().decode(ev.target.value);
+            console.log(`← ${txt}`);
+            parseRx(txt);
         });
 
-        await connectWithExistingDevice('manual');  // Call the updated connection function
-        rssiPill.textContent = 'RSSI: (not available in WebBLE)';
+        // Update UI to show connected status
+        setConnectedUI(true);
+        showToast('Connected ✅');
+        vibrate([40, 30, 40]);
+        resetReconnect();
     } catch (err) {
-        hadConnectFailure = true;
-
-        const msg = err?.message || String(err);
-        log(`Connect error: ${msg}`);
-        vibrate([120, 40, 120]);
-
-        if (looksLikeBleBusy(msg)) {
-            showBanner(`
-                <strong>BLE Busy</strong><br>
-                PlayPUCK can only connect to <strong>one</strong> BLE app at a time.<br><br>
-                <ul>
-                    <li>Disconnect in <strong>nRF Connect</strong></li>
-                    <li>Force-close nRF (swipe away)</li>
-                    <li>Toggle Bluetooth off/on</li>
-                    <li>Then press Connect again</li>
-                </ul>
-            `);
-        } else {
-            showBanner(`
-                <strong>Connection failed</strong><br>
-                If PlayPUCK doesn’t appear or won’t connect, it’s often still connected in another BLE app.<br><br>
-                <ul>
-                    <li>Force-close any BLE apps (nRF Connect etc.)</li>
-                    <li>Toggle Bluetooth off/on</li>
-                    <li>Try Connect again</li>
-                </ul>
-            `);
-        }
-
+        console.log('Error while connecting:', err);
+        showToast('Connection failed');
         setConnectedUI(false);
     }
 });
@@ -1998,6 +1976,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
