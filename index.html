@@ -952,6 +952,92 @@ let rxChar = null;
 let ndef = null;
 let nfcActive = false;
 
+  let ndef = null;
+let nfcActive = false;
+
+// NFC Scan functions
+async function startNfcScan(){
+  if(!('NDEFReader' in window)){
+    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
+    return;
+  }
+  if(!txChar){
+    setNfcStatus('Connect to the PlayPUCK first (BLE).');
+    return;
+  }
+
+  try{
+    ndef = new NDEFReader();
+    setNfcStatus('Requesting NFC permission…');
+    await ndef.scan();
+    nfcActive = true;
+    setNfcStatus('NFC ready — tap a player tag.');
+
+    btnNfcStop.disabled = false;
+    btnNfcScan.disabled = true;
+
+    ndef.onreading = async (event) => {
+      try{
+        let playerId = null;
+
+        for(const record of event.message.records){
+          if(record.recordType === 'text'){
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if(record.recordType === 'url'){
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          }
+          if(playerId) break;
+        }
+
+        if(!playerId){
+          if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        }
+
+        if(!playerId){
+          setNfcStatus('Tag read, but no player_id found.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+        await sendCheckin(playerId);
+
+      }catch(e){
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
+      }
+    };
+
+    ndef.onreadingerror = () => {
+      setNfcStatus('NFC reading error — try again.');
+      log('NFC reading error.');
+    };
+
+  }catch(err){
+    nfcActive = false;
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    log(`NFC error: ${err?.message || err}`);
+  }
+}
+
+function stopNfcScan(){
+  nfcActive = false;
+  if(ndef){
+    ndef.onreading = null;
+    ndef.onreadingerror = null;
+  }
+  btnNfcStop.disabled = true;
+  btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+  setNfcStatus('NFC stopped. Tap “Tap NFC to check in” to start again.');
+  log('NFC scan stopped (handlers removed).');
+}
+
+
 let hadConnectFailure = false;
 let reconnectTimer = null;
 let reconnectBackoffMs = 900;
@@ -1852,6 +1938,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
