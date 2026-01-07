@@ -1736,37 +1736,41 @@ function setConnectedUI(connected) {
 
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
 btnConnect.addEventListener('click', async () => {
-  try{
+  try {
     hideBanner();
     hadConnectFailure = false;
-
     log('Requesting BLE device…');
-device = await navigator.bluetooth.requestDevice({
-  acceptAllDevices: true,
-  optionalServices: [0xFFFF]
-});
 
+    // Request a BLE device (PlayPUCK) using Web Bluetooth API
+    device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [0xFFFF] // PlayPUCK service UUID
+    });
+
+    // Set the device name in the UI
     deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
+    // Handle device disconnection event
     device.addEventListener('gattserverdisconnected', () => {
       log('Disconnected.');
       vibrate([60]);
       setConnectedUI(false);
-      if(nfcActive) stopNfcScan();
+      if (nfcActive) stopNfcScan();
       scheduleReconnect('link dropped');
     });
 
+    // Establish the BLE connection
     await connectWithExistingDevice('manual');
     rssiPill.textContent = 'RSSI: (not available in WebBLE)';
-
-  }catch(err){
+  } catch (err) {
     hadConnectFailure = true;
 
     const msg = err?.message || String(err);
     log(`Connect error: ${msg}`);
-    vibrate([120,40,120]);
+    vibrate([120, 40, 120]);
 
-    if(looksLikeBleBusy(msg)){
+    // Display error message for BLE Busy
+    if (looksLikeBleBusy(msg)) {
       showBanner(`
         <strong>BLE Busy</strong><br>
         PlayPUCK can only connect to <strong>one</strong> BLE app at a time.<br><br>
@@ -1777,7 +1781,7 @@ device = await navigator.bluetooth.requestDevice({
           <li>Then press Connect again</li>
         </ul>
       `);
-    }else{
+    } else {
       showBanner(`
         <strong>Connection failed</strong><br>
         If PlayPUCK doesn’t appear or won’t connect, it’s often still connected in another BLE app.<br><br>
@@ -1788,7 +1792,6 @@ device = await navigator.bluetooth.requestDevice({
         </ul>
       `);
     }
-
     setConnectedUI(false);
   }
 });
@@ -1938,6 +1941,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
