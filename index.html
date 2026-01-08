@@ -982,7 +982,7 @@ async function startNfcScan() {
 
         let playerId = null;
 
-        // Iterate through the records and try to extract playerId
+        // Check if NFC tag contains valid data
         for (const record of event.message.records) {
           console.log("Record:", record);  // Debug log for each NFC record
 
@@ -993,12 +993,17 @@ async function startNfcScan() {
             const urlTxt = decodeRecordText(record);
             playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
           }
-          if (playerId) break;
+
+          if (playerId) {
+            break;
+          }
         }
 
-        // If no playerId found in the NFC records, fall back to the serialNumber if available
+        // If no playerId found, use serial number from the event
         if (!playerId) {
-          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
+          if (event.serialNumber) {
+            playerId = String(event.serialNumber).trim();
+          }
         }
 
         // If no playerId is found at all, exit
@@ -2019,6 +2024,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
