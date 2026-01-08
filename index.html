@@ -1002,9 +1002,9 @@ async function startNfcScan(){
       return;
     }
 
-    // Autofill the player ID to the check-in input and tagUid
-    checkinPlayerId.value = playerId.trim();  // Make sure to trim it
-    tagUid.value = playerId.trim();  // Autofill tag UID field
+    // Autofill both the player ID and Tag UID fields
+    checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
+    tagUid.value = playerId.trim();           // Autofill Tag UID field
 
     // Enable the check-in button
     btnCheckinManual.disabled = !checkinPlayerId.value.trim();  // Enable if playerId is not empty
@@ -1020,6 +1020,7 @@ async function startNfcScan(){
     setNfcStatus(`NFC read error: ${e.message}`);
   }
 };
+
 
     ndef.onreadingerror = () => {
       setNfcStatus('NFC reading error — try again.');
@@ -2005,6 +2006,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
