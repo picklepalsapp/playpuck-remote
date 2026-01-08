@@ -978,11 +978,11 @@ async function startNfcScan() {
 
     ndef.onreading = async (event) => {
       try {
-        console.log("NFC tag detected:", event);  // Debug log to ensure the event is triggered
+        console.log("NFC tag detected:", event);  // Add debug log to ensure the event is triggered
 
         let playerId = null;
 
-        // Check if NFC tag contains valid data
+        // Iterate through the records and try to extract playerId
         for (const record of event.message.records) {
           console.log("Record:", record);  // Debug log for each NFC record
 
@@ -993,17 +993,12 @@ async function startNfcScan() {
             const urlTxt = decodeRecordText(record);
             playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
           }
-
-          if (playerId) {
-            break;
-          }
+          if (playerId) break;
         }
 
-        // If no playerId found, use serial number from the event
+        // If no playerId found in the NFC records, fall back to the serialNumber if available
         if (!playerId) {
-          if (event.serialNumber) {
-            playerId = String(event.serialNumber).trim();
-          }
+          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
         }
 
         // If no playerId is found at all, exit
@@ -1015,19 +1010,21 @@ async function startNfcScan() {
 
         console.log("Player ID extracted:", playerId);  // Log the extracted player ID
 
-        // Autofill both the player ID and Tag UID fields
+        // Make sure the fields are correctly assigned and log the values
+        console.log("Setting playerId to fields...");
+        
+        // Check that these elements exist
+        if (!checkinPlayerId || !tagUid) {
+          console.error('Error: checkinPlayerId or tagUid is not found in the DOM!');
+          return;
+        }
+
+        // Assign the playerId value to the input fields
         checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
         tagUid.value = playerId.trim();           // Autofill Tag UID field
 
-        // Debug logs for checking
-        console.log("checkinPlayerId.value: ", checkinPlayerId.value);
-        console.log("tagUid.value: ", tagUid.value);
-
-        // Ensure checkinPlayerId and tagUid are set
-        if (!checkinPlayerId.value.trim() || !tagUid.value.trim()) {
-          setNfcStatus("Player ID or UID not correctly captured.");
-          return;
-        }
+        // Log to ensure correct assignment
+        console.log("Updated values: checkinPlayerId:", checkinPlayerId.value, "tagUid:", tagUid.value);
 
         // Enable the check-in button if playerId is not empty
         btnCheckinManual.disabled = !checkinPlayerId.value.trim();
@@ -1044,12 +1041,8 @@ async function startNfcScan() {
         setNfcStatus(`NFC read error: ${e.message}`);
       }
     };
-  } catch (err) {
-    nfcActive = false;
-    btnNfcStop.disabled = true;
-    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
-    setNfcStatus(`NFC error: ${err?.message || err}`);
-    log(`NFC error: ${err?.message || err}`);
+  } catch (e) {
+    setNfcStatus(`NFC scan failed: ${e.message}`);
   }
 }
 
@@ -2030,6 +2023,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
