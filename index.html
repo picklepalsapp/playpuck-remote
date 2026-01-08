@@ -954,7 +954,7 @@ let nfcActive = false;
 
 
 // NFC Scan functions
-async function startNfcScan(){
+async function startNfcScan() {
   // Check if BLE is connected before proceeding
   if (!txChar) {
     setNfcStatus('Connect to the PlayPUCK first (BLE).');
@@ -977,56 +977,73 @@ async function startNfcScan(){
     btnNfcScan.disabled = true;
 
     ndef.onreading = async (event) => {
-  try {
-    console.log("NFC tag detected:", event);  // Add debug log to ensure the event is triggered
+      try {
+        console.log("NFC tag detected:", event);  // Debug log to ensure the event is triggered
 
-    let playerId = null;
+        let playerId = null;
 
-    // Iterate through the records and try to extract playerId
-    for (const record of event.message.records) {
-      console.log("Record:", record);  // Debug log for each NFC record
+        // Iterate through the records and try to extract playerId
+        for (const record of event.message.records) {
+          console.log("Record:", record);  // Debug log for each NFC record
 
-      if (record.recordType === 'text') {
-        const txt = decodeRecordText(record);
-        playerId = tryExtractPlayerIdFromText(txt);
-      } else if (record.recordType === 'url') {
-        const urlTxt = decodeRecordText(record);
-        playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          if (record.recordType === 'text') {
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if (record.recordType === 'url') {
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          }
+          if (playerId) break;
+        }
+
+        // If no playerId found in the NFC records, fall back to the serialNumber if available
+        if (!playerId) {
+          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        }
+
+        // If no playerId is found at all, exit
+        if (!playerId) {
+          setNfcStatus('Tag read, but no player_id found.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        console.log("Player ID extracted:", playerId);  // Log the extracted player ID
+
+        // Log the playerId before setting the values
+        console.log("Before setting: playerId =", playerId);
+        console.log("Before setting: checkinPlayerId.value =", checkinPlayerId.value);
+        console.log("Before setting: tagUid.value =", tagUid.value);
+
+        // Autofill both the player ID and Tag UID fields
+        checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
+        tagUid.value = playerId.trim();           // Autofill Tag UID field
+
+        // Log the values after setting them to confirm
+        console.log("After setting: checkinPlayerId.value =", checkinPlayerId.value);
+        console.log("After setting: tagUid.value =", tagUid.value);
+
+        // Enable the check-in button if playerId is not empty
+        btnCheckinManual.disabled = !checkinPlayerId.value.trim();
+
+        // Update NFC status and send CHECKIN with the player ID
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+
+        // Send the playerId for check-in
+        await sendCheckin(playerId);
+
+      } catch (e) {
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
       }
-      if (playerId) break;
-    }
-
-    // If no playerId found in the NFC records, fall back to the serialNumber if available
-    if (!playerId) {
-      if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
-    }
-
-    // If no playerId is found at all, exit
-    if (!playerId) {
-      setNfcStatus('Tag read, but no player_id found.');
-      log('NFC: Tag read, but player_id not extracted.');
-      return;
-    }
-
-    console.log("Player ID extracted:", playerId);  // Log the extracted player ID
-
-    // Autofill both the player ID and Tag UID fields
-    checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
-    tagUid.value = playerId.trim();           // Autofill Tag UID field
-
-    // Enable the check-in button if playerId is not empty
-    btnCheckinManual.disabled = !checkinPlayerId.value.trim();
-
-    // Update NFC status and send CHECKIN with the player ID
-    setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
-    log(`NFC → player_id=${playerId}`);
-
-    // Send the playerId for check-in
-    await sendCheckin(playerId);
-
-  } catch (e) {
-    log(`NFC onreading error: ${e.message}`);
-    setNfcStatus(`NFC read error: ${e.message}`);
+    };
+  } catch (err) {
+    nfcActive = false;
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    log(`NFC error: ${err?.message || err}`);
   }
 };
 
@@ -2023,6 +2040,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
