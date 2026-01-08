@@ -1520,6 +1520,7 @@ async function startNfcScan(){
         const tagUid = document.getElementById('tagUid');
 
         if (checkinPlayerId && tagUid) {
+          // Update fields with the playerId
           checkinPlayerId.value = playerId.trim();  // Set the value of checkinPlayerId field
           tagUid.value = playerId.trim();           // Set the value of tagUid field
 
@@ -1550,19 +1551,10 @@ async function startNfcScan(){
   }
 }
 
-    ndef.onreadingerror = () => {
-      setNfcStatus('NFC reading error — try again.');
-      log('NFC reading error.');
-    };
-
-  }catch(err){
-    nfcActive = false;
-    btnNfcStop.disabled = true;
-    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
-    setNfcStatus(`NFC error: ${err?.message || err}`);
-    log(`NFC error: ${err?.message || err}`);
-  }
-}
+ndef.onreadingerror = () => {
+  setNfcStatus('NFC reading error — try again.');
+  log('NFC reading error.');
+};
 
 function stopNfcScan(){
   nfcActive = false;
@@ -2121,6 +2113,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 
 </body>
 </html>
+
 
 
 
