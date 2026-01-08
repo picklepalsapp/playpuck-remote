@@ -952,6 +952,101 @@ let rxChar = null;
 let ndef = null;
 let nfcActive = false;
 
+
+// NFC Scan functions
+async function startNfcScan(){
+  // Check if BLE is connected before proceeding
+  if (!txChar) {
+    setNfcStatus('Connect to the PlayPUCK first (BLE).');
+    return;
+  }
+
+  if (!('NDEFReader' in window)) {
+    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
+    return;
+  }
+
+  try {
+    ndef = new NDEFReader();
+    setNfcStatus('Requesting NFC permission…');
+    await ndef.scan();
+    nfcActive = true;
+    setNfcStatus('NFC ready — tap a player tag.');
+
+    btnNfcStop.disabled = false;
+    btnNfcScan.disabled = true;
+
+    ndef.onreading = async (event) => {
+      try {
+        let playerId = null;
+
+        // Iterate through the records and try to extract playerId
+        for (const record of event.message.records) {
+          if (record.recordType === 'text') {
+            const txt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromText(txt);
+          } else if (record.recordType === 'url') {
+            const urlTxt = decodeRecordText(record);
+            playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
+          }
+          if (playerId) break;
+        }
+
+        if (!playerId) {
+          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        }
+
+        if (!playerId) {
+          setNfcStatus('Tag read, but no player_id found.');
+          log('NFC: Tag read, but player_id not extracted.');
+          return;
+        }
+
+        // Autofill the player ID to the check-in input
+        checkinPlayerId.value = playerId.trim(); // Make sure to trim it
+
+        // Enable the check-in button
+        btnCheckinManual.disabled = !checkinPlayerId.value.trim(); // Enable if playerId is not empty
+
+        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
+        log(`NFC → player_id=${playerId}`);
+
+        // Send the playerId for check-in
+        await sendCheckin(playerId);
+
+      } catch (e) {
+        log(`NFC onreading error: ${e.message}`);
+        setNfcStatus(`NFC read error: ${e.message}`);
+      }
+    };
+
+    ndef.onreadingerror = () => {
+      setNfcStatus('NFC reading error — try again.');
+      log('NFC reading error.');
+    };
+
+  } catch (err) {
+    nfcActive = false;
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    log(`NFC error: ${err?.message || err}`);
+  }
+}
+
+function stopNfcScan(){
+  nfcActive = false;
+  if(ndef){
+    ndef.onreading = null;
+    ndef.onreadingerror = null;
+  }
+  btnNfcStop.disabled = true;
+  btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+  setNfcStatus('NFC stopped. Tap “Tap NFC to check in” to start again.');
+  log('NFC scan stopped (handlers removed).');
+}
+
+
 let hadConnectFailure = false;
 let reconnectTimer = null;
 let reconnectBackoffMs = 900;
@@ -1551,32 +1646,41 @@ function scheduleReconnect(reason){
 }
 
 async function connectWithExistingDevice(label) {
-  setReconnectPill(label);
-  server = await device.gatt.connect();
-  service = await server.getPrimaryService(BLE.SERVICE_UUID);
+    try {
+        setReconnectPill(label);
 
-  txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
-  rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+        // Attempt to connect to the GATT server
+        server = await device.gatt.connect();
+        console.log("Connected to GATT server");
 
-  try {
-    await rxChar.startNotifications();
-    rxChar.addEventListener('characteristicvaluechanged', (ev) => {
-      const txt = new TextDecoder().decode(ev.target.value);
-      log(`← ${txt}`);
-      parseRx(txt);
-    });
-  } catch (e) {
-    log(`RX notifications not enabled: ${e.message}`);
-  }
+        // Fetch services and characteristics
+        service = await server.getPrimaryService(BLE.SERVICE_UUID);
+        txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+        rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
 
-  setConnectedUI(true);
-  log('Connected ✅');
-  showToast('Connected ✅');
-  vibrate([40, 30, 40]);
-  resetReconnect();
+        console.log("GATT service and characteristics retrieved");
 
-  try { await bleSend('PING'); } catch (_) {}
+        // Start notifications for RX (Receiving)
+        await rxChar.startNotifications();
+        rxChar.addEventListener('characteristicvaluechanged', (ev) => {
+            const txt = new TextDecoder().decode(ev.target.value);
+            console.log(`← ${txt}`);
+            parseRx(txt); // Process the incoming data
+        });
+
+        // Update the UI when connected
+        setConnectedUI(true);
+        showToast('Connected ✅');
+        vibrate([40, 30, 40]);
+        resetReconnect(); // Reset the reconnect timer after successful connection
+    } catch (error) {
+        // Handle any errors during connection
+        console.error('Error while connecting to GATT server:', error);
+        log(`Connection error: ${error.message}`);
+        setConnectedUI(false); // Update UI to show disconnected status
+    }
 }
+
 
 async function tryReconnect(fromTimer) {
   try {
@@ -1900,6 +2004,9 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
+
+
 
 
 
