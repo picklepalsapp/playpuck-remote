@@ -954,6 +954,7 @@ let nfcActive = false;
 
 
 // NFC Scan functions
+// NFC Scan functions
 async function startNfcScan() {
   // Check if BLE is connected before proceeding
   if (!txChar) {
@@ -1010,18 +1011,12 @@ async function startNfcScan() {
 
         console.log("Player ID extracted:", playerId);  // Log the extracted player ID
 
-        // Log the playerId before setting the values
-        console.log("Before setting: playerId =", playerId);
-        console.log("Before setting: checkinPlayerId.value =", checkinPlayerId.value);
-        console.log("Before setting: tagUid.value =", tagUid.value);
-
         // Autofill both the player ID and Tag UID fields
         checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
         tagUid.value = playerId.trim();           // Autofill Tag UID field
 
-        // Log the values after setting them to confirm
-        console.log("After setting: checkinPlayerId.value =", checkinPlayerId.value);
-        console.log("After setting: tagUid.value =", tagUid.value);
+        console.log("Before setting: checkinPlayerId.value =", checkinPlayerId.value);
+        console.log("Before setting: tagUid.value =", tagUid.value);
 
         // Enable the check-in button if playerId is not empty
         btnCheckinManual.disabled = !checkinPlayerId.value.trim();
@@ -2024,6 +2019,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
