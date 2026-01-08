@@ -1045,22 +1045,6 @@ async function startNfcScan() {
     setNfcStatus(`NFC error: ${err?.message || err}`);
     log(`NFC error: ${err?.message || err}`);
   }
-};
-
-
-
-    ndef.onreadingerror = () => {
-      setNfcStatus('NFC reading error — try again.');
-      log('NFC reading error.');
-    };
-
-  } catch (err) {
-    nfcActive = false;
-    btnNfcStop.disabled = true;
-    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
-    setNfcStatus(`NFC error: ${err?.message || err}`);
-    log(`NFC error: ${err?.message || err}`);
-  }
 }
 
 function stopNfcScan(){
@@ -2040,6 +2024,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
