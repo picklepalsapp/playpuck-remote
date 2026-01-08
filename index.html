@@ -978,10 +978,14 @@ async function startNfcScan(){
 
     ndef.onreading = async (event) => {
   try {
+    console.log("NFC tag detected:", event);  // Add debug log to ensure the event is triggered
+
     let playerId = null;
 
     // Iterate through the records and try to extract playerId
     for (const record of event.message.records) {
+      console.log("Record:", record);  // Debug log for each NFC record
+
       if (record.recordType === 'text') {
         const txt = decodeRecordText(record);
         playerId = tryExtractPlayerIdFromText(txt);
@@ -1003,6 +1007,8 @@ async function startNfcScan(){
       log('NFC: Tag read, but player_id not extracted.');
       return;
     }
+
+    console.log("Player ID extracted:", playerId);  // Log the extracted player ID
 
     // Autofill both the player ID and Tag UID fields
     checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
@@ -2017,6 +2023,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
