@@ -1415,24 +1415,31 @@ btnApplyProfileMidMatch.addEventListener('click', async () => {
 });
 
 /* ---------- CHECK-IN (manual + NFC) ---------- */
-async function sendCheckin(playerIdRaw){
+async function sendCheckin(playerIdRaw) {
   const playerId = String(playerIdRaw || '').trim();
-  if(!playerId){
+  if (!playerId) {
     log('Check-in: player_id is empty.');
     setNfcStatus('Enter a player_id or tap a tag.');
     return;
   }
-  try{
+  try {
     await bleSend('CHECKIN', { player_id: playerId });
     setNfcStatus(`✅ Sent CHECKIN for: ${playerId}`);
-  }catch(e){
+  } catch (e) {
     log(`Check-in send error: ${e.message}`);
     setNfcStatus(`❌ BLE send failed: ${e.message}`);
   }
 }
 
 btnCheckinManual.addEventListener('click', async () => {
-  await sendCheckin(checkinPlayerId.value);
+  const playerId = checkinPlayerId.value.trim();
+  
+  if (playerId) {
+    // Autofill the Tag UID field when the manual player ID is entered
+    tagUid.value = playerId;
+  }
+
+  await sendCheckin(playerId);
 });
 
 function decodeRecordText(record){
@@ -2006,6 +2013,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
