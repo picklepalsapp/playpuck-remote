@@ -1649,83 +1649,131 @@ function setConnectedUI(connected) {
 }
 
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
+// Ensure we preserve the working logic and improve as needed.
 btnConnect.addEventListener('click', async () => {
-  try{
-    hideBanner();
-    hadConnectFailure = false;
+    try {
+        hideBanner();
+        hadConnectFailure = false;
 
-    log('Requesting BLE device…');
-device = await navigator.bluetooth.requestDevice({
-  acceptAllDevices: true,
-  optionalServices: [0xFFFF]
+        // Request the device using Bluetooth's Web API, specifically for PlayPUCK devices.
+        log('Requesting BLE device...');
+        device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,  // Use specific filters if needed
+            optionalServices: [BLE.SERVICE_UUID]  // The required service UUID
+        });
+
+        deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
+
+        // Prevent duplicate connection attempts if the device is already connected
+        if (device.gatt?.connected) {
+            console.log('Device already connected!');
+            return; // Exit if the device is already connected
+        }
+
+        // Establish connection to the device
+        const server = await device.gatt.connect();
+        console.log("Connected to GATT server");
+
+        // Fetch the PlayPUCK service and characteristics
+        const service = await server.getPrimaryService(BLE.SERVICE_UUID);
+        txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
+        rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
+
+        console.log("GATT service and characteristics retrieved");
+
+        // Start receiving notifications for the RX characteristic
+        await rxChar.startNotifications();
+        rxChar.addEventListener('characteristicvaluechanged', (ev) => {
+            const txt = new TextDecoder().decode(ev.target.value);
+            console.log(`← ${txt}`);
+            parseRx(txt);  // Parse and process incoming data
+        });
+
+        // Update the UI to reflect the successful connection
+        setConnectedUI(true);
+        showToast('Connected ✅');
+        vibrate([40, 30, 40]);  // Vibrate feedback for connection success
+        resetReconnect();  // Reset any reconnect logic
+
+    } catch (err) {
+        console.log('Error while connecting:', err);
+        showToast('Connection failed');
+        setConnectedUI(false);  // Update UI to reflect the error
+    }
 });
 
-    deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
+// Disconnect button logic
+btnDisconnect.addEventListener('click', async () => {
+    try {
+        resetReconnect();
+        setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
 
-    device.addEventListener('gattserverdisconnected', () => {
-      log('Disconnected.');
-      vibrate([60]);
-      setConnectedUI(false);
-      if(nfcActive) stopNfcScan();
-      scheduleReconnect('link dropped');
-    });
+        // Disconnect the device if it's connected
+        if (device?.gatt?.connected) {
+            device.gatt.disconnect();
+            vibrate([50, 20, 50]);
+            setConnectedUI(false);  // Update UI for disconnection
+            if (nfcActive) stopNfcScan();  // Stop NFC scan if active
+        }
+    } catch (e) {
+        log(`Disconnect error: ${e.message}`);
+    }
+});
 
-    await connectWithExistingDevice('manual');
-    rssiPill.textContent = 'RSSI: (not available in WebBLE)';
+// This ensures the UI reflects the correct connection state
+function setConnectedUI(connected) {
+    connStatus.textContent = connected ? 'Connected' : 'Disconnected';
+    connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
+    connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
+    connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
 
-  }catch(err){
-    hadConnectFailure = true;
+    if (connected) {
+        btnConnect.className = 'secondary';
+        btnConnect.disabled = true;
 
-    const msg = err?.message || String(err);
-    log(`Connect error: ${msg}`);
-    vibrate([120,40,120]);
+        btnDisconnect.className = 'accent';
+        btnDisconnect.disabled = false;
 
-    if(looksLikeBleBusy(msg)){
-      showBanner(`
-        <strong>BLE Busy</strong><br>
-        PlayPUCK can only connect to <strong>one</strong> BLE app at a time.<br><br>
-        <ul>
-          <li>Disconnect in <strong>nRF Connect</strong></li>
-          <li>Force-close nRF (swipe away)</li>
-          <li>Toggle Bluetooth off/on</li>
-          <li>Then press Connect again</li>
-        </ul>
-      `);
-    }else{
-      showBanner(`
-        <strong>Connection failed</strong><br>
-        If PlayPUCK doesn’t appear or won’t connect, it’s often still connected in another BLE app.<br><br>
-        <ul>
-          <li>Force-close any BLE apps (nRF Connect etc.)</li>
-          <li>Toggle Bluetooth off/on</li>
-          <li>Try Connect again</li>
-        </ul>
-      `);
+        hideBanner();
+        hadConnectFailure = false;
+
+        if (autoReconnect.checked) setReconnectPill('—');
+        else setReconnectPill('OFF');
+    } else {
+        btnConnect.className = 'accent';
+        btnConnect.disabled = false;
+
+        btnDisconnect.className = 'secondary';
+        btnDisconnect.disabled = true;
+
+        if (hadConnectFailure) {
+            if (!bleBanner.innerHTML) {
+                showBanner(`<strong>Connection failed</strong><br>Try again.`);
+            }
+        } else {
+            hideBanner();
+        }
     }
 
-    setConnectedUI(false);
-  }
-});
+    // Disable buttons while not connected
+    btnSendWifi.disabled = !connected;
+    btnUploadProfile.disabled = !connected;
+    btnStartGame.disabled = !connected;
+    btnEndGame.disabled = !connected;
+    btnPauseToggle.disabled = !connected;
+    btnApplyProfileMidMatch.disabled = !connected;
+    btnCheckinManual.disabled = !connected;
+    btnTagRegister.disabled = !connected;
+    btnTagAssign.disabled = !connected;
+    btnTagClearTeams.disabled = !connected;
+    btnTagClearAll.disabled = !connected;
 
-btnDisconnect.addEventListener('click', async () => {
-  try{
-    resetReconnect();
-    setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
+    const webNfcSupported = ('NDEFReader' in window);
+    btnNfcScan.disabled = !(connected && webNfcSupported);
+    btnNfcStop.disabled = !nfcActive;
 
-    if(device?.gatt?.connected) device.gatt.disconnect();
-    vibrate([50,20,50]);
-    setConnectedUI(false);
-    if(nfcActive) stopNfcScan();
-  }catch(e){
-    log(`Disconnect error: ${e.message}`);
-  }
-});
-
-document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible' && autoReconnect.checked && device && !device.gatt?.connected){
-    tryReconnect(false);
-  }
-});
+    renderStateUI();
+}
 
 /* ---------- STEP BUTTONS ---------- */
 btnSendWifi.addEventListener('click', async () => {
@@ -1852,6 +1900,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
