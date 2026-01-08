@@ -1459,17 +1459,20 @@ function tryExtractPlayerIdFromUrl(urlText){
   }
 }
 
+// NFC Scan functions
 async function startNfcScan(){
-  if(!('NDEFReader' in window)){
-    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
-    return;
-  }
-  if(!txChar){
+  // Check if BLE is connected before proceeding
+  if (!txChar) {
     setNfcStatus('Connect to the PlayPUCK first (BLE).');
     return;
   }
 
-  try{
+  if (!('NDEFReader' in window)) {
+    setNfcStatus('Web NFC not available (Android Chrome/Edge required).');
+    return;
+  }
+
+  try {
     ndef = new NDEFReader();
     setNfcStatus('Requesting NFC permission…');
     await ndef.scan();
@@ -1480,39 +1483,72 @@ async function startNfcScan(){
     btnNfcScan.disabled = true;
 
     ndef.onreading = async (event) => {
-      try{
+      try {
+        console.log("NFC tag detected:", event);
+
         let playerId = null;
 
-        for(const record of event.message.records){
-          if(record.recordType === 'text'){
+        // Iterate through the records and try to extract playerId
+        for (const record of event.message.records) {
+          console.log("Record:", record); // Debug log for each NFC record
+
+          if (record.recordType === 'text') {
             const txt = decodeRecordText(record);
             playerId = tryExtractPlayerIdFromText(txt);
-          } else if(record.recordType === 'url'){
+          } else if (record.recordType === 'url') {
             const urlTxt = decodeRecordText(record);
             playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
           }
-          if(playerId) break;
+          if (playerId) break;
         }
 
-        if(!playerId){
-          if(event && event.serialNumber) playerId = String(event.serialNumber).trim();
+        // If no playerId found, use serialNumber if available
+        if (!playerId) {
+          if (event && event.serialNumber) playerId = String(event.serialNumber).trim();
         }
 
-        if(!playerId){
-          setNfcStatus('Tag read, but no player_id found.');
-          log('NFC: Tag read, but player_id not extracted.');
+        // Ensure playerId is valid
+        if (!playerId) {
+          console.log('No player_id found.');
           return;
         }
 
-        setNfcStatus(`Read tag for: ${playerId} — sending CHECKIN…`);
-        log(`NFC → player_id=${playerId}`);
-        await sendCheckin(playerId);
+        console.log("Player ID extracted:", playerId);
 
-      }catch(e){
-        log(`NFC onreading error: ${e.message}`);
-        setNfcStatus(`NFC read error: ${e.message}`);
+        // Ensure elements exist before updating them
+        const checkinPlayerId = document.getElementById('checkinPlayerId');
+        const tagUid = document.getElementById('tagUid');
+
+        if (checkinPlayerId && tagUid) {
+          checkinPlayerId.value = playerId.trim();  // Set the value of checkinPlayerId field
+          tagUid.value = playerId.trim();           // Set the value of tagUid field
+
+          // Log updated values
+          console.log(`Updated fields: checkinPlayerId: ${checkinPlayerId.value}, tagUid: ${tagUid.value}`);
+
+          // Enable the check-in button if playerId is valid
+          const btnCheckinManual = document.getElementById('btnCheckinManual');
+          if (btnCheckinManual) {
+            // Only enable button if checkinPlayerId has a valid, non-empty value
+            btnCheckinManual.disabled = !checkinPlayerId.value.trim();
+            console.log('Check-in button enabled:', !btnCheckinManual.disabled);
+          }
+        } else {
+          console.log('Fields not available to update!');
+        }
+      } catch (e) {
+        console.error(`NFC error: ${e.message}`);
       }
     };
+
+  } catch (err) {
+    nfcActive = false;
+    btnNfcStop.disabled = true;
+    btnNfcScan.disabled = !(txChar && ('NDEFReader' in window));
+    setNfcStatus(`NFC error: ${err?.message || err}`);
+    console.error(`NFC error: ${err?.message || err}`);
+  }
+}
 
     ndef.onreadingerror = () => {
       setNfcStatus('NFC reading error — try again.');
@@ -2085,6 +2121,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 
 </body>
 </html>
+
 
 
 
