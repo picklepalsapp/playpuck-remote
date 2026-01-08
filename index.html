@@ -1015,8 +1015,8 @@ async function startNfcScan() {
         checkinPlayerId.value = playerId.trim();  // Autofill manual player ID field
         tagUid.value = playerId.trim();           // Autofill Tag UID field
 
-        console.log("Before setting: checkinPlayerId.value =", checkinPlayerId.value);
-        console.log("Before setting: tagUid.value =", tagUid.value);
+        console.log("After setting: checkinPlayerId.value =", checkinPlayerId.value);
+        console.log("After setting: tagUid.value =", tagUid.value);
 
         // Enable the check-in button if playerId is not empty
         btnCheckinManual.disabled = !checkinPlayerId.value.trim();
@@ -2019,6 +2019,7 @@ log('Ready. Connect to a PlayPUCK to begin.');
 </script>
 </body>
 </html>
+
 
 
 
