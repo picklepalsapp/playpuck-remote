@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>PlayPUCK BLE Control</title>
+  <title>PlayPUCK Remote</title>
 
   <style>
     :root{
@@ -34,34 +34,77 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    /* ---- Header & Status Bar ---- */
     header{
-      padding: 16px 16px 10px;
+      background: #fff;
       position: sticky;
       top: 0;
       z-index: 20;
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
     }
+    
+    .header-title {
+      padding: 16px 16px 10px;
+      text-align: center;
+    }
+    
     header h1{
       margin:0;
       font-size: 18px;
       letter-spacing: .2px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content: space-between;
-    }
-    header .status{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: var(--chip);
-      color: var(--muted);
-      border: 1px solid rgba(99,91,255,.15);
-      white-space: nowrap;
+      color: var(--accent);
     }
 
+    /* New Grid Status Bar */
+    .status-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 0 14px 14px;
+      background: #fff;
+    }
+
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--chip);
+      border: 1px solid rgba(99,91,255,.1);
+      border-radius: 12px;
+      padding: 8px 4px;
+      text-align: center;
+      min-height: 54px;
+    }
+
+    .status-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .status-val {
+      font-size: 12px; 
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      /* Ensures FALLBACK_AUTHORITY wraps if needed */
+      word-wrap: break-word; 
+      word-break: break-word;
+      max-width: 100%;
+    }
+
+    /* Connection dot */
+    .dot {
+      display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px;
+      background: var(--muted);
+    }
+    .dot.on { background: var(--success); }
+
+    /* ---- Main & Cards ---- */
     main{
       padding: 14px 14px 26px;
       max-width: 760px;
@@ -114,31 +157,16 @@
 
     .card .cardBody{ padding: 14px; }
 
-    .row{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
+    .row{ display:flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
     label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 6px;
-      font-weight: 600;
+      display:block; font-size: 12px; color: var(--muted); margin: 0 0 6px; font-weight: 600;
     }
 
     input, select, textarea{
-      width: 100%;
-      padding: 12px 12px;
-      font-size: 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      outline: none;
-      box-shadow: 0 1px 0 rgba(2,8,23,.02);
+      width: 100%; padding: 12px 12px; font-size: 16px; border-radius: 14px;
+      border: 1px solid var(--border); background: #fff; color: var(--text);
+      outline: none; box-shadow: 0 1px 0 rgba(2,8,23,.02);
     }
     textarea{ min-height: 110px; resize: vertical; }
 
@@ -147,192 +175,81 @@
       box-shadow: 0 0 0 4px rgba(99,91,255,.12);
     }
 
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .threeCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
+    .twoCol{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .threeCol{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
     button{
-      -webkit-tap-highlight-color: transparent;
-      appearance: none;
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor:pointer;
-      width: 100%;
-      min-height: 48px;
-      background: var(--btn);
-      color: var(--btnText);
+      -webkit-tap-highlight-color: transparent; appearance: none; border: 0;
+      border-radius: 14px; padding: 12px 14px; font-size: 16px; font-weight: 700;
+      cursor:pointer; width: 100%; min-height: 48px;
+      background: var(--btn); color: var(--btnText);
       box-shadow: 0 8px 18px rgba(17,24,39,.12);
       transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
     }
     button:active{ transform: translateY(1px); }
-    button.secondary{
-      background: #ffffff;
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 18px rgba(2,8,23,.06);
-    }
+    button.secondary{ background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: 0 8px 18px rgba(2,8,23,.06); }
     button.accent{ background: var(--accent); }
     button.good{ background: var(--accent2); }
     button.warn{ background: var(--warn); }
     button.danger{ background: var(--danger); }
-
-    button:disabled{
-      opacity: .55;
-      cursor:not-allowed;
-      box-shadow: none;
-    }
+    button:disabled{ opacity: .55; cursor:not-allowed; box-shadow: none; }
 
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
+      display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
+      border-radius: 999px; background: #f8fafc; border: 1px solid var(--border);
+      color: var(--muted); font-size: 12px; font-weight: 600;
     }
 
-    .hint{
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.35;
-    }
+    .hint{ font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.35; }
 
     .log{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      background: #0b1220;
-      color: #dbeafe;
-      border-radius: 14px;
-      padding: 12px;
-      border: 1px solid rgba(226,232,240,.14);
-      max-height: 200px;
-      overflow:auto;
-      white-space: pre-wrap;
+      font-size: 12px; background: #0b1220; color: #dbeafe;
+      border-radius: 14px; padding: 12px; border: 1px solid rgba(226,232,240,.14);
+      max-height: 200px; overflow:auto; white-space: pre-wrap;
     }
 
-    .scoreboard{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
+    .scoreboard{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .scoreTile{
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
-      position: relative;
+      border: 1px solid var(--border); border-radius: 16px; padding: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%); position: relative;
     }
-    .scoreTile h3{
-      margin:0;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .scoreVal{
-      margin-top: 8px;
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: .6px;
-    }
+    .scoreTile h3{ margin:0; font-size: 13px; color: var(--muted); font-weight: 700; }
+    .scoreVal{ margin-top: 8px; font-size: 34px; font-weight: 900; letter-spacing: .6px; }
 
-    .infoRow{
-      margin-top: 10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
+    .infoRow{ margin-top: 10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
     .infoChip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
+      display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
+      border-radius: 999px; background: #f8fafc; border: 1px solid var(--border);
+      color: var(--muted); font-size: 12px; font-weight: 700;
     }
 
     .gameOver{
-      display:none;
-      margin-top: 10px;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(239,68,68,.25);
-      background: rgba(239,68,68,.08);
-      color: #7f1d1d;
-      font-weight: 900;
-      line-height: 1.2;
+      display:none; margin-top: 10px; padding: 12px 12px; border-radius: 14px;
+      border: 1px solid rgba(239,68,68,.25); background: rgba(239,68,68,.08);
+      color: #7f1d1d; font-weight: 900; line-height: 1.2;
     }
-    .gameOver small{
-      display:block;
-      margin-top:6px;
-      font-weight:700;
-      color:#7f1d1d;
-      opacity:.9;
-      font-size:12px;
-    }
+    .gameOver small{ display:block; margin-top:6px; font-weight:700; color:#7f1d1d; opacity:.9; font-size:12px; }
 
     .nfcStatus{
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1.35;
+      margin-top: 10px; padding: 10px 12px; border-radius: 14px;
+      border: 1px solid var(--border); background: #f8fafc; color: var(--muted);
+      font-size: 12px; font-weight: 600; line-height: 1.35;
     }
 
     .bleBanner{
-      display:none;
-      margin-top:12px;
-      padding:12px;
-      border-radius:14px;
-      background:#fee2e2;
-      border:1px solid #fecaca;
-      color:#7f1d1d;
-      font-size:13px;
-      line-height:1.35;
+      display:none; margin-top:12px; padding:12px; border-radius:14px;
+      background:#fee2e2; border:1px solid #fecaca; color:#7f1d1d;
+      font-size:13px; line-height:1.35;
     }
     .bleBanner strong{ font-weight:900; }
     .bleBanner ul{ margin:8px 0 0 18px; padding:0; }
 
     .toast{
-      position:fixed;
-      left:50%;
-      bottom:22px;
-      transform:translateX(-50%);
-      z-index:9999;
-      display:none;
-      align-items:center;
-      gap:10px;
-      background:#0b1220;
-      color:#e5e7eb;
-      border:1px solid rgba(226,232,240,.14);
-      border-radius:999px;
-      padding:10px 14px;
-      box-shadow:0 18px 40px rgba(2,8,23,.25);
-      pointer-events:none;
+      position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:9999;
+      display:none; align-items:center; gap:10px; background:#0b1220; color:#e5e7eb;
+      border:1px solid rgba(226,232,240,.14); border-radius:999px; padding:10px 14px;
+      box-shadow:0 18px 40px rgba(2,8,23,.25); pointer-events:none;
     }
     .toast.show{ display:flex; animation: toastIn .18s ease-out; }
     @keyframes toastIn{
@@ -340,32 +257,17 @@
       to{ transform: translateX(-50%) translateY(0); opacity:1; }
     }
     .tick{
-      width:22px;height:22px;border-radius:999px;
-      background:rgba(34,197,94,.16);
-      border:1px solid rgba(34,197,94,.35);
-      display:grid;place-items:center;
+      width:22px;height:22px;border-radius:999px; background:rgba(34,197,94,.16);
+      border:1px solid rgba(34,197,94,.35); display:grid; place-items:center;
     }
     .tick svg{ width:14px;height:14px;stroke:var(--success);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round; }
 
     .checkRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px 12px;
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:#fff;
+      display:flex; gap:10px; align-items:center; padding: 10px 12px;
+      border:1px solid var(--border); border-radius:14px; background:#fff;
     }
-    .checkRow input[type="checkbox"]{
-      width:20px;height:20px;
-      margin:0;
-      accent-color: var(--accent);
-    }
-    .checkRow span{
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
+    .checkRow input[type="checkbox"]{ width:20px;height:20px; margin:0; accent-color: var(--accent); }
+    .checkRow span{ font-size: 13px; color: var(--muted); font-weight: 700; }
 
     @media (max-width: 460px){
       .twoCol, .threeCol{ grid-template-columns: 1fr; }
@@ -373,13 +275,29 @@
     }
   </style>
 </head>
-
 <body>
 <header>
-  <h1>
-    PlayPUCK BLE Control
-    <span id="connStatus" class="status">Disconnected</span>
-  </h1>
+  <div class="header-title">
+    <h1>PlayPUCK Remote</h1>
+  </div>
+  
+  <div class="status-bar">
+    <div class="status-item">
+      <span class="status-label">Role</span>
+      <span id="roleDisplay" class="status-val">—</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">State</span>
+      <span id="stateDisplay" class="status-val">IDLE</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Status</span>
+      <span class="status-val" style="display:flex;align-items:center;gap:2px;">
+         <span id="connDot" class="dot"></span>
+         <span id="connText">Offline</span>
+      </span>
+    </div>
+  </div>
 </header>
 
 <main>
@@ -812,7 +730,13 @@ const BLE = {
 
 const el = (id) => document.getElementById(id);
 const logEl = el('log');
-const connStatus = el('connStatus');
+
+// Status Bar Elements
+const roleDisplay = el('roleDisplay');
+const stateDisplay = el('stateDisplay');
+const connDot = el('connDot');
+const connText = el('connText');
+
 const deviceNamePill = el('deviceNamePill');
 const rssiPill = el('rssiPill');
 const reconnectPill = el('reconnectPill');
@@ -842,17 +766,6 @@ function showBanner(html){
 function hideBanner(){
   bleBanner.style.display = 'none';
   bleBanner.innerHTML = '';
-}
-function looksLikeBleBusy(errMsg){
-  const m = String(errMsg || '').toLowerCase();
-  return (
-    (m.includes('gatt') && m.includes('busy')) ||
-    m.includes('operation already in progress') ||
-    m.includes('failed to connect') ||
-    m.includes('networkerror') ||
-    m.includes('notpermittederror') ||
-    m.includes('securityerror')
-  );
 }
 
 const btnConnect = el('btnConnect');
@@ -1080,9 +993,10 @@ let lastState = {
   format: null,
   win_points: null,
   win_rule: null,
-  paused: false,      // ✅ authoritative pause
+  paused: false,
   game_over: false,
-  winner: null
+  winner: null,
+  role: 'UNKNOWN' // Added Role support
 };
 
 function persistLastState(){
@@ -1142,6 +1056,11 @@ function renderPauseUI(){
 
   btnPauseToggle.textContent = paused ? 'Unpause game' : 'Pause game';
   btnPauseToggle.className = paused ? 'good' : 'secondary';
+  
+  // Also update global state display if paused
+  if(paused) stateDisplay.textContent = 'PAUSED';
+  else if(lastState.game_over) stateDisplay.textContent = 'GAME OVER';
+  else stateDisplay.textContent = 'ACTIVE';
 }
 
 btnPauseToggle.addEventListener('click', async () => {
@@ -1160,7 +1079,6 @@ btnPauseToggle.addEventListener('click', async () => {
       showToast('Pause sent');
       vibrate([40,30,40]);
     }
-    // UI updates when next STATE arrives (authoritative)
   }catch(e){
     log(`Pause cmd send error: ${e.message}`);
   }
@@ -1174,6 +1092,9 @@ function renderStateUI(){
   infoServerNum.textContent = lastState.server_num ? `Server: ${lastState.server_num}` : 'Server: —';
   infoMode.textContent = lastState.mode ? `Mode: ${lastState.mode}` : 'Mode: —';
   infoTarget.textContent = lastState.win_points ? `First to: ${lastState.win_points}` : 'First to: —';
+  
+  // Update New Status Bar
+  roleDisplay.textContent = lastState.role || '—';
 
   setGameOverUI(!!lastState.game_over, (lastState.winner || null), lastState.a ?? 0, lastState.b ?? 0);
 
@@ -1183,7 +1104,6 @@ function renderStateUI(){
   btnScoreA.disabled = !canScore;
   btnScoreB.disabled = !canScore;
 
-  // edit score locked while paused or game over
   const canEdit = !!txChar && !isPaused && !lastState.game_over;
   btnAminus.disabled = !canEdit;
   btnAplus.disabled  = !canEdit;
@@ -1193,7 +1113,6 @@ function renderStateUI(){
   btnBplus.disabled  = !canEdit;
   btnBset.disabled   = !canEdit;
 
-  // TAG_TAP locked when paused or game over
   btnTagTap.disabled = !(!!txChar && !isPaused && !lastState.game_over);
 
   renderPauseUI();
@@ -1217,8 +1136,11 @@ function parseRx(text){
       if(typeof obj.format === 'string') lastState.format = obj.format;
       if(typeof obj.win_points === 'number') lastState.win_points = obj.win_points;
       if(typeof obj.win_rule === 'string') lastState.win_rule = obj.win_rule;
-      if(typeof obj.paused === 'boolean') lastState.paused = obj.paused;     // ✅ authoritative pause
+      if(typeof obj.paused === 'boolean') lastState.paused = obj.paused;
       if(typeof obj.game_over === 'boolean') lastState.game_over = obj.game_over;
+      
+      // Added Role Parsing
+      if(typeof obj.role === 'string') lastState.role = obj.role;
 
       if(!lastState.game_over) lastState.winner = null;
 
@@ -1327,7 +1249,6 @@ btnCheckinManual.addEventListener('click', async () => {
   const playerId = checkinPlayerId.value.trim();
   
   if (playerId) {
-    // Autofill the Tag UID field when the manual player ID is entered
     tagUid.value = playerId;
   }
 
@@ -1360,9 +1281,7 @@ function tryExtractPlayerIdFromUrl(urlText){
   }
 }
 
-// --- CORRECTED NFC SCAN FUNCTION (FIXED) ---
 async function startNfcScan() {
-  // 1. Pre-checks
   if (!txChar) {
     setNfcStatus('Connect to the PlayPUCK first (BLE).');
     return;
@@ -1373,7 +1292,6 @@ async function startNfcScan() {
   }
 
   try {
-    // 2. Start Scanning
     ndef = new NDEFReader();
     setNfcStatus('Requesting NFC permission…');
     await ndef.scan();
@@ -1381,17 +1299,14 @@ async function startNfcScan() {
     nfcActive = true;
     setNfcStatus('NFC ready — tap a player tag.');
 
-    // 3. UI State
     btnNfcStop.disabled = false;
     btnNfcScan.disabled = true;
 
-    // 4. Reading Event
     ndef.onreading = async (event) => {
       try {
         log("NFC tag detected.");
         let playerId = null;
 
-        // A) Try to find a Text or URL record with data
         for (const record of event.message.records) {
           if (record.recordType === 'text') {
             const txt = decodeRecordText(record);
@@ -1400,22 +1315,18 @@ async function startNfcScan() {
             const urlTxt = decodeRecordText(record);
             playerId = tryExtractPlayerIdFromUrl(urlTxt) || tryExtractPlayerIdFromText(urlTxt);
           }
-          if (playerId) break; // Found one!
+          if (playerId) break;
         }
 
-        // B) Fallback to Serial Number if no data found
         if (!playerId && event.serialNumber) {
            playerId = String(event.serialNumber).trim();
         }
 
-        // C) Handle Result
         if (playerId) {
           log(`NFC Read: ${playerId}`);
           
-          // --- FIX: Update the Global UI Elements Directly ---
           if(checkinPlayerId) {
              checkinPlayerId.value = playerId;
-             // Force UI update for the checkin button
              if(btnCheckinManual) btnCheckinManual.disabled = false;
           }
           
@@ -1423,7 +1334,6 @@ async function startNfcScan() {
              tagUid.value = playerId;
           }
 
-          // Update Status & Send Command
           setNfcStatus(`✅ Read: ${playerId} — sending CHECKIN…`);
           await sendCheckin(playerId);
 
@@ -1567,36 +1477,25 @@ function scheduleReconnect(reason){
 async function connectWithExistingDevice(label) {
     try {
         setReconnectPill(label);
-
-        // Attempt to connect to the GATT server
         server = await device.gatt.connect();
-        console.log("Connected to GATT server");
-
-        // Fetch services and characteristics
         service = await server.getPrimaryService(BLE.SERVICE_UUID);
         txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
         rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
 
-        console.log("GATT service and characteristics retrieved");
-
-        // Start notifications for RX (Receiving)
         await rxChar.startNotifications();
         rxChar.addEventListener('characteristicvaluechanged', (ev) => {
             const txt = new TextDecoder().decode(ev.target.value);
             console.log(`← ${txt}`);
-            parseRx(txt); // Process the incoming data
+            parseRx(txt);
         });
 
-        // Update the UI when connected
         setConnectedUI(true);
         showToast('Connected ✅');
         vibrate([40, 30, 40]);
-        resetReconnect(); // Reset the reconnect timer after successful connection
+        resetReconnect();
     } catch (error) {
-        // Handle any errors during connection
-        console.error('Error while connecting to GATT server:', error);
         log(`Connection error: ${error.message}`);
-        setConnectedUI(false); // Update UI to show disconnected status
+        setConnectedUI(false);
     }
 }
 
@@ -1616,10 +1515,17 @@ async function tryReconnect(fromTimer) {
 }
 
 function setConnectedUI(connected) {
-  connStatus.textContent = connected ? 'Connected' : 'Disconnected';
-  connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
-  connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
-  connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
+  
+  // New Status Bar Updates
+  if(connected){
+      connDot.classList.add('on');
+      connText.textContent = 'Online';
+      connText.style.color = 'var(--text)';
+  } else {
+      connDot.classList.remove('on');
+      connText.textContent = 'Offline';
+      connText.style.color = 'var(--muted)';
+  }
 
   if (connected) {
     btnConnect.className = 'secondary';
@@ -1672,131 +1578,60 @@ function setConnectedUI(connected) {
 }
 
 /* ---------- BLE CONNECT / DISCONNECT ---------- */
-// Ensure we preserve the working logic and improve as needed.
 btnConnect.addEventListener('click', async () => {
     try {
         hideBanner();
         hadConnectFailure = false;
 
-        // Request the device using Bluetooth's Web API, specifically for PlayPUCK devices.
         log('Requesting BLE device...');
         device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,  // Use specific filters if needed
-            optionalServices: [BLE.SERVICE_UUID]  // The required service UUID
+            acceptAllDevices: true,
+            optionalServices: [BLE.SERVICE_UUID]
         });
 
         deviceNamePill.textContent = `Device: ${device.name || 'Unnamed'}`;
 
-        // Prevent duplicate connection attempts if the device is already connected
-        if (device.gatt?.connected) {
-            console.log('Device already connected!');
-            return; // Exit if the device is already connected
-        }
+        if (device.gatt?.connected) return;
 
-        // Establish connection to the device
         const server = await device.gatt.connect();
-        console.log("Connected to GATT server");
-
-        // Fetch the PlayPUCK service and characteristics
         const service = await server.getPrimaryService(BLE.SERVICE_UUID);
         txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
         rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
 
-        console.log("GATT service and characteristics retrieved");
-
-        // Start receiving notifications for the RX characteristic
         await rxChar.startNotifications();
         rxChar.addEventListener('characteristicvaluechanged', (ev) => {
             const txt = new TextDecoder().decode(ev.target.value);
             console.log(`← ${txt}`);
-            parseRx(txt);  // Parse and process incoming data
+            parseRx(txt);
         });
 
-        // Update the UI to reflect the successful connection
         setConnectedUI(true);
         showToast('Connected ✅');
-        vibrate([40, 30, 40]);  // Vibrate feedback for connection success
-        resetReconnect();  // Reset any reconnect logic
+        vibrate([40, 30, 40]);
+        resetReconnect();
 
     } catch (err) {
         console.log('Error while connecting:', err);
         showToast('Connection failed');
-        setConnectedUI(false);  // Update UI to reflect the error
+        setConnectedUI(false);
     }
 });
 
-// Disconnect button logic
 btnDisconnect.addEventListener('click', async () => {
     try {
         resetReconnect();
         setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
 
-        // Disconnect the device if it's connected
         if (device?.gatt?.connected) {
             device.gatt.disconnect();
             vibrate([50, 20, 50]);
-            setConnectedUI(false);  // Update UI for disconnection
-            if (nfcActive) stopNfcScan();  // Stop NFC scan if active
+            setConnectedUI(false);
+            if (nfcActive) stopNfcScan();
         }
     } catch (e) {
         log(`Disconnect error: ${e.message}`);
     }
 });
-
-// This ensures the UI reflects the correct connection state
-function setConnectedUI(connected) {
-    connStatus.textContent = connected ? 'Connected' : 'Disconnected';
-    connStatus.style.background = connected ? 'rgba(16,185,129,.12)' : 'var(--chip)';
-    connStatus.style.borderColor = connected ? 'rgba(16,185,129,.25)' : 'rgba(99,91,255,.15)';
-    connStatus.style.color = connected ? '#065f46' : 'var(--muted)';
-
-    if (connected) {
-        btnConnect.className = 'secondary';
-        btnConnect.disabled = true;
-
-        btnDisconnect.className = 'accent';
-        btnDisconnect.disabled = false;
-
-        hideBanner();
-        hadConnectFailure = false;
-
-        if (autoReconnect.checked) setReconnectPill('—');
-        else setReconnectPill('OFF');
-    } else {
-        btnConnect.className = 'accent';
-        btnConnect.disabled = false;
-
-        btnDisconnect.className = 'secondary';
-        btnDisconnect.disabled = true;
-
-        if (hadConnectFailure) {
-            if (!bleBanner.innerHTML) {
-                showBanner(`<strong>Connection failed</strong><br>Try again.`);
-            }
-        } else {
-            hideBanner();
-        }
-    }
-
-    // Disable buttons while not connected
-    btnSendWifi.disabled = !connected;
-    btnUploadProfile.disabled = !connected;
-    btnStartGame.disabled = !connected;
-    btnEndGame.disabled = !connected;
-    btnPauseToggle.disabled = !connected;
-    btnApplyProfileMidMatch.disabled = !connected;
-    btnCheckinManual.disabled = !connected;
-    btnTagRegister.disabled = !connected;
-    btnTagAssign.disabled = !connected;
-    btnTagClearTeams.disabled = !connected;
-    btnTagClearAll.disabled = !connected;
-
-    const webNfcSupported = ('NDEFReader' in window);
-    btnNfcScan.disabled = !(connected && webNfcSupported);
-    btnNfcStop.disabled = !nfcActive;
-
-    renderStateUI();
-}
 
 /* ---------- STEP BUTTONS ---------- */
 btnSendWifi.addEventListener('click', async () => {
@@ -1844,7 +1679,6 @@ btnEndGame.addEventListener('click', async () => {
   }
 });
 
-// Score game (blocked when paused)
 btnScoreA.addEventListener('click', async () => {
   try{
     if(lastState.paused){ log('Score blocked: puck paused.'); showToast('Paused'); return; }
@@ -1864,7 +1698,6 @@ btnScoreB.addEventListener('click', async () => {
   }
 });
 
-// Edit score (blocked when paused)
 btnAminus.addEventListener('click', async () => {
   try{
     if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
