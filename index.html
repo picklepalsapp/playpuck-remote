@@ -723,9 +723,10 @@
 </div>
 <script>
     /* -----------------------------------------------------
-       PlayPUCK Web Portal - Updated Logic
-       - Score Buttons: Send ACTION (Triggers rules/sideout)
-       - Edit Buttons: Send SYNC_SET (Direct override)
+       PlayPUCK Web Portal - Fixed Protocol
+       1. bleSend: Now sends pure JSON (Fixes WiFi, Upload, Start/End)
+       2. Score Buttons: Send ACTION (Triggers rules/sideout)
+       3. Edit Buttons: Send SYNC_SET (Direct override)
        ----------------------------------------------------- */
 
     const BLE = {
@@ -1023,10 +1024,15 @@
 
     function enc(str){ return new TextEncoder().encode(str); }
 
-    async function bleSend(command, payloadObj = null) {
+    /* ---------- FIXED BLE SEND (Pure JSON) ---------- */
+    async function bleSend(type, data = {}) {
       if (!txChar) throw new Error('Not connected / TX characteristic missing.');
-      const payload = payloadObj ? JSON.stringify(payloadObj) : '';
-      const line = payload ? `${command} ${payload}` : `${command}`;
+      
+      // FIX: Wrap command (type) and data into one JSON object.
+      // This matches the Arduino expectation of searching for "type":"..."
+      const payload = { type: type, ...data };
+      const line = JSON.stringify(payload);
+      
       await txChar.writeValue(new TextEncoder().encode(line));
       log(`→ ${line}`);
     }
@@ -1642,7 +1648,7 @@
         lastState.winner = null;
         persistLastState();
         setGameOverUI(false, null, lastState.a ?? 0, lastState.b ?? 0);
-        await bleSend('ACTION', { action: 'START_GAME' });
+        await bleSend('START_GAME');
         renderStateUI();
       }catch(e){
         log(`Start error: ${e.message}`);
@@ -1651,7 +1657,7 @@
 
     btnEndGame.addEventListener('click', async () => {
       try{
-        await bleSend('ACTION', { action: 'END_GAME' });
+        await bleSend('END_GAME');
         showToast('Sent END_GAME');
       }catch(e){
         log(`End game error: ${e.message}`);
@@ -1664,7 +1670,6 @@
         if(lastState.paused){ log('Score blocked: puck paused.'); showToast('Paused'); return; }
         if(lastState.game_over){ log('Score blocked: game over.'); showToast('Game Over'); return; }
         
-        // FIX: Send ACTION so Puck applies rules
         await bleSend('ACTION', { action: 'SCORE_A' });
       }catch(e){
         log(`Score A error: ${e.message}`);
@@ -1676,7 +1681,6 @@
         if(lastState.paused){ log('Score blocked: puck paused.'); showToast('Paused'); return; }
         if(lastState.game_over){ log('Score blocked: game over.'); showToast('Game Over'); return; }
         
-        // FIX: Send ACTION so Puck applies rules
         await bleSend('ACTION', { action: 'SCORE_B' });
       }catch(e){
         log(`Score B error: ${e.message}`);
@@ -1693,7 +1697,6 @@
         if(lastState.paused){ log('Edit blocked: puck paused.'); showToast('Paused'); return; }
         if(lastState.game_over){ log('Edit blocked: game over.'); showToast('Game Over'); return; }
         
-        // Calculate new val locally
         const newVal = Math.max(0, (lastState.a || 0) - 1);
         await sendSyncOverride({ a: newVal });
       }catch(e){ log(`A- error: ${e.message}`); }
@@ -1758,6 +1761,3 @@
     setReconnectPill(autoReconnect.checked ? '—' : 'OFF');
     log('Ready. Connect to a PlayPUCK to begin.');
 </script>
-</body>
-</html>
-
