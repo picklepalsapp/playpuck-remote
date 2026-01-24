@@ -9,24 +9,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
 
 <style>
-/* --- PlayPUCK Brand Variables (Light Theme) --- */
+/* --- PlayPUCK Brand Variables (Clean White Theme) --- */
 :root {
-  /* Core Layout Colors */
-  --bg: #F6F7FB;         /* Original light grey background */
-  --card: #FFFFFF;       /* White cards */
-  --text: #0F1218;       /* Brand 'Charcoal' for text */
-  --muted: #64748B;      /* Slate grey for secondary text */
-  --border: #E2E8F0;     /* Light borders */
-  --shadow: 0 4px 20px rgba(0,0,0,0.05); /* Soft shadow */
+  --bg: #F6F7FB;
+  --card: #FFFFFF;
+  --text: #0F1218;       /* Charcoal */
+  --muted: #64748B;      /* Slate */
+  --border: #E2E8F0;
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
 
-  /* Brand Traffic Light Palette */
+  /* Traffic Light System */
   --puck-green: #1CB860;
   --puck-amber: #F9CF25;
   --puck-red:   #E92020;
   --puck-charcoal: #0F1218;
 
-  /* UI Elements */
-  --btn-primary: #0F1218; /* Charcoal buttons (like original) */
+  /* UI Components */
+  --btn-primary: #0F1218;
   --btn-text: #FFFFFF;
   --chip-bg: #F1F5F9;
 }
@@ -36,7 +35,7 @@ html, body { height: 100%; }
 
 body {
   margin: 0;
-  font-family: "Comfortaa", system-ui, sans-serif; /* Brand Font */
+  font-family: "Comfortaa", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -44,85 +43,46 @@ body {
 
 /* ---- Header ---- */
 header {
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 50;
+  background: #fff; position: sticky; top: 0; z-index: 50;
   border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
+.header-title { padding: 16px; text-align: center; }
+header h1 { margin: 0; font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
 
-.header-title {
-  padding: 16px;
-  text-align: center;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-header p {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* Status Bar Grid (Preserved from Original) */
+/* Status Bar */
 .status-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 0 14px 14px;
-  background: #fff;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+  padding: 0 14px 14px; background: #fff;
 }
 .status-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: var(--chip-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px; /* Rounded corners */
-  padding: 8px 4px;
-  min-height: 54px;
+  background: var(--chip-bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 8px 4px; min-height: 54px;
 }
 .status-label { font-size: 10px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
 .status-val { font-size: 12px; font-weight: 800; color: var(--text); line-height: 1.1; word-wrap: break-word; }
-
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: var(--muted); }
 .dot.on { background: var(--puck-green); box-shadow: 0 0 6px var(--puck-green); }
 
 /* ---- Layout & Cards ---- */
-main {
-  padding: 20px 14px 40px;
-  max-width: 760px;
-  margin: 0 auto;
-}
+main { padding: 20px 14px 40px; max-width: 760px; margin: 0 auto; }
 .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 24px; /* Brand rounded look */
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px; box-shadow: var(--shadow); overflow: hidden;
 }
-
 .cardHeader {
-  padding: 16px;
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
-  border-bottom: 1px solid var(--border);
-  background: #FAFAFA; /* Very subtle grey header */
+  padding: 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  border-bottom: 1px solid var(--border); background: #FAFAFA;
 }
 .cardHeader h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text); }
 .cardHeader p { margin: 4px 0 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
-
 .stepBadge {
   font-size: 12px; font-weight: 800; color: var(--puck-charcoal);
-  background: var(--puck-amber); /* Traffic light amber */
-  padding: 4px 10px; border-radius: 99px; min-width: 28px; text-align: center;
+  background: var(--puck-amber); padding: 4px 10px; border-radius: 99px; min-width: 28px; text-align: center;
 }
-
 .cardBody { padding: 16px; }
 
 /* ---- Inputs & Forms ---- */
@@ -131,38 +91,34 @@ main {
 .threeCol { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
 label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; font-weight: 700; }
-
 input, select, textarea {
   width: 100%; padding: 12px 14px; font-size: 16px; border-radius: 12px;
   border: 1px solid var(--border); background: #fff; color: var(--text);
-  outline: none; font-family: inherit;
-  transition: border-color 0.2s;
+  outline: none; font-family: inherit; transition: border-color 0.2s;
 }
 input:focus, select:focus, textarea:focus {
-  border-color: var(--puck-green);
-  box-shadow: 0 0 0 3px rgba(28,184,96,0.1);
+  border-color: var(--puck-green); box-shadow: 0 0 0 3px rgba(28,184,96,0.1);
 }
 textarea { min-height: 100px; resize: vertical; }
 
-/* ---- Buttons (Brand Pills) ---- */
+/* ---- Buttons ---- */
 button {
   -webkit-tap-highlight-color: transparent; appearance: none; border: 0;
-  border-radius: 99px; /* Pill Shape */
-  padding: 12px 20px; font-size: 15px; font-weight: 700;
+  border-radius: 99px; padding: 12px 20px; font-size: 15px; font-weight: 700;
   cursor: pointer; width: 100%; min-height: 48px;
   background: var(--btn-primary); color: var(--btn-text);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform .1s ease, opacity .2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform .1s ease, opacity .2s ease;
   font-family: inherit;
 }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
 button.secondary { background: #fff; color: var(--text); border: 2px solid var(--border); box-shadow: none; }
-button.accent { background: var(--puck-charcoal); color: #fff; } /* Primary Action */
+button.accent { background: var(--puck-charcoal); color: #fff; }
 button.good { background: var(--puck-green); color: #fff; }
 button.warn { background: var(--puck-amber); color: #000; }
 button.danger { background: var(--puck-red); color: #fff; }
+button.iconBtn { width: auto; min-height: 36px; padding: 6px 12px; font-size: 13px; }
 
 /* ---- Components ---- */
 .pill {
@@ -172,16 +128,23 @@ button.danger { background: var(--puck-red); color: #fff; }
 }
 .checkRow {
   display: flex; gap: 10px; align-items: center; padding: 12px;
-  border: 1px solid var(--border); border-radius: 12px; background: #fff;
-  cursor: pointer;
+  border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer;
 }
 .checkRow input { width: 20px; height: 20px; margin: 0; accent-color: var(--puck-green); }
-
 .bleBanner {
   display: none; margin-top: 12px; padding: 12px; border-radius: 12px;
   background: #FEF2F2; border: 1px solid #FECACA; color: var(--puck-red);
   font-size: 13px; line-height: 1.4;
 }
+
+/* ---- Input Device List (NEW) ---- */
+.device-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.device-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: #fff; border: 1px solid var(--border); border-radius: 12px;
+}
+.device-mac { font-family: monospace; font-weight: 700; color: var(--text); }
+.device-label { font-size: 11px; color: var(--muted); }
 
 /* Scoreboard */
 .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
@@ -197,44 +160,31 @@ button.danger { background: var(--puck-red); color: #fff; }
   padding: 4px 10px; border-radius: 8px; background: var(--chip-bg); border: 1px solid var(--border);
   color: var(--muted); font-size: 11px; font-weight: 700;
 }
-
 .gameOver {
   display: none; margin-top: 12px; padding: 16px; border-radius: 16px;
   background: #FEF2F2; border: 2px solid var(--puck-red);
   color: var(--puck-red); text-align: center; font-weight: 800;
 }
-
 .log {
-  font-family: monospace; font-size: 11px;
-  background: #0F172A; color: #E2E8F0;
-  border-radius: 12px; padding: 12px;
-  max-height: 180px; overflow: auto; white-space: pre-wrap;
+  font-family: monospace; font-size: 11px; background: #0F172A; color: #E2E8F0;
+  border-radius: 12px; padding: 12px; max-height: 180px; overflow: auto; white-space: pre-wrap;
 }
-
 .toast {
   position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 9999;
-  display: none; align-items: center; gap: 10px;
-  background: var(--puck-charcoal); color: #fff;
-  border-radius: 99px; padding: 12px 24px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2); pointer-events: none;
+  display: none; align-items: center; gap: 10px; background: var(--puck-charcoal); color: #fff;
+  border-radius: 99px; padding: 12px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); pointer-events: none;
 }
 .toast.show { display: flex; animation: toastIn .2s ease-out; }
 @keyframes toastIn { from{ transform: translateX(-50%) translateY(10px); opacity:0; } to{ transform: translateX(-50%) translateY(0); opacity:1; } }
 
-/* Mobile Tweaks */
-@media (max-width: 480px) {
-  .twoCol, .threeCol { grid-template-columns: 1fr; }
-  .scoreboard { gap: 10px; }
-}
+@media (max-width: 480px) { .twoCol, .threeCol { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <header>
   <div class="header-title">
     <h1>PlayPUCK</h1>
-    <p>Tapping into Sport</p>
   </div>
-
   <div class="status-bar">
     <div class="status-item">
       <span class="status-label">Role</span>
@@ -270,15 +220,12 @@ button.danger { background: var(--puck-red); color: #fff; }
           <button id="btnConnect" class="accent">Connect</button>
           <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
         </div>
-        
         <div id="bleBanner" class="bleBanner"></div>
-        
         <div class="row" style="margin-top:12px;">
           <span class="pill" id="deviceNamePill">Device: —</span>
           <span class="pill" id="rssiPill">RSSI: —</span>
           <span class="pill" id="reconnectPill">Reconnect: —</span>
         </div>
-
         <div style="margin-top:12px;">
           <label class="checkRow">
             <input id="autoReconnect" type="checkbox" checked>
@@ -292,7 +239,7 @@ button.danger { background: var(--puck-red); color: #fff; }
       <div class="cardHeader">
         <div>
           <h2>Wi-Fi Setup</h2>
-          <p>Manage Cloud Sync credentials.</p>
+          <p>Send credentials to the puck.</p>
         </div>
         <div class="stepBadge">2</div>
       </div>
@@ -301,26 +248,16 @@ button.danger { background: var(--puck-red); color: #fff; }
         <select id="savedWifi">
           <option value="" selected>— Select Saved —</option>
         </select>
-        <div class="hint">Stored locally on your device.</div>
-
         <div class="twoCol" style="margin-top:12px;">
-          <div>
-            <label>SSID Name</label>
-            <input id="wifiSsid" placeholder="e.g. HomeWiFi">
-          </div>
-          <div>
-            <label>Password</label>
-            <input id="wifiPass" type="password" placeholder="••••••••">
-          </div>
+          <div><label>SSID Name</label><input id="wifiSsid" placeholder="e.g. HomeWiFi"></div>
+          <div><label>Password</label><input id="wifiPass" type="password" placeholder="••••••••"></div>
         </div>
-
         <div style="margin-top:10px;">
            <label class="checkRow">
               <input id="showWifiPass" type="checkbox">
-              <span>Show password characters</span>
+              <span>Show password</span>
            </label>
         </div>
-
         <div class="twoCol" style="margin-top:16px;">
           <button id="btnSendWifi" class="good" disabled>Send to Puck</button>
           <button id="btnSaveWifi" class="secondary">Save Locally</button>
@@ -332,23 +269,51 @@ button.danger { background: var(--puck-red); color: #fff; }
       </div>
     </section>
 
+    <section class="card" id="cardInputs">
+      <div class="cardHeader">
+        <div>
+          <h2>Input Devices</h2>
+          <p>Manage allowed Shelly/RF buttons.</p>
+        </div>
+        <div class="stepBadge">3</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+           <div>
+             <label>Device MAC Address</label>
+             <input id="inputMac" placeholder="AA:BB:CC:DD:EE:FF">
+           </div>
+           <div style="display:flex; align-items:flex-end;">
+             <button id="btnAddMac" class="accent">Add Device</button>
+           </div>
+        </div>
+        
+        <label style="margin-top:16px;">Allowed Devices (Upload to Sync)</label>
+        <div id="deviceList" class="device-list">
+           <div class="pill" style="justify-content:center;">No devices added</div>
+        </div>
+        
+        <div class="hint">
+          Add MACs here, then press <b>Upload Profile</b> below to send the Allowlist to the Puck.
+        </div>
+      </div>
+    </section>
+
     <section class="card" id="cardMatch">
       <div class="cardHeader">
         <div>
           <h2>Game Mode</h2>
           <p>Configure rules and profiles.</p>
         </div>
-        <div class="stepBadge">3</div>
+        <div class="stepBadge">4</div>
       </div>
       <div class="cardBody">
-        
         <label>Sport</label>
         <select id="sportSelect" style="margin-bottom:12px;">
             <option value="PICKLEBALL" selected>Pickleball</option>
-            <option value="TENNIS">Tennis (Future)</option>
-            <option value="BADMINTON">Badminton (Future)</option>
+            <option value="TENNIS">Tennis</option>
+            <option value="BADMINTON">Badminton</option>
         </select>
-
         <div class="twoCol">
           <div>
             <label>Format</label>
@@ -365,7 +330,6 @@ button.danger { background: var(--puck-red); color: #fff; }
             </select>
           </div>
         </div>
-
         <div class="twoCol" style="margin-top:12px;">
           <div>
             <label>Play to...</label>
@@ -385,37 +349,38 @@ button.danger { background: var(--puck-red); color: #fff; }
           </div>
         </div>
 
-        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-            <div class="twoCol">
-                <div>
-                   <label>Match ID (Optional)</label>
-                   <input id="matchId" placeholder="e.g. COURT-1">
-                </div>
-                <div>
-                   <label>Custom Override</label>
-                   <select id="customOverride">
-                       <option value="OFF" selected>OFF</option>
-                       <option value="ON">ON (Use JSON)</option>
-                   </select>
-                </div>
-            </div>
-            
-            <div style="margin-top:10px;">
-              <textarea id="matchJson" placeholder='{"rules":...}'></textarea>
-            </div>
+        <button id="btnUploadProfile" class="accent" style="margin-top:16px;" disabled>Upload Profile (Rules + Devices)</button>
+        
+        <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:10px;">
+           <label>Advanced</label>
+           <div class="twoCol">
+              <input id="matchId" placeholder="Match ID (Optional)">
+              <select id="customOverride">
+                 <option value="OFF" selected>Override OFF</option>
+                 <option value="ON">Override ON (Use JSON)</option>
+              </select>
+           </div>
+           <textarea id="matchJson" style="margin-top:8px; display:none;" placeholder="JSON"></textarea>
         </div>
-
-        <button id="btnUploadProfile" class="accent" style="margin-top:16px;" disabled>Upload Profile to Puck</button>
-        <div class="hint" style="text-align:center;">Must be uploaded before starting.</div>
+        
+        <div class="twoCol" style="margin-top:10px;">
+           <button id="btnApplyProfileMidMatch" class="warn" disabled>Apply Mid-Match</button>
+           <button id="btnPauseToggle" class="secondary" disabled>Pause Game</button>
+        </div>
+        <div class="checkRow" style="margin-top:8px;">
+            <input id="chkAutoPauseApply" type="checkbox">
+            <span>Auto-pause on apply</span>
+        </div>
       </div>
     </section>
+
     <section class="card" id="cardStart">
         <div class="cardHeader">
             <div>
                 <h2>Match Control</h2>
                 <p>Start or End the active session.</p>
             </div>
-            <div class="stepBadge">4</div>
+            <div class="stepBadge">5</div>
         </div>
         <div class="cardBody">
             <div class="twoCol">
@@ -431,16 +396,14 @@ button.danger { background: var(--puck-red); color: #fff; }
           <h2>Scoreboard</h2>
           <p>Live scoring and remote inputs.</p>
         </div>
-        <div class="stepBadge">5</div>
+        <div class="stepBadge">6</div>
       </div>
       <div class="cardBody">
-        
         <div id="gameOverBanner" class="gameOver">
           GAME OVER<br>
           <span id="gameOverWinner" style="font-size:14px; color:#000;">—</span>
-          <br><small id="gameOverSub" style="color:#000; opacity:0.6;">Final: —</small>
+          <br><small id="gameOverSub">Final: —</small>
         </div>
-
         <div class="scoreboard">
           <div class="scoreTile">
             <h3>Team A</h3>
@@ -451,46 +414,27 @@ button.danger { background: var(--puck-red); color: #fff; }
             <div id="scoreB" class="scoreVal">0</div>
           </div>
         </div>
-
         <div class="twoCol" style="margin-top:12px;">
             <button id="btnScoreA" class="accent" disabled>+ Point A</button>
             <button id="btnScoreB" class="accent" disabled>+ Point B</button>
         </div>
-
         <button id="btnUndo" class="secondary" style="margin-top:12px;">Undo Last Action</button>
-
         <div class="infoRow">
             <span class="infoChip" id="infoServe">Serve: —</span>
             <span class="infoChip" id="infoServerNum">Server: —</span>
             <span class="infoChip" id="infoMode">Mode: —</span>
-            <span class="infoChip" id="infoTarget">Target: —</span>
-        </div>
-
-        <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
-            <label class="checkRow" style="margin-bottom:12px;">
-                <input id="chkAutoPauseApply" type="checkbox">
-                <span>Auto-pause on rule change</span>
-            </label>
-            
-            <div class="twoCol">
-                <button id="btnPauseToggle" class="warn" disabled>Pause Game</button>
-                <button id="btnApplyProfileMidMatch" class="secondary" disabled>Update Rules (Mid-game)</button>
-            </div>
-            <div style="text-align:center; margin-top:10px;">
-                 <span class="pill" id="pausePill">Paused: OFF</span>
-                 <span class="pill" id="infoPaused">State: Active</span>
-            </div>
+            <span class="infoChip" id="pausePill">Paused: OFF</span>
         </div>
       </div>
     </section>
-
+    
     <section class="card" id="cardEdit">
       <div class="cardHeader">
         <div>
           <h2>Manual Edit</h2>
           <p>Correction override (Admin only).</p>
         </div>
-        <div class="stepBadge">6</div>
+        <div class="stepBadge">7</div>
       </div>
       <div class="cardBody">
         <div class="twoCol">
@@ -526,7 +470,7 @@ button.danger { background: var(--puck-red); color: #fff; }
             <h2>NFC & Tags</h2>
             <p>Register players and hardware tags.</p>
         </div>
-        <div class="stepBadge">7</div>
+        <div class="stepBadge">8</div>
       </div>
       <div class="cardBody">
         <div class="twoCol">
@@ -577,501 +521,321 @@ button.danger { background: var(--puck-red); color: #fff; }
     </section>
 
     <section class="card">
-        <div class="cardHeader">
-            <h2>Debug Log</h2>
-        </div>
-        <div class="cardBody">
-            <div id="log" class="log"></div>
-        </div>
+        <div class="cardHeader"><h2>Debug Log</h2></div>
+        <div class="cardBody"><div id="log" class="log"></div></div>
     </section>
+  </div>
+</main>
 
-  </div> </main>
-
-<div id="toast" class="toast">
-    <span id="toastText">Action Successful</span>
-</div>
+<div id="toast" class="toast"><span id="toastText">Action Successful</span></div>
 
 <script>
-/* -----------------------------------------------------
-   PlayPUCK Web Portal - Fixed Protocol
-   (All existing logic maintained)
-   ----------------------------------------------------- */
-const BLE = {
-  SERVICE_UUID: 0xFFFF,
-  TX_CHAR_UUID: '0000ff01-0000-1000-8000-00805f9b34fb',
-  RX_CHAR_UUID: '0000ff02-0000-1000-8000-00805f9b34fb',
-};
-
+/* PlayPUCK Web Portal - Merged & Updated Logic */
 const el = (id) => document.getElementById(id);
 const logEl = el('log');
+function log(msg) { logEl.textContent = `[${new Date().toLocaleTimeString()}] ${msg}\n` + logEl.textContent; }
+function showToast(t) { el('toastText').textContent = t; el('toast').classList.add('show'); setTimeout(()=>el('toast').classList.remove('show'),1300); }
+function vibrate(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (_) {} }
 
-// Status Bar Elements
-const roleDisplay = el('roleDisplay');
-const stateDisplay = el('stateDisplay');
-const connDot = el('connDot');
-const connText = el('connText');
-const deviceNamePill = el('deviceNamePill');
-const rssiPill = el('rssiPill');
-const reconnectPill = el('reconnectPill');
-const bleBanner = el('bleBanner');
-const toast = el('toast');
-const toastText = el('toastText');
-
-function log(msg) {
-  const ts = new Date().toLocaleTimeString();
-  logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
-}
-
-function showToast(t) {
-  toastText.textContent = t;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 1300);
-}
-
-function vibrate(pattern) {
-  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {}
-}
-
-/* --- UTILS --- */
-function showBanner(html){
-  bleBanner.innerHTML = html; bleBanner.style.display = 'block';
-}
-function hideBanner(){
-  bleBanner.style.display = 'none'; bleBanner.innerHTML = '';
-}
-
-// Elements
-const btnConnect = el('btnConnect');
-const btnDisconnect = el('btnDisconnect');
-const autoReconnect = el('autoReconnect');
-const savedWifi = el('savedWifi');
-const wifiSsid = el('wifiSsid');
-const wifiPass = el('wifiPass');
-const showWifiPass = el('showWifiPass');
-const btnSendWifi = el('btnSendWifi');
-const btnSaveWifi = el('btnSaveWifi');
-const btnForgetWifi = el('btnForgetWifi');
-const btnClearWifi = el('btnClearWifi');
-
-const matchType = el('matchType');
-const scoringMode = el('scoringMode');
-const winPointsPreset = el('winPointsPreset');
-const winRule = el('winRule');
-const matchId = el('matchId');
-const customOverride = el('customOverride');
-const matchJson = el('matchJson');
-const btnUploadProfile = el('btnUploadProfile');
-
-const btnStartGame = el('btnStartGame');
-const btnEndGame = el('btnEndGame');
-const btnScoreA = el('btnScoreA');
-const btnScoreB = el('btnScoreB');
-const btnUndo = el('btnUndo');
-
-const btnAminus = el('btnAminus');
-const btnAplus = el('btnAplus');
-const btnAset = el('btnAset');
-const btnBminus = el('btnBminus');
-const btnBplus = el('btnBplus');
-const btnBset = el('btnBset');
-
-const scoreAEl = el('scoreA');
-const scoreBEl = el('scoreB');
-const setAVal = el('setAVal');
-const setBVal = el('setBVal');
-
-const btnNfcScan = el('btnNfcScan');
-const btnNfcStop = el('btnNfcStop');
-const nfcStatusEl = el('nfcStatus');
-const checkinPlayerId = el('checkinPlayerId');
-const btnCheckinManual = el('btnCheckinManual');
-
-const tagUid = el('tagUid');
-const tagRole = el('tagRole');
-const tagTeam = el('tagTeam');
-const btnTagRegister = el('btnTagRegister');
-const btnTagAssign = el('btnTagAssign');
-const btnTagTap = el('btnTagTap');
-const btnTagClearTeams = el('btnTagClearTeams');
-const btnTagClearAll = el('btnTagClearAll');
-
-let tagSeq = 1;
-function normUid(u){ return String(u || '').trim().toUpperCase(); }
-
-const gameOverBanner = el('gameOverBanner');
-const gameOverWinner = el('gameOverWinner');
-const gameOverSub = el('gameOverSub');
-
-const infoServe = el('infoServe');
-const infoServerNum = el('infoServerNum');
-const infoMode = el('infoMode');
-const infoTarget = el('infoTarget');
-
-const btnPauseToggle = el('btnPauseToggle');
-const pausePill = el('pausePill');
-const infoPaused = el('infoPaused');
-const btnApplyProfileMidMatch = el('btnApplyProfileMidMatch');
-const chkAutoPauseApply = el('chkAutoPauseApply');
-
-let device = null;
-let server = null;
-let service = null;
-let txChar = null;
-let rxChar = null;
+/* --- VARIABLES & STATE --- */
+const BLE = { SERVICE_UUID: 0xFFFF, TX_CHAR: '0000ff01-0000-1000-8000-00805f9b34fb', RX_CHAR: '0000ff02-0000-1000-8000-00805f9b34fb' };
+let device, txChar, rxChar;
+let lastState = { a:0, b:0, game_over:false, paused:false, rules:{} };
+let allowedMacs = []; // Local mirror for Step 3
 let ndef = null;
 let nfcActive = false;
-let hadConnectFailure = false;
 let reconnectTimer = null;
 let reconnectBackoffMs = 900;
 const reconnectBackoffMaxMs = 12000;
+let hadConnectFailure = false;
 
-/* ---------- Original Logic ---------- */
-const LS_WIFI_KEY = 'playpuck_wifi_saved_v1';
-const LS_STATE_KEY = 'playpuck_last_state_v1';
-const LS_AUTORECON_KEY = 'playpuck_auto_reconnect_v1';
-
-function safeJsonParse(s, fallback){
-  try{ return JSON.parse(s); }catch(_){ return fallback; }
-}
-
-function loadSavedWifi(){
-  const arr = safeJsonParse(localStorage.getItem(LS_WIFI_KEY) || '[]', []);
-  return Array.isArray(arr) ? arr : [];
-}
-function saveSavedWifi(arr){ localStorage.setItem(LS_WIFI_KEY, JSON.stringify(arr || [])); }
-
-function renderSavedWifiDropdown(selectedSsid=''){
-  const arr = loadSavedWifi().slice().sort((a,b)=>String(a.ssid||'').localeCompare(String(b.ssid||'')));
-  savedWifi.innerHTML = '';
-  const opt0 = document.createElement('option');
-  opt0.value = ''; opt0.textContent = '— Select a saved SSID —';
-  savedWifi.appendChild(opt0);
-  for(const item of arr){
-    const ssid = String(item.ssid || '');
-    if(!ssid) continue;
-    const o = document.createElement('option');
-    o.value = ssid; o.textContent = ssid;
-    if(selectedSsid && selectedSsid === ssid) o.selected = true;
-    savedWifi.appendChild(o);
-  }
-}
-
-function upsertWifi(ssid, pass){
-  ssid = String(ssid||'').trim(); pass = String(pass||'');
-  if(!ssid) throw new Error('SSID is empty.');
-  const arr = loadSavedWifi();
-  const idx = arr.findIndex(x => String(x.ssid||'') === ssid);
-  const entry = { ssid, pass, updated_at: Date.now() };
-  if(idx >= 0) arr[idx] = entry; else arr.push(entry);
-  saveSavedWifi(arr); renderSavedWifiDropdown(ssid);
-}
-function forgetWifi(ssid){
-  ssid = String(ssid||'').trim(); if(!ssid) return;
-  const arr = loadSavedWifi().filter(x => String(x.ssid||'') !== ssid);
-  saveSavedWifi(arr); renderSavedWifiDropdown('');
-}
-function clearAllWifi(){ saveSavedWifi([]); renderSavedWifiDropdown(''); }
-
-savedWifi.addEventListener('change', () => {
-  const ssid = savedWifi.value; if(!ssid) return;
-  const arr = loadSavedWifi(); const found = arr.find(x => String(x.ssid||'') === ssid);
-  if(found){ wifiSsid.value = String(found.ssid||''); wifiPass.value = String(found.pass||''); log(`Loaded: ${ssid}`); }
-});
-btnSaveWifi.addEventListener('click', () => {
-  try{ upsertWifi(wifiSsid.value, wifiPass.value); showToast('Saved Wi-Fi'); }catch(e){ log(e.message); }
-});
-btnForgetWifi.addEventListener('click', () => {
-  const ssid = savedWifi.value || wifiSsid.value.trim();
-  forgetWifi(ssid); showToast('Forgot Wi-Fi');
-});
-btnClearWifi.addEventListener('click', () => { clearAllWifi(); showToast('Cleared Wi-Fi'); });
-showWifiPass.addEventListener('change', () => { wifiPass.type = showWifiPass.checked ? 'text' : 'password'; });
-
-function loadAutoReconnect(){ return localStorage.getItem(LS_AUTORECON_KEY) !== '0'; }
-function saveAutoReconnect(v){ localStorage.setItem(LS_AUTORECON_KEY, v ? '1' : '0'); }
-autoReconnect.checked = loadAutoReconnect();
-autoReconnect.addEventListener('change', () => {
-  saveAutoReconnect(autoReconnect.checked);
-  if(!autoReconnect.checked){ resetReconnect(); setReconnectPill('OFF'); }
-  else { setReconnectPill('—'); }
-});
-
-let lastState = {
-  a: 0, b: 0, serving: null, server_num: null, mode: null, format: null,
-  win_points: null, win_rule: null, paused: false, game_over: false, winner: null, role: 'UNKNOWN'
-};
-function persistLastState(){ try{ localStorage.setItem(LS_STATE_KEY, JSON.stringify(lastState)); }catch(_){} }
-function restoreLastState(){
-  const obj = safeJsonParse(localStorage.getItem(LS_STATE_KEY) || 'null', null);
-  if(obj && typeof obj === 'object') lastState = Object.assign({}, lastState, obj);
-}
-
-let bleRxBuffer = ""; let lastMatchId = ""; let lastEpoch = -1; let lastSeq = -1;
-
-function onBleRxChunk(chunk) {
-  if (!chunk) return; bleRxBuffer += chunk;
-  let idx;
-  while ((idx = bleRxBuffer.indexOf("\n")) >= 0) {
-    const line = bleRxBuffer.slice(0, idx).trim(); bleRxBuffer = bleRxBuffer.slice(idx + 1);
-    if (line) processFrame(line);
-  }
-  if (bleRxBuffer.length > 4096) bleRxBuffer = "";
-}
-
-function setNfcStatus(t){ if(nfcStatusEl) nfcStatusEl.textContent = t; }
-function setReconnectPill(text){ reconnectPill.textContent = `Reconnect: ${text}`; }
-
-/* BLE SEND */
-async function bleSend(cmd, payloadObj = {}) {
-  if (!txChar) throw new Error("Not connected");
-  let finalCmd = cmd; let finalPayload = payloadObj ?? {};
-  if (cmd === "ACTION") {
-    finalCmd = "INPUT";
-    finalPayload = { kind: "WEB_CLICK", source: "WEB_PORTAL", seq: Date.now(), ts_ms: Date.now(), payload: payloadObj ?? {} };
-  }
-  const packet = `${finalCmd} ${JSON.stringify(finalPayload)}\n`;
-  const bytes = new TextEncoder().encode(packet);
-  const chunkSize = 20;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    await txChar.writeValue(bytes.slice(i, i + chunkSize));
-  }
-  console.log(`→ ${packet.trim()}`);
-}
-
-function setGameOverUI(isOver, winner, a, b){
-  if(isOver){
-    gameOverBanner.style.display = 'block';
-    gameOverWinner.textContent = winner ? `${winner} WINS` : '—';
-    gameOverSub.textContent = `Final score: A ${a} - ${b} B`;
-  } else {
-    gameOverBanner.style.display = 'none';
-  }
-}
-
-function renderPauseUI(){
-  if(!pausePill || !infoPaused || !btnPauseToggle) return;
-  const paused = !!lastState.paused;
-  const txt = paused ? 'ON' : 'OFF';
-  pausePill.textContent = `Pause: ${txt}`; infoPaused.textContent = `State: ${paused?'Paused':'Active'}`;
-  btnPauseToggle.textContent = paused ? 'Resume Game' : 'Pause Game';
-  btnPauseToggle.className = paused ? 'good' : 'warn';
-  if(paused) stateDisplay.textContent = 'PAUSED';
-  else if(lastState.game_over) stateDisplay.textContent = 'GAME OVER';
-  else stateDisplay.textContent = 'ACTIVE';
-}
-
-btnPauseToggle.addEventListener('click', async () => {
-  if(!txChar) return;
-  try{
-    const paused = !!lastState.paused;
-    await bleSend('ACTION', { action: paused ? 'RESUME_GAME' : 'PAUSE_GAME' });
-    showToast(paused ? 'Resumed' : 'Paused');
-  }catch(e){ log(e.message); }
-});
-
-function processFrame(frame) {
-  try {
-    const sp = frame.indexOf(" ");
-    const cmd = sp >= 0 ? frame.slice(0, sp) : frame;
-    const jsonStr = sp >= 0 ? frame.slice(sp + 1).trim() : "";
-    const obj = jsonStr ? JSON.parse(jsonStr) : {};
-
-    if (cmd === "STATE" || cmd === "GET_STATE") {
-      const mid = obj.match_id || "";
-      const epoch = (obj.authority_epoch ?? -1);
-      const seq = (obj.state_seq ?? -1);
-      if (mid && mid !== lastMatchId) { lastMatchId = mid; lastEpoch = -1; lastSeq = -1; }
-      if (epoch < lastEpoch) return;
-      if (epoch === lastEpoch && seq !== -1 && seq <= lastSeq) return;
-      lastEpoch = epoch; lastSeq = seq;
-
-      const sState = obj.sport_state || obj;
-      lastState.a = sState.a ?? 0;
-      lastState.b = sState.b ?? 0;
-      lastState.server_team = sState.server_team ?? null;
-      lastState.server_num = sState.server_num ?? null;
-      lastState.game_over = !!sState.game_over;
-      lastState.winner = sState.winner ?? null;
-      lastState.paused = !!obj.paused; // Top level paused in new protocol
-
-      const rules = sState.rules || obj.rules;
-      if (rules) {
-        lastState.win_points = rules.target ?? lastState.win_points;
-        const winBy = rules.win_by ?? 2;
-        lastState.win_rule = (winBy === 0) ? "SUDDEN_DEATH" : "TWO_CLEAR";
-        lastState.matchType = rules.format ?? lastState.matchType;
-        lastState.mode = rules.scoring ?? lastState.mode;
-      }
-      renderStateUI(); renderPauseUI();
-      return;
+/* --- INPUT DEVICE LIST (NEW) --- */
+function renderDeviceList() {
+    const list = el('deviceList');
+    list.innerHTML = '';
+    if(allowedMacs.length === 0) {
+        list.innerHTML = '<div class="pill" style="justify-content:center;">No devices added</div>';
+        return;
     }
-    if (cmd === 'GAME_OVER') {
-        lastState.game_over = true; renderStateUI();
-        showToast('Game Over');
-    }
-  } catch (e) { console.error("Parse error", e); }
+    allowedMacs.forEach(mac => {
+        const div = document.createElement('div');
+        div.className = 'device-item';
+        div.innerHTML = `
+            <div><div class="device-mac">${mac}</div><div class="device-label">Shelly/RF Button</div></div>
+            <button class="iconBtn danger" onclick="removeMac('${mac}')">X</button>
+        `;
+        list.appendChild(div);
+    });
 }
+window.removeMac = function(mac) {
+    allowedMacs = allowedMacs.filter(m => m !== mac);
+    renderDeviceList();
+}
+el('btnAddMac').addEventListener('click', () => {
+    const val = el('inputMac').value.trim().toUpperCase();
+    if(val.length < 5) return showToast('Invalid MAC');
+    if(!allowedMacs.includes(val)) { allowedMacs.push(val); renderDeviceList(); el('inputMac').value=''; }
+});
 
+/* --- PROFILE BUILDER (Includes Allowed Macs) --- */
 function buildMatchPayload() {
-  if (customOverride.value === "ON") {
-    let obj; try { obj = JSON.parse(matchJson.value); } catch { throw new Error("Invalid JSON"); }
-    if (matchId.value.trim()) obj.match_id = matchId.value.trim();
-    return obj;
-  }
-  return {
-    sport: "Pickleball",
-    match_id: matchId.value.trim() || undefined,
-    rules: {
-      target: Number(winPointsPreset.value),
-      win_by: (winRule.value === "SUDDEN_DEATH") ? 0 : 2,
-      format: matchType.value,
-      scoring: scoringMode.value
+    if (el('customOverride').value === "ON") {
+        try { return JSON.parse(el('matchJson').value); } catch(e){ log('Invalid JSON'); return {}; }
     }
-  };
-}
-function syncJsonPreview(){
-  if(customOverride.value === 'OFF') {
-    try{ matchJson.value = JSON.stringify(buildMatchPayload(), null, 2); }catch(_){}
-  }
-}
-[matchType, scoringMode, winPointsPreset, winRule, customOverride, matchId].forEach(x => x.addEventListener('change', syncJsonPreview));
-syncJsonPreview();
-
-btnApplyProfileMidMatch.addEventListener('click', async () => {
-  if(!txChar) return;
-  try{
-    const payload = buildMatchPayload();
-    const autoPause = !!chkAutoPauseApply?.checked;
-    if(autoPause && !lastState.paused) await bleSend('ACTION', { action: 'PAUSE_GAME' });
-    await bleSend('PROFILE_SELECT', payload);
-    showToast('Rules Updated');
-    if(autoPause) setTimeout(async ()=> { if(lastState.paused) await bleSend('ACTION', { action: 'RESUME_GAME' }); }, 500);
-  }catch(e){ log(e.message); }
-});
-
-/* NFC */
-async function startNfcScan() {
-  if(!txChar) return setNfcStatus('Connect BLE first');
-  if(!('NDEFReader' in window)) return setNfcStatus('Web NFC not supported');
-  try {
-    ndef = new NDEFReader();
-    await ndef.scan();
-    nfcActive = true;
-    setNfcStatus('Tap tag now...');
-    btnNfcStop.disabled = false; btnNfcScan.disabled = true;
-    ndef.onreading = async (event) => {
-      const sn = event.serialNumber;
-      if(sn) {
-        log(`NFC: ${sn}`);
-        tagUid.value = sn; checkinPlayerId.value = sn;
-        btnCheckinManual.disabled = false;
-        await bleSend('CHECKIN', { player_id: sn });
-        setNfcStatus(`Sent CHECKIN: ${sn}`);
-        showToast('Tag Scanned');
-      }
+    const rules = {
+      target: Number(el('winPointsPreset').value),
+      win_by: (el('winRule').value === "SUDDEN_DEATH") ? 0 : 2,
+      format: el('matchType').value,
+      scoring: el('scoringMode').value,
+      allowed_button_macs: allowedMacs // Sync allowlist to puck
     };
-  } catch(e) { setNfcStatus(e.message); }
-}
-btnNfcScan.addEventListener('click', startNfcScan);
-btnNfcStop.addEventListener('click', () => { nfcActive=false; btnNfcStop.disabled=true; btnNfcScan.disabled=false; setNfcStatus('Scan stopped'); });
-
-/* TAGS */
-btnTagRegister.addEventListener('click', async () => {
-    if(!tagUid.value) return; await bleSend('TAG_REGISTER', { uid:normUid(tagUid.value), role:tagRole.value }); showToast('Tag Registered');
-});
-btnTagAssign.addEventListener('click', async () => {
-    if(!tagUid.value) return; await bleSend('TAG_ASSIGN', { uid:normUid(tagUid.value), team:tagTeam.value }); showToast('Tag Assigned');
-});
-btnTagTap.addEventListener('click', async () => {
-    if(!tagUid.value) return; await bleSend('TAG_TAP', { uid:normUid(tagUid.value), seq:tagSeq++ }); showToast('Tap Sent');
-});
-
-/* BLE Connection Logic */
-function setConnectedUI(connected) {
-  if(connected){
-    connDot.classList.add('on'); connText.textContent = 'Online';
-    btnConnect.className = 'secondary'; btnConnect.disabled = true;
-    btnDisconnect.className = 'danger'; btnDisconnect.disabled = false;
-    if(autoReconnect.checked) setReconnectPill('—');
-  } else {
-    connDot.classList.remove('on'); connText.textContent = 'Offline';
-    btnConnect.className = 'accent'; btnConnect.disabled = false;
-    btnDisconnect.className = 'secondary'; btnDisconnect.disabled = true;
-  }
-  // Enable buttons
-  [btnSendWifi, btnUploadProfile, btnStartGame, btnEndGame, btnPauseToggle, btnApplyProfileMidMatch, btnCheckinManual,
-   btnTagRegister, btnTagAssign, btnTagTap, btnTagClearTeams, btnTagClearAll].forEach(b => b.disabled = !connected);
-  
-  if(connected && 'NDEFReader' in window) btnNfcScan.disabled = false;
-  renderStateUI();
+    const payload = { sport: el('sportSelect').value, rules: rules };
+    if(el('matchId').value) payload.match_id = el('matchId').value;
+    return payload;
 }
 
+function syncJsonPreview(){
+   if(el('customOverride').value === 'OFF') {
+     try{ el('matchJson').value = JSON.stringify(buildMatchPayload(), null, 2); }catch(_){}
+     el('matchJson').style.display = 'none';
+   } else {
+     el('matchJson').style.display = 'block';
+   }
+}
+[el('matchType'), el('scoringMode'), el('winPointsPreset'), el('winRule'), el('customOverride'), el('matchId')].forEach(x => x.addEventListener('change', syncJsonPreview));
+
+/* --- BLE LOGIC --- */
 async function connectBle() {
   try {
-    device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [BLE.SERVICE_UUID] });
-    deviceNamePill.textContent = device.name;
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(BLE.SERVICE_UUID);
-    txChar = await service.getCharacteristic(BLE.TX_CHAR_UUID);
-    rxChar = await service.getCharacteristic(BLE.RX_CHAR_UUID);
-    await rxChar.startNotifications();
-    rxChar.addEventListener('characteristicvaluechanged', (e) => onBleRxChunk(new TextDecoder().decode(e.target.value)));
-    setConnectedUI(true); showToast('Connected');
-    device.gatt.device.addEventListener('gattserverdisconnected', () => { setConnectedUI(false); if(autoReconnect.checked) scheduleReconnect(); });
+    device = await navigator.bluetooth.requestDevice({ acceptAllDevices:true, optionalServices:[BLE.SERVICE_UUID] });
+    el('deviceNamePill').textContent = device.name;
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+    await performConnect();
   } catch(e) { log(e.message); }
 }
 
+async function performConnect() {
+    try {
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(BLE.SERVICE_UUID);
+        txChar = await service.getCharacteristic(BLE.TX_CHAR);
+        rxChar = await service.getCharacteristic(BLE.RX_CHAR);
+        await rxChar.startNotifications();
+        rxChar.addEventListener('characteristicvaluechanged', (e) => onBleRx(new TextDecoder().decode(e.target.value)));
+        
+        el('connText').textContent = 'Online'; el('connDot').classList.add('on');
+        el('btnConnect').disabled = true; el('btnDisconnect').disabled = false;
+        
+        // Enable controls
+        const btns = ['btnSendWifi','btnUploadProfile','btnStartGame','btnScoreA','btnScoreB','btnUndo','btnPauseToggle','btnApplyProfileMidMatch','btnCheckinManual','btnTagRegister','btnTagAssign','btnTagClearTeams','btnTagClearAll'];
+        btns.forEach(id => { if(el(id)) el(id).disabled=false; });
+        if('NDEFReader' in window) el('btnNfcScan').disabled = false;
+
+        showToast('Connected');
+        resetReconnect();
+        await bleSend('GET_STATE'); 
+    } catch(e) { 
+        log('Connect failed: ' + e.message); 
+        onDisconnected();
+    }
+}
+
+function onDisconnected() {
+    el('connText').textContent = 'Offline'; el('connDot').classList.remove('on');
+    el('btnConnect').disabled = false; el('btnDisconnect').disabled = true;
+    if(el('autoReconnect').checked) scheduleReconnect();
+}
+
+function resetReconnect(){ reconnectBackoffMs = 900; if(reconnectTimer) clearTimeout(reconnectTimer); reconnectTimer=null; el('reconnectPill').textContent='Reconnect: —'; }
+
 function scheduleReconnect(){
     if(reconnectTimer) return;
-    setReconnectPill('Retry in 2s');
+    const wait = reconnectBackoffMs;
+    reconnectBackoffMs = Math.min(Math.floor(reconnectBackoffMs * 1.5), reconnectBackoffMaxMs);
+    el('reconnectPill').textContent = `Retry in ${Math.round(wait/100)/10}s`;
     reconnectTimer = setTimeout(async () => {
         reconnectTimer = null;
-        if(device && !device.gatt.connected) {
-            try { await device.gatt.connect(); setConnectedUI(true); } catch(e){ scheduleReconnect(); }
+        if(device && !device.gatt.connected) await performConnect();
+    }, wait);
+}
+
+async function bleSend(cmd, payload={}) {
+    if(!txChar) return;
+    if(cmd === 'ACTION') { cmd='INPUT'; payload={ kind:'WEB_CLICK', source:'WEB', seq:Date.now(), ts_ms:Date.now(), payload:payload }; }
+    const pkt = `${cmd} ${JSON.stringify(payload)}\n`;
+    const enc = new TextEncoder().encode(pkt);
+    for(let i=0; i<enc.length; i+=20) await txChar.writeValue(enc.slice(i, i+20));
+    console.log('->', pkt);
+}
+
+let rxBuf = "";
+function onBleRx(chunk) {
+    rxBuf += chunk;
+    if(rxBuf.includes('\n')) {
+        const lines = rxBuf.split('\n');
+        rxBuf = lines.pop(); 
+        lines.forEach(processFrame);
+    }
+}
+
+function processFrame(line) {
+    try {
+        const sp = line.indexOf(' ');
+        const cmd = sp > 0 ? line.slice(0,sp) : line;
+        const body = sp > 0 ? JSON.parse(line.slice(sp+1)) : {};
+        if(cmd === 'STATE' || cmd === 'GET_STATE') {
+            const s = body.sport_state || body;
+            lastState = s;
+            updateUI(s);
+            // Sync Allowlist from Puck Rules
+            if(s.rules && s.rules.allowed_button_macs) {
+                const remote = s.rules.allowed_button_macs;
+                let changed = false;
+                remote.forEach(m => { if(!allowedMacs.includes(m)) { allowedMacs.push(m); changed=true; } });
+                if(changed) renderDeviceList();
+            }
         }
-    }, 2000);
+        if(cmd === 'GAME_OVER') {
+             lastState.game_over = true;
+             lastState.winner = body.winner || body.payload?.winner; // handle both formats
+             updateUI(lastState);
+             showToast('Game Over');
+        }
+    } catch(e) { console.log('Parse err', e); }
 }
 
-btnConnect.addEventListener('click', connectBle);
-btnDisconnect.addEventListener('click', () => { if(device) device.gatt.disconnect(); });
-
-/* Buttons */
-btnUploadProfile.addEventListener('click', async () => { await bleSend('PROFILE_SELECT', buildMatchPayload()); showToast('Profile Uploaded'); });
-btnStartGame.addEventListener('click', async () => { await bleSend('START_GAME'); showToast('Game Started'); });
-btnEndGame.addEventListener('click', async () => { await bleSend('END_GAME'); showToast('Game Ended'); });
-
-btnScoreA.addEventListener('click', async () => { await bleSend('ACTION', {action:'SCORE_A'}); });
-btnScoreB.addEventListener('click', async () => { await bleSend('ACTION', {action:'SCORE_B'}); });
-btnUndo.addEventListener('click', async () => { await bleSend('ACTION', {action:'UNDO'}); });
-
-async function sendSync(upd) { await bleSend('SYNC_SET', upd); }
-btnAplus.addEventListener('click', ()=> sendSync({a: (lastState.a||0)+1}));
-btnAminus.addEventListener('click', ()=> sendSync({a: Math.max(0,(lastState.a||0)-1)}));
-btnAset.addEventListener('click', ()=> sendSync({a: Number(setAVal.value)}));
-btnBplus.addEventListener('click', ()=> sendSync({b: (lastState.b||0)+1}));
-btnBminus.addEventListener('click', ()=> sendSync({b: Math.max(0,(lastState.b||0)-1)}));
-btnBset.addEventListener('click', ()=> sendSync({b: Number(setBVal.value)}));
-
-function renderStateUI() {
-    const d = lastState;
-    if(scoreAEl) scoreAEl.innerText = d.a;
-    if(scoreBEl) scoreBEl.innerText = d.b;
-    if(setAVal) setAVal.value = d.a;
-    if(setBVal) setBVal.value = d.b;
-    setGameOverUI(d.game_over, d.winner, d.a, d.b);
-
-    infoServe.textContent = `Serve: ${d.server_team || '—'}`;
-    infoServerNum.textContent = `Server: ${d.server_num || '—'}`;
-    infoMode.textContent = `Mode: ${d.mode || '—'}`;
-    infoTarget.textContent = `Target: ${d.win_points || '—'}`;
+function updateUI(s) {
+    const mode = el('sportSelect').value;
+    
+    // Tennis Logic from original
+    if (mode === "TENNIS") {
+        const tennisScores = ["0", "15", "30", "40", "GM"];
+        el('scoreA').innerText = tennisScores[Math.min(s.a||0, 4)] || s.a;
+        el('scoreB').innerText = tennisScores[Math.min(s.b||0, 4)] || s.b;
+    } else {
+        el('scoreA').innerText = s.a || 0;
+        el('scoreB').innerText = s.b || 0;
+    }
+    
+    // Pause / Game Over logic
+    if (s.game_over) {
+        el('stateDisplay').innerText = "GAME OVER";
+        el('stateDisplay').style.color = "red";
+        el('gameOverBanner').style.display = 'block';
+        el('gameOverWinner').innerText = s.winner || '-';
+        el('gameOverSub').innerText = `Final: A ${s.a} - ${s.b} B`;
+    } else {
+        el('stateDisplay').innerText = s.paused ? "PAUSED" : "ACTIVE";
+        el('stateDisplay').style.color = "inherit";
+        el('gameOverBanner').style.display = 'none';
+    }
+    
+    // Info chips
+    el('infoServe').innerText = `Serve: ${s.server_team!=null?s.server_team:'-'}`;
+    el('infoServerNum').innerText = `Server: ${s.server_num!=null?s.server_num:'-'}`;
+    el('infoMode').innerText = `Mode: ${s.mode||'-'}`;
+    el('pausePill').innerText = `Paused: ${s.paused?'ON':'OFF'}`;
+    
+    // Button state for mid-match
+    el('btnPauseToggle').innerText = s.paused ? "Resume Game" : "Pause Game";
+    el('btnPauseToggle').className = s.paused ? "good" : "secondary";
 }
 
-// Boot
-renderSavedWifiDropdown('');
-restoreLastState();
-renderStateUI();
-renderPauseUI();
-setConnectedUI(false);
+/* --- NFC LOGIC (Restored Full Parsing) --- */
+el('btnNfcScan').onclick = async () => {
+    if(!txChar) return showToast('Connect BLE first');
+    if('NDEFReader' in window) {
+        try {
+            ndef = new NDEFReader(); await ndef.scan();
+            el('nfcStatus').textContent = 'Tap Tag Now...';
+            el('btnNfcStop').disabled = false;
+            el('btnNfcScan').disabled = true;
+            nfcActive = true;
+            
+            ndef.onreading = ({serialNumber, message}) => {
+                let pid = null;
+                // Try reading text records (Advanced)
+                for (const record of message.records) {
+                    const dec = new TextDecoder(record.encoding || 'utf-8');
+                    const txt = dec.decode(record.data);
+                    if (record.recordType === 'text') pid = txt; 
+                    else if (record.recordType === 'url') pid = txt; // simplified url extraction
+                    if(pid) break;
+                }
+                // Fallback to serial
+                if(!pid) pid = serialNumber;
+                
+                el('tagUid').value = pid;
+                el('checkinPlayerId').value = pid;
+                el('btnCheckinManual').disabled = false;
+                el('nfcStatus').textContent = `Read: ${pid}`;
+                bleSend('CHECKIN', {player_id:pid});
+                showToast('Tag Scanned');
+            };
+        } catch(e) { el('nfcStatus').textContent = e.message; }
+    } else el('nfcStatus').textContent = 'Web NFC not supported';
+};
+el('btnNfcStop').onclick = () => { nfcActive=false; el('btnNfcStop').disabled=true; el('btnNfcScan').disabled=false; };
+
+/* --- EVENT LISTENERS --- */
+el('btnConnect').onclick = connectBle;
+el('btnDisconnect').onclick = () => { if(device) device.gatt.disconnect(); };
+el('btnSendWifi').onclick = () => {
+    const ssid = el('wifiSsid').value, pass = el('wifiPass').value;
+    if(ssid) bleSend('WIFI', {ssid, pass}); showToast('Sent WiFi');
+};
+el('btnUploadProfile').onclick = async () => {
+    await bleSend('PROFILE_SELECT', buildMatchPayload());
+    showToast('Profile Uploaded');
+};
+el('btnStartGame').onclick = () => bleSend('START_GAME');
+el('btnEndGame').onclick = () => bleSend('END_GAME');
+el('btnScoreA').onclick = () => bleSend('ACTION', {action:'SCORE_A'});
+el('btnScoreB').onclick = () => bleSend('ACTION', {action:'SCORE_B'});
+el('btnUndo').onclick = () => bleSend('ACTION', {action:'UNDO'});
+
+// Mid-match apply logic
+el('btnApplyProfileMidMatch').onclick = async () => {
+    const pause = el('chkAutoPauseApply').checked;
+    if(pause && !lastState.paused) await bleSend('ACTION', {action:'PAUSE_GAME'});
+    await bleSend('PROFILE_SELECT', buildMatchPayload());
+    showToast('Rules Updated');
+    if(pause) setTimeout(()=>bleSend('ACTION', {action:'RESUME_GAME'}), 500);
+};
+
+// Checkin Manual
+el('btnCheckinManual').onclick = () => bleSend('CHECKIN', {player_id: el('checkinPlayerId').value});
+
+// Tag Tools
+el('btnTagRegister').onclick = () => bleSend('TAG_REGISTER', {uid:el('tagUid').value, role:el('tagRole').value});
+el('btnTagAssign').onclick = () => bleSend('TAG_ASSIGN', {uid:el('tagUid').value, team:el('tagTeam').value});
+el('btnTagTap').onclick = () => bleSend('TAG_TAP', {uid:el('tagUid').value, seq: Date.now()});
+el('btnTagClearTeams').onclick = () => bleSend('TAG_CLEAR_TEAMS', {all:true});
+el('btnTagClearAll').onclick = () => bleSend('TAG_CLEAR_ALL', {all:true});
+
+// Wifi Storage
+const LS_WIFI = 'playpuck_wifi';
+function loadWifi() {
+    const saved = JSON.parse(localStorage.getItem(LS_WIFI)||'[]');
+    const sel = el('savedWifi'); sel.innerHTML='<option value="">— Select Saved —</option>';
+    saved.forEach(w => { const o = document.createElement('option'); o.value=w.ssid; o.text=w.ssid; sel.appendChild(o); });
+}
+el('btnSaveWifi').onclick = () => {
+    const saved = JSON.parse(localStorage.getItem(LS_WIFI)||'[]');
+    saved.push({ssid:el('wifiSsid').value, pass:el('wifiPass').value});
+    localStorage.setItem(LS_WIFI, JSON.stringify(saved));
+    loadWifi(); showToast('Saved');
+};
+el('savedWifi').onchange = (e) => {
+    const saved = JSON.parse(localStorage.getItem(LS_WIFI)||'[]');
+    const f = saved.find(x=>x.ssid===e.target.value);
+    if(f) { el('wifiSsid').value=f.ssid; el('wifiPass').value=f.pass; }
+};
+
+/* Init */
+loadWifi();
+renderDeviceList();
+syncJsonPreview();
 </script>
 </body>
 </html>
