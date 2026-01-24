@@ -9,23 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
 
 <style>
-/* --- Brand Palette (Charcoal & Traffic Lights) --- */
-:root{
-  --bg: #0F1218;         /* Charcoal Background */
-  --card: #1B1F2A;       /* PuckPanel2 */
-  --text: #FFFFFF;
-  --muted: #94A3B8;      /* Light Grey for hints */
-  --border: #2D3748;     /* Subtle borders */
-  --shadow: 0 4px 20px rgba(0,0,0,0.5);
-  
-  /* Traffic Light System */
+/* --- PlayPUCK Brand Variables (Light Theme) --- */
+:root {
+  /* Core Layout Colors */
+  --bg: #F6F7FB;         /* Original light grey background */
+  --card: #FFFFFF;       /* White cards */
+  --text: #0F1218;       /* Brand 'Charcoal' for text */
+  --muted: #64748B;      /* Slate grey for secondary text */
+  --border: #E2E8F0;     /* Light borders */
+  --shadow: 0 4px 20px rgba(0,0,0,0.05); /* Soft shadow */
+
+  /* Brand Traffic Light Palette */
   --puck-green: #1CB860;
   --puck-amber: #F9CF25;
   --puck-red:   #E92020;
-  --puck-blue:  #3B82F6; /* Action Blue */
-  
+  --puck-charcoal: #0F1218;
+
+  /* UI Elements */
+  --btn-primary: #0F1218; /* Charcoal buttons (like original) */
   --btn-text: #FFFFFF;
-  --chip-bg: #2D3748;
+  --chip-bg: #F1F5F9;
 }
 
 * { box-sizing: border-box; }
@@ -39,597 +42,385 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---- Header & Status Bar ---- */
+/* ---- Header ---- */
 header {
-  background: rgba(27, 31, 42, 0.95); /* Semi-transparent card color */
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 .header-title {
-  padding: 16px 16px 10px;
+  padding: 16px;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 
 header h1 {
   margin: 0;
   font-size: 24px;
-  letter-spacing: -0.5px;
   font-weight: 700;
   color: var(--text);
+  letter-spacing: -0.5px;
+}
+header p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-/* PlayPUCK Logo Bar styling */
-.logo-bar {
-  display: flex; 
-  gap: 4px;
-  margin-top: 4px;
-}
-.logo-seg { width: 14px; height: 5px; border-radius: 4px; }
-.seg-g { background: var(--puck-green); }
-.seg-a { background: var(--puck-amber); }
-.seg-r { background: var(--puck-red); }
-
-/* Grid Status Bar */
+/* Status Bar Grid (Preserved from Original) */
 .status-bar {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   padding: 0 14px 14px;
+  background: #fff;
 }
-
 .status-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: var(--chip-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px; /* Rounded corners */
   padding: 8px 4px;
-  text-align: center;
   min-height: 54px;
 }
+.status-label { font-size: 10px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+.status-val { font-size: 12px; font-weight: 800; color: var(--text); line-height: 1.1; word-wrap: break-word; }
 
-.status-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: var(--muted); }
+.dot.on { background: var(--puck-green); box-shadow: 0 0 6px var(--puck-green); }
 
-.status-val {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.1;
-  word-wrap: break-word;
-}
-
-.dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
-  background: var(--muted);
-}
-.dot.on { background: var(--puck-green); box-shadow: 0 0 8px var(--puck-green); }
-
-/* ---- Main & Cards ---- */
+/* ---- Layout & Cards ---- */
 main {
   padding: 20px 14px 40px;
-  max-width: 700px; /* Mobile focused */
+  max-width: 760px;
   margin: 0 auto;
 }
+.grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-/* Card Styling - Matching Kotlin PuckPanel2 */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px; /* Brand rounded look */
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
-.card .cardHeader {
+.cardHeader {
   padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: #FAFAFA; /* Very subtle grey header */
 }
-
-.card .cardHeader h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--puck-green); /* Accent headers */
-}
-
-.card .cardHeader p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
+.cardHeader h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text); }
+.cardHeader p { margin: 4px 0 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
 
 .stepBadge {
-  font-size: 12px;
-  font-weight: 800;
-  color: #111;
-  background: var(--puck-amber); /* Amber Step Badges */
-  padding: 4px 10px;
-  border-radius: 99px;
-  min-width: 28px;
-  text-align: center;
+  font-size: 12px; font-weight: 800; color: var(--puck-charcoal);
+  background: var(--puck-amber); /* Traffic light amber */
+  padding: 4px 10px; border-radius: 99px; min-width: 28px; text-align: center;
 }
 
-.card .cardBody { padding: 16px; }
+.cardBody { padding: 16px; }
 
-/* Forms & Inputs - Dark Theme */
+/* ---- Inputs & Forms ---- */
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-label {
-  display: block; font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-input, select, textarea {
-  width: 100%; padding: 14px 16px; font-size: 16px; border-radius: 14px;
-  border: 1px solid var(--border); 
-  background: #0b0d12; /* Darker than card */
-  color: var(--text);
-  outline: none; 
-  font-family: inherit;
-}
-
-textarea { min-height: 100px; resize: vertical; }
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--puck-green);
-  box-shadow: 0 0 0 2px rgba(28, 184, 96, 0.2);
-}
-
-.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .threeCol { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
-/* Buttons - Rounded Pills */
+label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; font-weight: 700; }
+
+input, select, textarea {
+  width: 100%; padding: 12px 14px; font-size: 16px; border-radius: 12px;
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  outline: none; font-family: inherit;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--puck-green);
+  box-shadow: 0 0 0 3px rgba(28,184,96,0.1);
+}
+textarea { min-height: 100px; resize: vertical; }
+
+/* ---- Buttons (Brand Pills) ---- */
 button {
   -webkit-tap-highlight-color: transparent; appearance: none; border: 0;
-  border-radius: 99px; /* Pill shape */
-  padding: 14px 20px; font-size: 15px; font-weight: 700;
-  cursor: pointer; width: 100%; min-height: 50px;
-  background: var(--chip-bg); color: var(--text);
-  transition: transform .1s ease, filter .2s ease;
+  border-radius: 99px; /* Pill Shape */
+  padding: 12px 20px; font-size: 15px; font-weight: 700;
+  cursor: pointer; width: 100%; min-height: 48px;
+  background: var(--btn-primary); color: var(--btn-text);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform .1s ease, opacity .2s ease;
   font-family: inherit;
 }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-button:active { transform: scale(0.98); }
-
-button.secondary { background: transparent; border: 2px solid var(--border); color: var(--muted); }
-button.accent { background: var(--puck-blue); color: #fff; }
-button.good { background: var(--puck-green); color: #000; } /* Black text on green for contrast */
+button.secondary { background: #fff; color: var(--text); border: 2px solid var(--border); box-shadow: none; }
+button.accent { background: var(--puck-charcoal); color: #fff; } /* Primary Action */
+button.good { background: var(--puck-green); color: #fff; }
 button.warn { background: var(--puck-amber); color: #000; }
 button.danger { background: var(--puck-red); color: #fff; }
 
-button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
-
-/* Sport Select Tabs */
-.sport-tabs {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
-}
-.sport-tab {
-  border: 2px solid var(--border); border-radius: 12px; padding: 10px;
-  text-align: center; cursor: pointer; color: var(--muted); font-weight: 700; font-size: 13px;
-}
-.sport-tab.active {
-  border-color: var(--puck-green); background: rgba(28, 184, 96, 0.1); color: var(--puck-green);
-}
-
-/* Pills & Hints */
+/* ---- Components ---- */
 .pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-  border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-  color: var(--muted); font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+  border-radius: 99px; background: var(--chip-bg); border: 1px solid var(--border);
+  color: var(--muted); font-size: 12px; font-weight: 700;
 }
-.hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+.checkRow {
+  display: flex; gap: 10px; align-items: center; padding: 12px;
+  border: 1px solid var(--border); border-radius: 12px; background: #fff;
+  cursor: pointer;
+}
+.checkRow input { width: 20px; height: 20px; margin: 0; accent-color: var(--puck-green); }
 
-.log {
-  font-family: monospace; font-size: 11px;
-  background: #000; color: #0f0;
-  border-radius: 12px; padding: 12px; border: 1px solid var(--border);
-  max-height: 200px; overflow: auto; white-space: pre-wrap;
+.bleBanner {
+  display: none; margin-top: 12px; padding: 12px; border-radius: 12px;
+  background: #FEF2F2; border: 1px solid #FECACA; color: var(--puck-red);
+  font-size: 13px; line-height: 1.4;
 }
 
-/* Scoreboard Styling */
+/* Scoreboard */
 .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
 .scoreTile {
-  border: 2px solid var(--border); border-radius: 18px; padding: 16px;
-  background: rgba(255,255,255,0.03); text-align: center;
+  border: 1px solid var(--border); border-radius: 20px; padding: 16px;
+  background: linear-gradient(180deg, #fff 0%, #F8FAFC 100%); text-align: center;
 }
-.scoreTile h3 { margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.scoreVal { margin-top: 8px; font-size: 48px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
+.scoreTile h3 { margin: 0; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.scoreVal { margin-top: 6px; font-size: 42px; font-weight: 800; color: var(--text); letter-spacing: -1px; }
 
 .infoRow { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .infoChip {
-  padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05);
+  padding: 4px 10px; border-radius: 8px; background: var(--chip-bg); border: 1px solid var(--border);
   color: var(--muted); font-size: 11px; font-weight: 700;
 }
 
 .gameOver {
-  display: none; margin-top: 10px; padding: 16px; border-radius: 14px;
-  border: 2px solid var(--puck-red); background: rgba(233, 32, 32, 0.1);
-  color: var(--puck-red); font-weight: 800; text-align: center;
+  display: none; margin-top: 12px; padding: 16px; border-radius: 16px;
+  background: #FEF2F2; border: 2px solid var(--puck-red);
+  color: var(--puck-red); text-align: center; font-weight: 800;
 }
-
-/* Banners & Toasts */
-.bleBanner {
-  display: none; margin-top: 12px; padding: 12px; border-radius: 14px;
-  background: rgba(233, 32, 32, 0.15); border: 1px solid var(--puck-red); 
-  color: #ffcccc; font-size: 13px;
-}
-
-.toast {
-  position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 9999;
-  display: none; align-items: center; gap: 10px; 
-  background: var(--card); color: var(--puck-green);
-  border: 1px solid var(--puck-green); border-radius: 99px; padding: 12px 20px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none;
-  font-weight: 700;
-}
-.toast.show { display: flex; animation: toastIn .2s ease-out; }
-@keyframes toastIn { from{ transform: translateX(-50%) translateY(10px); opacity:0; } to{ transform: translateX(-50%) translateY(0); opacity:1; } }
-
-.checkRow {
-  display: flex; gap: 10px; align-items: center; padding: 12px;
-  border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,0.03);
-  cursor: pointer;
-}
-.checkRow input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--puck-green); }
-
-/* Responsive */
-@media (max-width: 480px) {
-  .twoCol, .threeCol { grid-template-columns: 1fr; }
-  .status-bar { grid-template-columns: 1fr 1fr; }
-  .status-item:nth-child(3) { grid-column: span 2; }
-}
-</style>
-</head>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>PlayPUCK Remote</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
-
-<style>
-/* --- Brand Palette (Charcoal & Traffic Lights) --- */
-:root{
-  --bg: #0F1218;         /* Charcoal Background */
-  --card: #1B1F2A;       /* PuckPanel2 */
-  --text: #FFFFFF;
-  --muted: #94A3B8;      /* Light Grey for hints */
-  --border: #2D3748;     /* Subtle borders */
-  --shadow: 0 4px 20px rgba(0,0,0,0.5);
-  
-  /* Traffic Light System */
-  --puck-green: #1CB860;
-  --puck-amber: #F9CF25;
-  --puck-red:   #E92020;
-  --puck-blue:  #3B82F6; /* Action Blue */
-  
-  --btn-text: #FFFFFF;
-  --chip-bg: #2D3748;
-}
-
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-
-body {
-  margin: 0;
-  font-family: "Comfortaa", system-ui, sans-serif; /* Brand Font */
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ---- Header & Status Bar ---- */
-header {
-  background: rgba(27, 31, 42, 0.95); /* Semi-transparent card color */
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-}
-
-.header-title {
-  padding: 16px 16px 10px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 24px;
-  letter-spacing: -0.5px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* PlayPUCK Logo Bar styling */
-.logo-bar {
-  display: flex; 
-  gap: 4px;
-  margin-top: 4px;
-}
-.logo-seg { width: 14px; height: 5px; border-radius: 4px; }
-.seg-g { background: var(--puck-green); }
-.seg-a { background: var(--puck-amber); }
-.seg-r { background: var(--puck-red); }
-
-/* Grid Status Bar */
-.status-bar {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 0 14px 14px;
-}
-
-.status-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--chip-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 4px;
-  text-align: center;
-  min-height: 54px;
-}
-
-.status-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.status-val {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.1;
-  word-wrap: break-word;
-}
-
-.dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
-  background: var(--muted);
-}
-.dot.on { background: var(--puck-green); box-shadow: 0 0 8px var(--puck-green); }
-
-/* ---- Main & Cards ---- */
-main {
-  padding: 20px 14px 40px;
-  max-width: 700px; /* Mobile focused */
-  margin: 0 auto;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-/* Card Styling - Matching Kotlin PuckPanel2 */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.card .cardHeader {
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.card .cardHeader h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--puck-green); /* Accent headers */
-}
-
-.card .cardHeader p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.stepBadge {
-  font-size: 12px;
-  font-weight: 800;
-  color: #111;
-  background: var(--puck-amber); /* Amber Step Badges */
-  padding: 4px 10px;
-  border-radius: 99px;
-  min-width: 28px;
-  text-align: center;
-}
-
-.card .cardBody { padding: 16px; }
-
-/* Forms & Inputs - Dark Theme */
-.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-label {
-  display: block; font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-input, select, textarea {
-  width: 100%; padding: 14px 16px; font-size: 16px; border-radius: 14px;
-  border: 1px solid var(--border); 
-  background: #0b0d12; /* Darker than card */
-  color: var(--text);
-  outline: none; 
-  font-family: inherit;
-}
-
-textarea { min-height: 100px; resize: vertical; }
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--puck-green);
-  box-shadow: 0 0 0 2px rgba(28, 184, 96, 0.2);
-}
-
-.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.threeCol { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-
-/* Buttons - Rounded Pills */
-button {
-  -webkit-tap-highlight-color: transparent; appearance: none; border: 0;
-  border-radius: 99px; /* Pill shape */
-  padding: 14px 20px; font-size: 15px; font-weight: 700;
-  cursor: pointer; width: 100%; min-height: 50px;
-  background: var(--chip-bg); color: var(--text);
-  transition: transform .1s ease, filter .2s ease;
-  font-family: inherit;
-}
-
-button:active { transform: scale(0.98); }
-
-button.secondary { background: transparent; border: 2px solid var(--border); color: var(--muted); }
-button.accent { background: var(--puck-blue); color: #fff; }
-button.good { background: var(--puck-green); color: #000; } /* Black text on green for contrast */
-button.warn { background: var(--puck-amber); color: #000; }
-button.danger { background: var(--puck-red); color: #fff; }
-
-button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
-
-/* Sport Select Tabs */
-.sport-tabs {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
-}
-.sport-tab {
-  border: 2px solid var(--border); border-radius: 12px; padding: 10px;
-  text-align: center; cursor: pointer; color: var(--muted); font-weight: 700; font-size: 13px;
-}
-.sport-tab.active {
-  border-color: var(--puck-green); background: rgba(28, 184, 96, 0.1); color: var(--puck-green);
-}
-
-/* Pills & Hints */
-.pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-  border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-  color: var(--muted); font-size: 11px; font-weight: 700;
-}
-.hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
 
 .log {
   font-family: monospace; font-size: 11px;
-  background: #000; color: #0f0;
-  border-radius: 12px; padding: 12px; border: 1px solid var(--border);
-  max-height: 200px; overflow: auto; white-space: pre-wrap;
-}
-
-/* Scoreboard Styling */
-.scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-.scoreTile {
-  border: 2px solid var(--border); border-radius: 18px; padding: 16px;
-  background: rgba(255,255,255,0.03); text-align: center;
-}
-.scoreTile h3 { margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.scoreVal { margin-top: 8px; font-size: 48px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
-
-.infoRow { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.infoChip {
-  padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05);
-  color: var(--muted); font-size: 11px; font-weight: 700;
-}
-
-.gameOver {
-  display: none; margin-top: 10px; padding: 16px; border-radius: 14px;
-  border: 2px solid var(--puck-red); background: rgba(233, 32, 32, 0.1);
-  color: var(--puck-red); font-weight: 800; text-align: center;
-}
-
-/* Banners & Toasts */
-.bleBanner {
-  display: none; margin-top: 12px; padding: 12px; border-radius: 14px;
-  background: rgba(233, 32, 32, 0.15); border: 1px solid var(--puck-red); 
-  color: #ffcccc; font-size: 13px;
+  background: #0F172A; color: #E2E8F0;
+  border-radius: 12px; padding: 12px;
+  max-height: 180px; overflow: auto; white-space: pre-wrap;
 }
 
 .toast {
   position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 9999;
-  display: none; align-items: center; gap: 10px; 
-  background: var(--card); color: var(--puck-green);
-  border: 1px solid var(--puck-green); border-radius: 99px; padding: 12px 20px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: none;
-  font-weight: 700;
+  display: none; align-items: center; gap: 10px;
+  background: var(--puck-charcoal); color: #fff;
+  border-radius: 99px; padding: 12px 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); pointer-events: none;
 }
 .toast.show { display: flex; animation: toastIn .2s ease-out; }
 @keyframes toastIn { from{ transform: translateX(-50%) translateY(10px); opacity:0; } to{ transform: translateX(-50%) translateY(0); opacity:1; } }
 
-.checkRow {
-  display: flex; gap: 10px; align-items: center; padding: 12px;
-  border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,0.03);
-  cursor: pointer;
-}
-.checkRow input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--puck-green); }
-
-/* Responsive */
+/* Mobile Tweaks */
 @media (max-width: 480px) {
   .twoCol, .threeCol { grid-template-columns: 1fr; }
-  .status-bar { grid-template-columns: 1fr 1fr; }
-  .status-item:nth-child(3) { grid-column: span 2; }
+  .scoreboard { gap: 10px; }
 }
 </style>
 </head>
-<section class="card" id="cardStart">
+<body>
+<header>
+  <div class="header-title">
+    <h1>PlayPUCK</h1>
+    <p>Tapping into Sport</p>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item">
+      <span class="status-label">Role</span>
+      <span id="roleDisplay" class="status-val">—</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">State</span>
+      <span id="stateDisplay" class="status-val">IDLE</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Status</span>
+      <span class="status-val" style="display:flex;align-items:center;">
+        <span id="connDot" class="dot"></span>
+        <span id="connText">Offline</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    
+    <section class="card" id="cardConnect">
+      <div class="cardHeader">
+        <div>
+          <h2>Connection</h2>
+          <p>Connect to your PlayPUCK via Bluetooth.</p>
+        </div>
+        <div class="stepBadge">1</div>
+      </div>
+      <div class="cardBody">
+        <div class="twoCol">
+          <button id="btnConnect" class="accent">Connect</button>
+          <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
+        </div>
+        
+        <div id="bleBanner" class="bleBanner"></div>
+        
+        <div class="row" style="margin-top:12px;">
+          <span class="pill" id="deviceNamePill">Device: —</span>
+          <span class="pill" id="rssiPill">RSSI: —</span>
+          <span class="pill" id="reconnectPill">Reconnect: —</span>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="checkRow">
+            <input id="autoReconnect" type="checkbox" checked>
+            <span>Auto-reconnect (Recommended)</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="cardWifi">
+      <div class="cardHeader">
+        <div>
+          <h2>Wi-Fi Setup</h2>
+          <p>Manage Cloud Sync credentials.</p>
+        </div>
+        <div class="stepBadge">2</div>
+      </div>
+      <div class="cardBody">
+        <label>Saved Networks</label>
+        <select id="savedWifi">
+          <option value="" selected>— Select Saved —</option>
+        </select>
+        <div class="hint">Stored locally on your device.</div>
+
+        <div class="twoCol" style="margin-top:12px;">
+          <div>
+            <label>SSID Name</label>
+            <input id="wifiSsid" placeholder="e.g. HomeWiFi">
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="wifiPass" type="password" placeholder="••••••••">
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+           <label class="checkRow">
+              <input id="showWifiPass" type="checkbox">
+              <span>Show password characters</span>
+           </label>
+        </div>
+
+        <div class="twoCol" style="margin-top:16px;">
+          <button id="btnSendWifi" class="good" disabled>Send to Puck</button>
+          <button id="btnSaveWifi" class="secondary">Save Locally</button>
+        </div>
+        <div class="twoCol" style="margin-top:10px;">
+           <button id="btnForgetWifi" class="warn">Forget SSID</button>
+           <button id="btnClearWifi" class="danger">Clear All</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="cardMatch">
+      <div class="cardHeader">
+        <div>
+          <h2>Game Mode</h2>
+          <p>Configure rules and profiles.</p>
+        </div>
+        <div class="stepBadge">3</div>
+      </div>
+      <div class="cardBody">
+        
+        <label>Sport</label>
+        <select id="sportSelect" style="margin-bottom:12px;">
+            <option value="PICKLEBALL" selected>Pickleball</option>
+            <option value="TENNIS">Tennis (Future)</option>
+            <option value="BADMINTON">Badminton (Future)</option>
+        </select>
+
+        <div class="twoCol">
+          <div>
+            <label>Format</label>
+            <select id="matchType">
+              <option value="DOUBLES" selected>DOUBLES</option>
+              <option value="SINGLES">SINGLES</option>
+            </select>
+          </div>
+          <div>
+            <label>Scoring</label>
+            <select id="scoringMode">
+              <option value="SIDEOUT" selected>SIDEOUT</option>
+              <option value="RALLY">RALLY</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:12px;">
+          <div>
+            <label>Play to...</label>
+            <select id="winPointsPreset">
+              <option value="7">7 Points</option>
+              <option value="11" selected>11 Points</option>
+              <option value="15">15 Points</option>
+              <option value="21">21 Points</option>
+            </select>
+          </div>
+          <div>
+            <label>Win Rule</label>
+            <select id="winRule">
+              <option value="SUDDEN_DEATH" selected>Sudden Death</option>
+              <option value="TWO_CLEAR">Win by 2</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+            <div class="twoCol">
+                <div>
+                   <label>Match ID (Optional)</label>
+                   <input id="matchId" placeholder="e.g. COURT-1">
+                </div>
+                <div>
+                   <label>Custom Override</label>
+                   <select id="customOverride">
+                       <option value="OFF" selected>OFF</option>
+                       <option value="ON">ON (Use JSON)</option>
+                   </select>
+                </div>
+            </div>
+            
+            <div style="margin-top:10px;">
+              <textarea id="matchJson" placeholder='{"rules":...}'></textarea>
+            </div>
+        </div>
+
+        <button id="btnUploadProfile" class="accent" style="margin-top:16px;" disabled>Upload Profile to Puck</button>
+        <div class="hint" style="text-align:center;">Must be uploaded before starting.</div>
+      </div>
+    </section>
+    <section class="card" id="cardStart">
         <div class="cardHeader">
             <div>
                 <h2>Match Control</h2>
-                <p>Start or End the active match.</p>
+                <p>Start or End the active session.</p>
             </div>
             <div class="stepBadge">4</div>
         </div>
         <div class="cardBody">
             <div class="twoCol">
-                <button id="btnStartGame" class="good" disabled>START GAME</button>
-                <button id="btnEndGame" class="danger" disabled>END GAME</button>
+                <button id="btnStartGame" class="good" disabled>Start Game</button>
+                <button id="btnEndGame" class="danger" disabled>End Game</button>
             </div>
         </div>
     </section>
@@ -646,21 +437,24 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
         
         <div id="gameOverBanner" class="gameOver">
           GAME OVER<br>
-          <span id="gameOverWinner" style="color:#fff; font-size:14px;">—</span>
-          <br><small id="gameOverSub" style="color:#fff; opacity:0.7">Final: —</small>
+          <span id="gameOverWinner" style="font-size:14px; color:#000;">—</span>
+          <br><small id="gameOverSub" style="color:#000; opacity:0.6;">Final: —</small>
         </div>
 
         <div class="scoreboard">
-          <div class="scoreTile" style="border-color:var(--puck-green);">
-            <h3 style="color:var(--puck-green)">Team A</h3>
+          <div class="scoreTile">
+            <h3>Team A</h3>
             <div id="scoreA" class="scoreVal">0</div>
-            <button id="btnScoreA" class="good" style="margin-top:10px; min-height:40px; font-size:13px;" disabled>+ Point A</button>
           </div>
-          <div class="scoreTile" style="border-color:var(--puck-blue);">
-            <h3 style="color:var(--puck-blue)">Team B</h3>
+          <div class="scoreTile">
+            <h3>Team B</h3>
             <div id="scoreB" class="scoreVal">0</div>
-            <button id="btnScoreB" class="accent" style="margin-top:10px; min-height:40px; font-size:13px;" disabled>+ Point B</button>
           </div>
+        </div>
+
+        <div class="twoCol" style="margin-top:12px;">
+            <button id="btnScoreA" class="accent" disabled>+ Point A</button>
+            <button id="btnScoreB" class="accent" disabled>+ Point B</button>
         </div>
 
         <button id="btnUndo" class="secondary" style="margin-top:12px;">Undo Last Action</button>
@@ -672,17 +466,17 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
             <span class="infoChip" id="infoTarget">Target: —</span>
         </div>
 
-        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-            <label class="checkRow" style="margin-bottom:10px;">
+        <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
+            <label class="checkRow" style="margin-bottom:12px;">
                 <input id="chkAutoPauseApply" type="checkbox">
                 <span>Auto-pause on rule change</span>
             </label>
             
             <div class="twoCol">
                 <button id="btnPauseToggle" class="warn" disabled>Pause Game</button>
-                <button id="btnApplyProfileMidMatch" class="secondary" disabled>Update Rules</button>
+                <button id="btnApplyProfileMidMatch" class="secondary" disabled>Update Rules (Mid-game)</button>
             </div>
-            <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
+            <div style="text-align:center; margin-top:10px;">
                  <span class="pill" id="pausePill">Paused: OFF</span>
                  <span class="pill" id="infoPaused">State: Active</span>
             </div>
@@ -700,27 +494,26 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
       </div>
       <div class="cardBody">
         <div class="twoCol">
-            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:12px;">
-                <label style="text-align:center; color:var(--puck-green);">TEAM A</label>
+            <div>
+                <label style="text-align:center;">Team A</label>
                 <div class="twoCol">
                     <button id="btnAminus" class="secondary" disabled>−</button>
                     <button id="btnAplus" class="secondary" disabled>+</button>
                 </div>
                 <div style="display:flex; gap:6px; margin-top:8px;">
                     <input id="setAVal" type="number" value="0" style="text-align:center;">
-                    <button id="btnAset" class="warn" style="width:auto; padding:0 14px;" disabled>Set</button>
+                    <button id="btnAset" class="warn" style="width:auto;" disabled>Set</button>
                 </div>
             </div>
-
-            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:12px;">
-                <label style="text-align:center; color:var(--puck-blue);">TEAM B</label>
+            <div>
+                <label style="text-align:center;">Team B</label>
                 <div class="twoCol">
                     <button id="btnBminus" class="secondary" disabled>−</button>
                     <button id="btnBplus" class="secondary" disabled>+</button>
                 </div>
                 <div style="display:flex; gap:6px; margin-top:8px;">
                     <input id="setBVal" type="number" value="0" style="text-align:center;">
-                    <button id="btnBset" class="warn" style="width:auto; padding:0 14px;" disabled>Set</button>
+                    <button id="btnBset" class="warn" style="width:auto;" disabled>Set</button>
                 </div>
             </div>
         </div>
@@ -731,7 +524,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
       <div class="cardHeader">
         <div>
             <h2>NFC & Tags</h2>
-            <p>Register players and tags.</p>
+            <p>Register players and hardware tags.</p>
         </div>
         <div class="stepBadge">7</div>
       </div>
@@ -740,21 +533,21 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
             <button id="btnNfcScan" class="accent" disabled>Scan NFC</button>
             <button id="btnNfcStop" class="secondary" disabled>Stop</button>
         </div>
-        <div id="nfcStatus" class="hint" style="text-align:center; padding:8px; border:1px solid var(--border); border-radius:8px; margin-top:10px;">
-            NFC Idle.
-        </div>
+        <div id="nfcStatus" class="pill" style="margin-top:10px; width:100%; justify-content:center;">NFC Idle</div>
         
         <div style="margin-top:16px;">
-            <label>Manual Player ID / Tag UID</label>
-            <input id="checkinPlayerId" placeholder="e.g. P1234">
-            <button id="btnCheckinManual" class="good" style="margin-top:8px;" disabled>Check-In Player</button>
+            <label>Manual Player ID</label>
+            <div style="display:flex; gap:8px;">
+                <input id="checkinPlayerId" placeholder="e.g. P1234">
+                <button id="btnCheckinManual" class="good" style="width:auto;" disabled>Check-In</button>
+            </div>
         </div>
 
         <hr style="border:0; border-top:1px solid var(--border); margin:16px 0;">
 
         <label>Tag Registration</label>
         <div class="twoCol">
-            <input id="tagUid" placeholder="UID (Colons optional)">
+            <input id="tagUid" placeholder="Tag UID">
             <select id="tagRole">
                 <option value="PLAYER">Player</option>
                 <option value="ADMIN">Admin</option>
@@ -773,7 +566,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
                 <option value="B">Team B</option>
                 <option value="NONE">None</option>
             </select>
-            <button id="btnTagAssign" class="secondary" disabled>Assign</button>
+            <button id="btnTagAssign" class="secondary" style="width:auto;" disabled>Assign</button>
         </div>
 
         <div class="twoCol" style="margin-top:16px;">
@@ -795,7 +588,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
   </div> </main>
 
 <div id="toast" class="toast">
-    <span>✅</span>
     <span id="toastText">Action Successful</span>
 </div>
 
@@ -933,21 +725,7 @@ let reconnectTimer = null;
 let reconnectBackoffMs = 900;
 const reconnectBackoffMaxMs = 12000;
 
-/* ---------- Visual Tab Logic (New) ---------- */
-// Simple logic to highlight the correct tab
-document.querySelectorAll('.sport-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
-        // Remove active class from all
-        document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
-        // Add to clicked
-        e.target.classList.add('active');
-        // Update hidden select if implemented
-        if(e.target.id === 'tabPickle') { el('sportSelect').value = 'PICKLEBALL'; }
-    });
-});
-
-/* ---------- All Original Logic Below ---------- */
-/* Using the exact logic from the provided source to ensure compatibility */
+/* ---------- Original Logic ---------- */
 const LS_WIFI_KEY = 'playpuck_wifi_saved_v1';
 const LS_STATE_KEY = 'playpuck_last_state_v1';
 const LS_AUTORECON_KEY = 'playpuck_auto_reconnect_v1';
